@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LiveYou · videos cortos</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <style>
   :root{--bg:#0b0a12;--panel:#14121f;--line:#2a2740;--text:#f3f1fa;--muted:#9a96b5;--pink:#ff3d6e;--violet:#5b1f9e;--teal:#2fe3c2}
   *{box-sizing:border-box;margin:0}
@@ -37,7 +38,8 @@
   header{display:flex;justify-content:space-between;align-items:center;padding:14px 5%;border-bottom:1px solid var(--line)}
   header .who{display:flex;align-items:center;gap:10px;background:none;border:0;color:var(--text);cursor:pointer}
   .av{width:40px;height:40px;border-radius:50%;object-fit:cover;background:var(--line)}
-  main{max-width:640px;margin:0 auto;padding:28px 5%}
+  main{max-width:980px;margin:0 auto;padding:28px 5%}
+  #vProfile,#vInbox{max-width:640px;margin:0 auto}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden}
   .cover{height:130px;background:linear-gradient(135deg,var(--pink),var(--violet))}
   .info{padding:0 24px 24px}
@@ -59,6 +61,38 @@
   .mrow{display:flex;gap:12px;padding:14px;border:1px solid var(--line);border-radius:14px;margin-bottom:10px;background:var(--panel)}
   #onboard{min-height:100vh;display:flex}
   #onboard .big{margin-top:0}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+  .grid.wide{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+  .vcard{position:relative;aspect-ratio:9/16;border-radius:10px;overflow:hidden;background:#000;cursor:pointer;border:0;padding:0;color:#fff}
+  .vcard video{width:100%;height:100%;object-fit:cover;pointer-events:none;display:block}
+  .vmeta{position:absolute;left:0;right:0;bottom:0;padding:18px 8px 8px;background:linear-gradient(transparent,rgba(0,0,0,.8));font-size:.8rem;text-align:left}
+  .lcard{display:flex;flex-direction:column;gap:8px;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;color:var(--text);cursor:pointer;font:inherit}
+  .lcard:hover{border-color:var(--pink)}
+  .lrow{display:flex;align-items:center;gap:10px}
+  .badge{background:var(--pink);color:#fff;font-weight:700;font-size:.75rem;padding:3px 10px;border-radius:999px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+  .chip{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:999px;padding:7px 14px;cursor:pointer;font-size:.9rem}
+  .chip.on{background:var(--pink);border-color:var(--pink)}
+  .head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:16px;z-index:20}
+  .mbox{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;width:100%;max-width:460px;max-height:92vh;overflow:auto}
+  .mbox.player{max-width:420px;padding:0}
+  .mbox.player video{width:100%;max-height:70vh;background:#000;display:block;border-radius:18px 18px 0 0}
+  .stage{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;align-items:start}
+  .vwrap{position:relative;background:#000;border-radius:14px;overflow:hidden;aspect-ratio:16/9}
+  .vwrap video{width:100%;height:100%;object-fit:contain;display:block}
+  .vwrap .badge{position:absolute;top:10px;left:10px}
+  .cnt{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.6);padding:3px 10px;border-radius:999px;font-size:.8rem}
+  #lvUnmute{position:absolute;left:50%;bottom:14px;transform:translateX(-50%)}
+  #reactLayer{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .fl{position:absolute;bottom:10px;font-size:1.8rem;animation:flo 2.2s ease-out forwards}
+  @keyframes flo{to{transform:translateY(-220px);opacity:0}}
+  .chat{background:var(--panel);border:1px solid var(--line);border-radius:14px;display:flex;flex-direction:column;height:min(560px,70vh)}
+  #lvMsgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+  .cmsg{word-break:break-word;font-size:.92rem}.cmsg b{color:var(--teal);margin-right:6px}.cmsg.host b{color:var(--pink)}.cmsg.sys{color:var(--muted);font-style:italic;font-size:.85rem}
+  .chat form{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line)}
+  .vrow{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-top:1px solid var(--line)}
+  @media(max-width:900px){.stage{grid-template-columns:1fr}}
   @media(max-width:760px){.app{grid-template-columns:1fr;padding-bottom:70px}
     .side{position:fixed;bottom:0;left:0;right:0;height:auto;flex-direction:row;justify-content:space-around;z-index:5;background:var(--bg);border-top:1px solid var(--line);border-right:0;padding:6px}
     .side .logo,.nav span{display:none}.side .who{margin-top:0}.nav{justify-content:center;width:auto}}
@@ -110,13 +144,65 @@
 <section id="app" class="app hidden">
   <aside class="side">
     <div class="logo">LiveYou<i>.</i></div>
-    <button class="nav on" id="navProfile"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>Perfil</span></button>
+    <button class="nav on" id="navFeed"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10H3z"/></svg><span>Para ti</span></button>
+    <button class="nav" id="navLive"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M6 6a8 8 0 000 12M18 6a8 8 0 010 12"/></svg><span>En vivo</span></button>
+    <button class="nav" id="navUpload"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg><span>Subir video</span></button>
+    <button class="nav" id="navProfile"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>Perfil</span></button>
     <button class="nav" id="navInbox"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span>Bandeja de entrada</span></button>
     <button class="nav" id="btnLogout2"><svg viewBox="0 0 24 24"><path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/></svg><span>Cerrar sesión</span></button>
     <button class="nav who" id="btnWho"><img class="av" id="hAvatar" alt="Tu foto"><span id="hName"></span></button>
   </aside>
   <main>
-    <div id="vProfile">
+    <div id="vFeed">
+      <h2 style="margin-bottom:14px">Para ti</h2>
+      <div id="feedGrid" class="grid"></div>
+    </div>
+
+    <div id="vLive" class="hidden">
+      <div class="head">
+        <h2>En vivo</h2>
+        <button class="btn main" id="btnGoLive">Transmitir en vivo</button>
+      </div>
+      <div class="chips" id="lvFilter"></div>
+      <p class="msg" id="liveMsg" role="status"></p>
+      <div id="liveGrid" class="grid wide"></div>
+    </div>
+
+    <div id="vStage" class="hidden">
+      <div class="stage">
+        <div>
+          <div class="vwrap">
+            <video id="lvVideo" autoplay playsinline></video>
+            <span class="badge">EN VIVO</span><span class="cnt" id="lvCount">0 viendo</span>
+            <button class="btn main hidden" id="lvUnmute">Activar sonido</button>
+            <div id="reactLayer"></div>
+          </div>
+          <h2 id="lvTitle" style="margin:14px 0 6px"></h2>
+          <span class="chip on" id="lvTopic"></span>
+          <div class="actions">
+            <button class="btn ghost" data-react="❤️">❤️</button><button class="btn ghost" data-react="🔥">🔥</button>
+            <button class="btn ghost" data-react="👏">👏</button><button class="btn ghost" data-react="😂">😂</button>
+            <button class="btn ghost hidden" id="lvLeave">Salir del directo</button>
+          </div>
+          <div id="lvHostTools" class="hidden">
+            <div class="actions">
+              <button class="btn ghost" id="lvMic">Silenciar micrófono</button>
+              <button class="btn ghost" id="lvCam">Apagar cámara</button>
+              <button class="btn ghost" id="lvFlip">Girar cámara</button>
+              <button class="btn ghost" id="lvShare">Compartir pantalla</button>
+              <button class="btn main" id="lvEnd">Terminar directo</button>
+            </div>
+            <div class="card" style="padding:14px;margin-top:14px"><strong>Espectadores</strong><div id="lvViewers"></div></div>
+          </div>
+        </div>
+        <aside class="chat">
+          <div id="lvMsgs" aria-live="polite"></div>
+          <form id="lvForm"><input id="lvInput" maxlength="300" placeholder="Escribe un mensaje" autocomplete="off" aria-label="Mensaje"><button class="btn main" type="submit">Enviar</button></form>
+        </aside>
+      </div>
+    </div>
+
+    <div id="vProfile" class="hidden">
     <div class="card">
       <div class="cover"></div>
       <div class="info" id="view">
@@ -142,7 +228,8 @@
         </div>
       </form>
     </div>
-    <div class="feed">Aún no hay videos. Aquí aparecerá tu contenido.</div>
+    <h3 style="margin:24px 0 12px">Mis videos</h3>
+    <div id="myVideos" class="grid"></div>
     </div>
     <div id="vInbox" class="hidden">
       <h2 style="margin-bottom:14px">Bandeja de entrada</h2>
@@ -156,6 +243,32 @@
     </div>
   </main>
 </section>
+
+<div id="mUpload" class="modal hidden"><form class="mbox" id="upForm">
+  <h2>Subir video</h2>
+  <label for="upFile">Video (máximo 50 MB)</label><input id="upFile" type="file" accept="video/*">
+  <label for="upCap">Descripción</label><textarea id="upCap" maxlength="200"></textarea>
+  <p class="msg" id="upMsg" role="status"></p>
+  <div class="actions"><button class="btn main" type="submit" id="upBtn">Publicar</button><button class="btn ghost" type="button" data-close="mUpload">Cancelar</button></div>
+</form></div>
+
+<div id="mGoLive" class="modal hidden"><form class="mbox" id="glForm">
+  <h2>Transmitir en vivo</h2>
+  <label>Elige un tema</label><div class="chips" id="glTopics"></div>
+  <label for="glTitle">Título (opcional)</label><input id="glTitle" maxlength="60" placeholder="Ej. Hablemos de cripto">
+  <p class="msg" id="glMsg" role="status"></p>
+  <div class="actions"><button class="btn main" type="submit" id="glBtn" disabled>Empezar ahora</button><button class="btn ghost" type="button" data-close="mGoLive">Cancelar</button></div>
+</form></div>
+
+<div id="mPlayer" class="modal hidden"><div class="mbox player">
+  <video id="pVideo" controls playsinline></video>
+  <div style="padding:16px">
+    <div class="lrow"><img class="av" id="pAv" alt=""><strong id="pName"></strong></div>
+    <p class="bio" id="pCap"></p>
+    <div class="user" id="pViews"></div>
+    <div class="actions"><button class="btn ghost" data-close="mPlayer">Cerrar</button><button class="btn ghost hidden" id="pDel">Eliminar video</button></div>
+  </div>
+</div></div>
 
 <script>
 /* ========== CONFIGURACIÓN: pega tu anon key ========== */
@@ -185,7 +298,7 @@ $("btnEmail").onclick = async () => {
   error ? say($("loginMsg"), error.message, "err")
         : say($("loginMsg"), "Listo. Revisa tu correo y abre el enlace.", "ok");
 };
-$("btnLogout").onclick = async () => { await sb.auth.signOut(); };
+$("btnLogout").onclick = async () => { await stopAll(); await sb.auth.signOut(); };
 
 /* ---------- Perfil ---------- */
 async function loadProfile(user){
@@ -231,16 +344,25 @@ function openEdit(show){
 }
 $("btnEdit").onclick = () => openEdit(true);
 $("btnWho").onclick = () => show("Profile");
-$("btnLogout2").onclick = () => sb.auth.signOut();
+$("btnLogout2").onclick = async () => { await stopAll(); await sb.auth.signOut(); };
 $("navProfile").onclick = () => show("Profile");
 $("navInbox").onclick = () => { show("Inbox"); loadInbox(); };
 
+let livePoll = null;
 function show(v){
-  ["Profile","Inbox"].forEach(n => {
+  if (v === "Live" && H) v = "Stage";
+  if (v !== "Stage") leaveWatch();
+  ["Feed","Live","Stage","Profile","Inbox"].forEach(n => {
     $("v"+n).classList.toggle("hidden", n !== v);
-    $("nav"+n).classList.toggle("on", n === v);
+    const nv = $("nav"+n); if (nv) nv.classList.toggle("on", n === v);
   });
+  clearInterval(livePoll);
+  if (v === "Feed") loadFeed();
+  if (v === "Profile") loadMyVideos();
+  if (v === "Live"){ loadLives(); livePoll = setInterval(loadLives, 15000); }
 }
+$("navFeed").onclick = () => show("Feed");
+$("navLive").onclick = () => show("Live");
 
 /* ---------- Crear perfil (primera vez) ---------- */
 function startOnboarding(){
@@ -257,7 +379,7 @@ $("obForm").onsubmit = async e => {
   $("obSave").disabled = false;
   if (error) return say($("obMsg"), error.code === "23505" ? "Ese usuario ya está en uso. Prueba con otro." : error.message, "err");
   profile = { ...profile, ...changes };
-  paint(); show("Profile");
+  paint(); show("Feed");
   $("onboard").classList.add("hidden"); $("app").classList.remove("hidden");
 };
 
@@ -316,16 +438,338 @@ $("editForm").onsubmit = async e => {
   paint(); openEdit(false);
 };
 
+/* ---------- Utilidades ---------- */
+const nameOf = p => (p && (p.full_name || p.username)) || "Usuario";
+const picOf = p => (p && p.avatar_url) || fallbackAvatar(nameOf(p));
+const openM = id => $(id).classList.remove("hidden");
+const closeM = id => $(id).classList.add("hidden");
+async function withAuthors(rows, key){
+  const ids = [...new Set(rows.map(r => r[key]))];
+  if (!ids.length) return {};
+  const { data } = await sb.from("profiles").select("id,username,full_name,avatar_url").in("id", ids);
+  return Object.fromEntries((data || []).map(p => [p.id, p]));
+}
+function note(el, text){ el.className = "feed"; el.textContent = text; }
+function chips(el, list, cur, pick){
+  el.replaceChildren();
+  list.forEach(t => {
+    const b = document.createElement("button"); b.type = "button";
+    b.className = "chip" + (t === cur ? " on" : ""); b.textContent = t;
+    b.onclick = () => { pick(t); chips(el, list, t, pick); };
+    el.append(b);
+  });
+}
+document.querySelectorAll("[data-close]").forEach(b => b.onclick = () => {
+  closeM(b.dataset.close);
+  if (b.dataset.close === "mPlayer"){ const v = $("pVideo"); v.pause(); v.removeAttribute("src"); v.load(); }
+});
+
+/* ---------- Videos ---------- */
+function vcard(v, a, withAuthor){
+  const b = document.createElement("button"); b.className = "vcard"; b.type = "button";
+  const vid = document.createElement("video");
+  vid.src = v.url + "#t=0.1"; vid.preload = "metadata"; vid.muted = true; vid.playsInline = true;
+  const m = document.createElement("div"); m.className = "vmeta";
+  m.textContent = (withAuthor ? nameOf(a) + " · " : "") + "▷ " + (v.views || 0);
+  b.append(vid, m); b.onclick = () => openPlayer(v, a);
+  return b;
+}
+async function fillVideos(box, query, withAuthor, emptyText){
+  box.replaceChildren(); box.className = "grid";
+  const { data, error } = await query;
+  if (error) return note(box, "No se pudieron cargar los videos.");
+  if (!data.length) return note(box, emptyText);
+  const au = await withAuthors(data, "user_id");
+  data.forEach(v => box.append(vcard(v, au[v.user_id], withAuthor)));
+}
+const loadFeed = () => fillVideos($("feedGrid"),
+  sb.from("videos").select("*").order("created_at", { ascending:false }).limit(60), true,
+  "Aún no hay videos. Sube el primero con el botón Subir video.");
+const loadMyVideos = () => fillVideos($("myVideos"),
+  sb.from("videos").select("*").eq("user_id", me.id).order("created_at", { ascending:false }), false,
+  "Todavía no subiste videos.");
+
+function openPlayer(v, a){
+  const vid = $("pVideo"); vid.src = v.url; vid.play().catch(() => {});
+  $("pAv").src = picOf(a); $("pName").textContent = nameOf(a) + (a && a.username ? "  @" + a.username : "");
+  $("pCap").textContent = v.caption || "";
+  $("pViews").textContent = ((v.views || 0) + 1) + " reproducciones";
+  sb.rpc("increment_views", { vid: v.id }).then(() => {});
+  const mine = v.user_id === me.id; $("pDel").classList.toggle("hidden", !mine);
+  $("pDel").onclick = async () => {
+    if (!confirm("¿Eliminar este video?")) return;
+    await sb.storage.from("videos").remove([v.path]);
+    await sb.from("videos").delete().eq("id", v.id);
+    $("mPlayer").querySelector("[data-close]").click(); show("Profile");
+  };
+  openM("mPlayer");
+}
+
+$("navUpload").onclick = () => { $("upForm").reset(); say($("upMsg"), ""); openM("mUpload"); };
+$("upForm").onsubmit = async e => {
+  e.preventDefault();
+  const f = $("upFile").files[0];
+  if (!f) return say($("upMsg"), "Elige un video.", "err");
+  if (!f.type.startsWith("video/")) return say($("upMsg"), "El archivo debe ser un video.", "err");
+  if (f.size > 50*1024*1024) return say($("upMsg"), "El video pesa más de 50 MB.", "err");
+  $("upBtn").disabled = true; say($("upMsg"), "Subiendo… no cierres la página.");
+  const ext = (f.name.split(".").pop() || "mp4").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const path = me.id + "/" + Date.now() + "." + ext;
+  const up = await sb.storage.from("videos").upload(path, f, { contentType: f.type });
+  if (up.error){ $("upBtn").disabled = false; return say($("upMsg"), "No se pudo subir: " + up.error.message, "err"); }
+  const url = sb.storage.from("videos").getPublicUrl(path).data.publicUrl;
+  const { error } = await sb.from("videos").insert({ user_id: me.id, url, path, caption: $("upCap").value.trim() });
+  $("upBtn").disabled = false;
+  if (error) return say($("upMsg"), "No se pudo publicar: " + error.message, "err");
+  closeM("mUpload"); show("Profile");
+};
+
+/* ---------- Directos ---------- */
+const TOPICS = ["Charla","Música","Cripto","Educación","Gaming","Cocina","Deportes","Humor","Otro"];
+const REACTS = ["❤️","🔥","👏","😂"];
+const MAX_VIEWERS = 15;
+const ICE = { iceServers: [{ urls:"stun:stun.l.google.com:19302" }, { urls:"stun:global.stun.twilio.com:3478" }] };
+let topicFilter = "Todos", pickedTopic = null, H = null, W = null;
+
+async function loadLives(){
+  if (!$("lvFilter").children.length)
+    chips($("lvFilter"), ["Todos", ...TOPICS], topicFilter, t => { topicFilter = t; loadLives(); });
+  const box = $("liveGrid");
+  let q = sb.from("lives").select("*").eq("is_live", true)
+    .gte("last_seen", new Date(Date.now() - 45000).toISOString()).order("started_at", { ascending:false });
+  if (topicFilter !== "Todos") q = q.eq("topic", topicFilter);
+  const { data, error } = await q;
+  box.replaceChildren();
+  if (error) return note(box, "No se pudieron cargar los directos.");
+  if (!data.length) return note(box, "Nadie transmite ahora" + (topicFilter !== "Todos" ? " en " + topicFilter : "") + ". ¡Sé el primero!");
+  box.className = "grid wide";
+  const au = await withAuthors(data, "host_id");
+  data.forEach(l => {
+    const a = au[l.host_id];
+    const b = document.createElement("button"); b.className = "lcard"; b.type = "button";
+    const row = document.createElement("div"); row.className = "lrow";
+    const img = new Image(); img.className = "av"; img.alt = ""; img.src = picOf(a);
+    const bd = document.createElement("span"); bd.className = "badge"; bd.textContent = "EN VIVO";
+    row.append(img, bd);
+    const t = document.createElement("strong"); t.textContent = l.title;
+    const m = document.createElement("span"); m.className = "user";
+    m.textContent = nameOf(a) + " · " + l.topic + " · " + (l.viewers || 0) + " viendo";
+    b.append(row, t, m); b.onclick = () => watchLive(l);
+    box.append(b);
+  });
+}
+
+/* chat y reacciones */
+function addLv(name, text, cls){
+  const d = document.createElement("div"); d.className = "cmsg" + (cls ? " " + cls : "");
+  if (cls === "sys") d.textContent = text;
+  else { const b = document.createElement("b"); b.textContent = name; d.append(b, document.createTextNode(text)); }
+  $("lvMsgs").append(d); $("lvMsgs").scrollTop = $("lvMsgs").scrollHeight;
+}
+const lvSys = t => addLv("", t, "sys");
+function floatEmoji(e){
+  const s = document.createElement("span"); s.className = "fl"; s.textContent = e;
+  s.style.left = (8 + Math.random()*80) + "%"; $("reactLayer").append(s);
+  setTimeout(() => s.remove(), 2300);
+}
+function setCount(n){ $("lvCount").textContent = n + " viendo"; }
+function playLv(){
+  const v = $("lvVideo"), p = v.play();
+  if (p && p.catch) p.catch(() => { v.muted = true; v.play().catch(() => {}); $("lvUnmute").classList.remove("hidden"); });
+}
+$("lvUnmute").onclick = () => { $("lvVideo").muted = false; $("lvUnmute").classList.add("hidden"); };
+document.querySelectorAll("[data-react]").forEach(b => b.onclick = () => {
+  const e = b.dataset.react;
+  if (H){ floatEmoji(e); bcast({ t:"react", e }); }
+  else if (W && W.conn && W.conn.open) W.conn.send({ t:"react", e });
+});
+$("lvForm").onsubmit = e => {
+  e.preventDefault();
+  const t = $("lvInput").value.trim().slice(0, 300); if (!t) return;
+  $("lvInput").value = "";
+  if (H){ addLv(nameOf(profile), t, "host"); bcast({ t:"chat", name:nameOf(profile), text:t, host:true }); }
+  else if (W && W.conn && W.conn.open) W.conn.send({ t:"chat", text:t });
+};
+function enterStage(host){
+  $("lvMsgs").replaceChildren(); $("lvUnmute").classList.add("hidden");
+  $("lvHostTools").classList.toggle("hidden", !host);
+  $("lvLeave").classList.toggle("hidden", host);
+  setCount(0); show("Stage");
+}
+
+/* --- anfitrión --- */
+$("btnGoLive").onclick = () => {
+  if (H) return show("Stage");
+  pickedTopic = null; $("glTitle").value = ""; $("glBtn").disabled = true; say($("glMsg"), "");
+  chips($("glTopics"), TOPICS, null, t => { pickedTopic = t; $("glBtn").disabled = false; });
+  openM("mGoLive");
+};
+function bcast(m){ if (H) H.viewers.forEach(v => { try { v.conn.send(m); } catch (e) {} }); }
+function refreshViewers(){
+  const n = H.viewers.size; setCount(n); bcast({ t:"count", n });
+  const box = $("lvViewers"); box.replaceChildren();
+  if (!n){ box.textContent = "Todavía no hay nadie."; return; }
+  H.viewers.forEach((v, id) => {
+    const r = document.createElement("div"); r.className = "vrow";
+    const s = document.createElement("span"); s.textContent = v.name;
+    const b = document.createElement("button"); b.className = "btn ghost"; b.style.padding = "5px 12px"; b.textContent = "Sacar";
+    b.onclick = () => { try { v.conn.send({ t:"kick" }); } catch (e) {} setTimeout(() => { try { v.conn.close(); } catch (e) {} }, 300); dropViewer(id); };
+    r.append(s, b); box.append(r);
+  });
+}
+function dropViewer(id){
+  if (!H) return; const v = H.viewers.get(id); if (!v) return;
+  H.viewers.delete(id); lvSys(v.name + " salió"); bcast({ t:"chat", sys:true, text:v.name + " salió" }); refreshViewers();
+}
+function hostConn(conn){
+  conn.on("open", () => {
+    if (!H) return;
+    const name = String((conn.metadata || {}).name || "Invitado").slice(0, 30);
+    if (H.viewers.size >= MAX_VIEWERS){ try { conn.send({ t:"deny", why:"La sala está llena." }); } catch (e) {} setTimeout(() => conn.close(), 500); return; }
+    const call = H.peer.call(conn.peer, H.stream);
+    H.viewers.set(conn.peer, { conn, call, name });
+    conn.send({ t:"ok", title:H.title, topic:H.topic });
+    lvSys(name + " entró"); bcast({ t:"chat", sys:true, text:name + " entró" }); refreshViewers();
+  });
+  conn.on("data", d => {
+    const v = H && H.viewers.get(conn.peer); if (!v || !d) return;
+    if (d.t === "chat"){ const text = String(d.text || "").trim().slice(0, 300); if (!text) return; addLv(v.name, text); bcast({ t:"chat", name:v.name, text }); }
+    else if (d.t === "react" && REACTS.includes(d.e)){ floatEmoji(d.e); bcast({ t:"react", e:d.e }); }
+  });
+  conn.on("close", () => dropViewer(conn.peer));
+  conn.on("error", () => dropViewer(conn.peer));
+}
+function cleanupHost(){
+  if (!H) return;
+  clearInterval(H.hb); H.stream.getTracks().forEach(t => t.stop()); try { H.peer.destroy(); } catch (e) {}
+  H = null; $("glBtn").disabled = !pickedTopic;
+}
+$("glForm").onsubmit = async e => {
+  e.preventDefault();
+  if (!pickedTopic || H) return;
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
+    return say($("glMsg"), "Tu navegador no permite usar la cámara. Abre la página con https en Chrome, Edge o Firefox.", "err");
+  $("glBtn").disabled = true; say($("glMsg"), "Activando cámara…");
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({ video:{ width:{ ideal:1280 }, height:{ ideal:720 }, facingMode:"user" }, audio:{ echoCancellation:true, noiseSuppression:true } }); }
+  catch (err) { $("glBtn").disabled = false; return say($("glMsg"), "No se pudo acceder a la cámara o al micrófono. Revisa los permisos del navegador.", "err"); }
+  const title = $("glTitle").value.trim() || ("Directo de " + nameOf(profile));
+  const peer = new Peer("liveyou-" + Math.random().toString(36).slice(2, 10), { config: ICE });
+  H = { peer, stream, viewers:new Map(), topic:pickedTopic, title, facing:"user", screen:false, row:null, hb:null };
+  peer.on("open", async id => {
+    const { data, error } = await sb.from("lives").insert({ host_id:me.id, title, topic:H.topic, peer_id:id, is_live:true }).select().single();
+    if (error){ say($("glMsg"), "No se pudo publicar el directo: " + error.message, "err"); cleanupHost(); return; }
+    H.row = data; closeM("mGoLive");
+    $("lvTitle").textContent = title; $("lvTopic").textContent = H.topic;
+    $("lvVideo").srcObject = stream; $("lvVideo").muted = true; playLv();
+    enterStage(true); lvSys("Estás en vivo. Los espectadores aparecerán aquí.");
+    H.hb = setInterval(() => sb.from("lives").update({ last_seen:new Date().toISOString(), viewers:H.viewers.size }).eq("id", H.row.id).then(() => {}), 15000);
+  });
+  peer.on("connection", hostConn);
+  peer.on("error", err => {
+    if (!H) return;
+    if (!H.row){ say($("glMsg"), "No se pudo conectar con el servicio de directos (" + err.type + ").", "err"); cleanupHost(); }
+    else lvSys("Error de conexión: " + err.type);
+  });
+};
+$("lvMic").onclick = () => {
+  const t = H.stream.getAudioTracks(); if (!t.length) return;
+  const on = !t[0].enabled; t.forEach(x => x.enabled = on); $("lvMic").textContent = on ? "Silenciar micrófono" : "Activar micrófono";
+};
+$("lvCam").onclick = () => {
+  const t = H.stream.getVideoTracks(); if (!t.length) return;
+  const on = !t[0].enabled; t.forEach(x => x.enabled = on); $("lvCam").textContent = on ? "Apagar cámara" : "Encender cámara";
+};
+async function swapVideo(track){
+  const old = H.stream.getVideoTracks()[0];
+  if (old) track.enabled = old.enabled;
+  H.viewers.forEach(v => {
+    const pc = v.call && v.call.peerConnection; if (!pc) return;
+    const s = pc.getSenders().find(x => x.track && x.track.kind === "video"); if (s) s.replaceTrack(track);
+  });
+  if (old){ H.stream.removeTrack(old); old.stop(); }
+  H.stream.addTrack(track); $("lvVideo").srcObject = H.stream;
+}
+$("lvFlip").onclick = async () => {
+  if (!H || H.screen) return;
+  const next = H.facing === "user" ? "environment" : "user";
+  try { const s = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:{ ideal:next } } }); await swapVideo(s.getVideoTracks()[0]); H.facing = next; }
+  catch (err) { lvSys("No se pudo cambiar de cámara."); }
+};
+$("lvShare").onclick = async () => {
+  if (!H) return;
+  if (H.screen){ H.screenTrack.stop(); H.screenTrack.dispatchEvent(new Event("ended")); return; }
+  if (!navigator.mediaDevices.getDisplayMedia) return lvSys("Tu dispositivo no permite compartir pantalla.");
+  try {
+    const s = await navigator.mediaDevices.getDisplayMedia({ video:true }); const t = s.getVideoTracks()[0];
+    H.screen = true; H.screenTrack = t; $("lvShare").textContent = "Dejar de compartir";
+    t.onended = async () => {
+      if (!H || !H.screen) return; H.screen = false; $("lvShare").textContent = "Compartir pantalla";
+      try { const c = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:H.facing } }); await swapVideo(c.getVideoTracks()[0]); } catch (err) {}
+    };
+    await swapVideo(t);
+  } catch (err) {}
+};
+async function endLive(){
+  if (!H) return; const row = H.row; bcast({ t:"end" });
+  await new Promise(r => setTimeout(r, 300));
+  if (row) await sb.from("lives").update({ is_live:false }).eq("id", row.id);
+  cleanupHost();
+}
+$("lvEnd").onclick = async () => {
+  if (!confirm("¿Terminar el directo para todos?")) return;
+  await endLive(); show("Live"); say($("liveMsg"), "Tu directo terminó. ¡Gracias por transmitir!", "ok");
+};
+
+/* --- espectador --- */
+function watchLive(l){
+  if (H) return show("Stage");
+  leaveWatch(); say($("liveMsg"), "");
+  $("lvTitle").textContent = l.title; $("lvTopic").textContent = l.topic;
+  $("lvVideo").muted = false; enterStage(false);
+  const peer = new Peer({ config: ICE });
+  W = { peer, conn:null, timer:null };
+  peer.on("open", () => {
+    W.conn = peer.connect(l.peer_id, { metadata:{ name:nameOf(profile) }, reliable:true });
+    W.timer = setTimeout(() => watchEnd("No se pudo conectar. Puede que el directo ya terminó o que tu red lo bloquee.", "err"), 15000);
+    W.conn.on("data", onWatchData);
+    W.conn.on("close", () => { if (W) watchEnd("Se perdió la conexión con el directo.", "err"); });
+  });
+  peer.on("call", call => { call.answer(); call.on("stream", s => { $("lvVideo").srcObject = s; playLv(); }); });
+  peer.on("error", err => { if (W) watchEnd(err.type === "peer-unavailable" ? "Este directo ya terminó." : "Error de conexión (" + err.type + ").", "err"); });
+}
+function onWatchData(d){
+  if (!d || !W) return;
+  if (d.t === "ok"){ clearTimeout(W.timer); lvSys("Estás dentro. Escribe para saludar."); }
+  else if (d.t === "deny") watchEnd(d.why || "No se pudo entrar.", "err");
+  else if (d.t === "kick") watchEnd("El anfitrión te sacó del directo.", "err");
+  else if (d.t === "end") watchEnd("El directo terminó. ¡Gracias por acompañar!", "ok");
+  else if (d.t === "count") setCount(d.n);
+  else if (d.t === "react") floatEmoji(d.e);
+  else if (d.t === "chat"){
+    if (d.sys) lvSys(d.text); else addLv(d.name, d.text, d.host ? "host" : (d.name === nameOf(profile) ? "me" : ""));
+  }
+}
+function leaveWatch(){
+  if (!W) return; const w = W; W = null;
+  clearTimeout(w.timer); try { w.conn && w.conn.close(); } catch (e) {} try { w.peer.destroy(); } catch (e) {}
+  $("lvVideo").srcObject = null;
+}
+function watchEnd(msg, type){ leaveWatch(); show("Live"); say($("liveMsg"), msg, type); }
+$("lvLeave").onclick = () => { leaveWatch(); show("Live"); };
+async function stopAll(){ leaveWatch(); await endLive(); }
+window.addEventListener("beforeunload", () => { try { H && H.peer.destroy(); W && W.peer.destroy(); } catch (e) {} });
+
 /* ---------- Estado de sesión ---------- */
 async function route(session){
   if (!session){
-    me = profile = null;
+    me = profile = null; stopAll();
     $("app").classList.add("hidden"); $("onboard").classList.add("hidden"); $("login").classList.remove("hidden");
     return;
   }
   me = session.user;
   profile = await loadProfile(me);
-  paint(); openEdit(false); show("Profile");
+  paint(); openEdit(false); show("Feed");
   $("login").classList.add("hidden");
   if (profile.onboarded === false){
     startOnboarding(); $("app").classList.add("hidden"); $("onboard").classList.remove("hidden");
