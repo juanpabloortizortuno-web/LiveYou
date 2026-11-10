@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LiveYou · videos cortos</title>
+<style>
+:root{--bg:#0d0a16;--panel:#1b1530;--line:#31274b;--tx:#f5f1ff;--mut:#a89fc4;--hot:#ff3d68;--ok:#3df5c8;color-scheme:dark}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;background:var(--bg);color:var(--tx);font:16px/1.4 "Trebuchet MS",system-ui,sans-serif;overflow:hidden}
+button,input{font:inherit;color:inherit}button{cursor:pointer;border:0;background:none}
+:focus-visible{outline:2px solid var(--ok);outline-offset:2px}
+input{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 12px;width:100%}
+.btn{background:var(--hot);color:#fff;font-weight:700;padding:11px;border-radius:10px;width:100%}
+.btn.alt{background:var(--panel);border:1px solid var(--line)}
+.btn.gg{background:#fff;color:#222;display:flex;align-items:center;justify-content:center;gap:10px}
+/* acceso */
+[hidden]{display:none!important}
+/* pantalla de bienvenida (logo animado) */
+#splash{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:radial-gradient(circle at 50% 45%,#2a1450,#0d0a16 70%);animation:sOut .6s 2.3s ease forwards}
+@keyframes sOut{to{opacity:0;visibility:hidden;transform:scale(1.05)}}
+.sl{display:flex;align-items:center;gap:14px}
+.sl svg{width:88px;height:88px;overflow:visible;animation:mk 1s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes mk{from{opacity:0;transform:scale(.2) rotate(-120deg)}to{opacity:1;transform:none}}
+.rg{transform-box:fill-box;transform-origin:center;animation:ring 1.6s .9s ease-out infinite}
+@keyframes ring{from{opacity:.9;transform:scale(1)}to{opacity:0;transform:scale(1.7)}}
+.wm{display:flex;font-size:3.6rem;font-weight:800;letter-spacing:-.05em;line-height:1}
+.wm span{opacity:0;transform:translateY(24px);animation:up .5s calc(.55s + var(--i)*.07s) cubic-bezier(.2,1,.3,1) forwards}
+.wm .dot{color:var(--hot)}
+@keyframes up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+/* acceso: dos paneles */
+#auth{position:fixed;inset:0;display:grid;grid-template-columns:1fr 1fr;background:var(--bg);z-index:60;overflow:auto}
+.ah{position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center;gap:16px;padding:48px 8vw;background:linear-gradient(150deg,#ff3d68 0%,#c2257f 45%,#4b1a8f 100%)}
+.ah .blob{position:absolute;border-radius:50%;background:#fff;pointer-events:none;animation:drift 14s ease-in-out infinite alternate}
+.b1{width:520px;height:520px;left:-150px;bottom:-210px;opacity:.1}
+.b2{width:340px;height:340px;right:-90px;top:-90px;opacity:.08;animation-delay:-5s!important}
+.b3{width:190px;height:190px;right:16%;bottom:14%;opacity:.12;animation-delay:-9s!important}
+@keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(34px,-26px) scale(1.1)}}
+.ah>:not(.blob){position:relative;animation:up .7s 1.9s both}
+.brand{display:flex;align-items:center;gap:12px;font-size:2.6rem;font-weight:800;letter-spacing:-.05em;line-height:1}
+.brand svg{width:54px;height:54px;flex:none}.brand b{color:var(--ok)}
+.ah h2{font-size:clamp(1.8rem,3vw,2.7rem);line-height:1.15;max-width:12em}
+.ah .sub{color:#fff;opacity:.85;font-size:1.05rem}
+.ar{display:grid;place-items:center;padding:28px 20px}
+#auth form{width:min(380px,100%);display:grid;gap:12px}
+#auth form>*{animation:up .6s both;animation-delay:calc(2s + var(--k,0)*.07s)}
+#auth form>:nth-child(2){--k:1}#auth form>:nth-child(3){--k:2}#auth form>:nth-child(4){--k:3}#auth form>:nth-child(5){--k:4}#auth form>:nth-child(6){--k:5}#auth form>:nth-child(7){--k:6}#auth form>:nth-child(8){--k:7}
+#auth h3{font-size:1.1rem}
+#auth .btn{border-radius:99px;padding:14px;text-transform:uppercase;letter-spacing:.05em;font-size:.85rem;transition:transform .15s,filter .15s}
+#auth .btn:hover{transform:translateY(-2px);filter:brightness(1.08)}
+#auth input{border-radius:12px;padding:14px 14px}
+#auth p{color:var(--mut);font-size:.9rem}#err{color:var(--hot);min-height:1.2em;font-size:.9rem}
+@media (max-width:820px){
+ #auth{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+ .ah{padding:26px 20px;gap:8px}.brand{font-size:2rem}.brand svg{width:42px;height:42px}
+ .ah h2{font-size:1.3rem}.ah .sub{display:none}.wm{font-size:2.6rem}.sl svg{width:64px;height:64px}
+}
+@media (prefers-reduced-motion:reduce){#splash{display:none}}
+/* estructura */
+#app{height:100%;display:grid;grid-template-columns:240px 1fr}
+#side{padding:16px 12px;display:flex;flex-direction:column;gap:6px;overflow:auto;border-right:1px solid var(--line)}
+#side .logo{font-size:1.7rem;font-weight:800;letter-spacing:-.05em;padding:4px 8px 10px}#side .logo b{color:var(--hot)}
+#q{border-radius:99px;margin-bottom:8px}
+.nv{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;font-weight:700;font-size:1.05rem;text-align:left;width:100%}
+.nv i{font-style:normal;font-size:1.4rem;width:28px;text-align:center}
+.nv:hover{background:var(--panel)}.nv.on{color:var(--hot)}
+.nv em{background:var(--hot);color:#fff;font-style:normal;font-size:.7rem;border-radius:99px;padding:0 6px;margin-left:auto}
+#main{position:relative;min-width:0;padding:12px 0 12px 0}
+#feed{height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none}
+#feed::-webkit-scrollbar{display:none}
+.card{height:100%;scroll-snap-align:start;display:grid;place-items:center;padding:6px 0}
+.stage{position:relative;height:100%;aspect-ratio:9/16;max-width:100%;border-radius:16px;overflow:hidden;background:#000}
+.stage video,.stage .bgart{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.stage .art{position:absolute;inset:0;display:grid;place-items:center;font-size:min(30vw,150px)}
+.shade{position:absolute;inset:auto 0 0;height:50%;background:linear-gradient(transparent,#000c);pointer-events:none}
+.info{position:absolute;left:14px;right:14px;bottom:62px;text-shadow:0 1px 6px #000}
+.info .u{display:flex;align-items:center;gap:8px;font-weight:800;margin-bottom:4px}
+.av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--hot);font-weight:800}
+.fol{background:var(--hot);border-radius:6px;padding:2px 12px;font-size:.85rem;font-weight:700}.fol.on{background:#fff3;}
+.ctl{position:absolute;left:0;right:0;bottom:0;padding:0 12px 10px;display:flex;align-items:center;gap:8px;font-size:.78rem}
+.ctl input[type=range]{padding:0;border:0;background:none;accent-color:var(--hot);height:16px;flex:1}
+.ctl button{font-size:1rem;padding:2px 5px;border-radius:6px}
+.ctl .t{color:#ddd;min-width:84px}
+.acts{position:absolute;left:calc(50% + min(var(--w),50vw)/2 + 14px);bottom:30px;display:grid;gap:14px;justify-items:center}
+.acts button{display:grid;justify-items:center;font-size:.78rem;gap:3px}
+.acts button b{width:46px;height:46px;border-radius:50%;background:var(--panel);display:grid;place-items:center;font-size:1.3rem;transition:transform .15s}
+.acts button.on b{color:var(--hot);transform:scale(1.12)}
+#nav{position:absolute;right:20px;top:50%;transform:translateY(-50%);display:grid;gap:12px;z-index:5}
+#nav button{width:46px;height:46px;border-radius:50%;background:var(--panel);font-size:1.2rem}
+.empty{height:100%;display:grid;place-items:center;text-align:center;padding:30px;color:var(--mut)}
+#grid{display:none;height:100%;overflow:auto;padding:12px 20px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;align-content:start}
+#main.ex #grid{display:grid}#main.ex #feed,#main.ex #nav{display:none}
+.tile{aspect-ratio:9/16;border-radius:12px;position:relative;overflow:hidden;text-align:left;background:#000}
+.tile span{position:absolute;left:8px;right:8px;bottom:8px;font-size:.8rem;text-shadow:0 1px 4px #000}
+
+/* panel abajo-izquierda */
+#dock{position:fixed;left:12px;bottom:12px;z-index:40;background:var(--panel);border:1px solid var(--line);border-radius:14px;width:min(340px,calc(100vw - 24px));max-height:62vh;display:flex;flex-direction:column;box-shadow:0 12px 40px #000a}
+#dock.max{inset:0;width:100vw;max-height:none;border-radius:0}
+#dock.min{width:auto;border-radius:99px}#dock.min .body,#dock.min nav{display:none}
+#dock header{display:flex;align-items:center;gap:6px;padding:8px 10px}#dock header strong{flex:1;font-size:.95rem;cursor:pointer}
+#dock header button{padding:4px 9px;border-radius:8px;background:var(--bg)}
+#dock nav{display:flex;border-block:1px solid var(--line)}
+#dock nav button{flex:1;padding:8px;color:var(--mut);font-size:.88rem}#dock nav button.on{color:var(--ok);box-shadow:inset 0 -2px var(--ok)}
+.body{padding:12px;overflow:auto;display:grid;gap:10px;align-content:start;flex:1;min-height:140px}
+.body small{color:var(--mut)}.msg{background:var(--bg);padding:8px 10px;border-radius:10px}.msg b{color:var(--ok);font-size:.85rem}
+.row{display:flex;gap:6px}.row .btn{width:auto;padding:10px 14px}
+.vid{display:flex;justify-content:space-between;align-items:center;background:var(--bg);padding:8px 10px;border-radius:10px;gap:8px}
+/* móvil */
+@media (max-width:820px){
+ #app{grid-template-columns:1fr;grid-template-rows:1fr auto}
+ #side{grid-row:2;flex-direction:row;border:0;border-top:1px solid var(--line);padding:4px;justify-content:space-around;gap:0;overflow:hidden}
+ #side .logo,#q{display:none}.nv{flex-direction:column;gap:0;padding:4px;font-size:.65rem;justify-content:center;width:auto}.nv i{font-size:1.25rem}.nv em{position:absolute;margin:0 0 14px 22px}
+ #main{padding:0}.stage{border-radius:0;height:100%;width:100%;aspect-ratio:auto}
+ .acts{left:auto;right:10px;bottom:70px}.acts button b{background:#0005;width:40px;height:40px}#nav{display:none}
+ #dock{bottom:70px}
+}
+.info a{color:var(--ok);font-weight:700;text-decoration:none}
+.info .cd{display:inline-block;margin-top:4px;padding:2px 8px;border-radius:99px;background:#0007;color:#ddd;font-size:.72rem;cursor:pointer}
+.pop{position:absolute;left:50%;top:45%;font-size:90px;color:var(--hot);pointer-events:none;text-shadow:0 2px 12px #0008;animation:pop .7s forwards;z-index:3}
+@keyframes pop{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}30%{opacity:1;transform:translate(-50%,-50%) scale(1.2)}100%{opacity:0;transform:translate(-50%,-90%) scale(1)}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+/* perfil */
+#prof{display:none;height:100%;overflow:auto}
+#main.pr #prof{display:block}#main.pr #feed,#main.pr #nav,#main.pr #grid{display:none}
+.ph{display:flex;gap:22px;padding:24px 20px 8px;max-width:760px;margin:0 auto;align-items:flex-start}
+img.pav,span.pav{width:96px;height:96px;border-radius:50%;object-fit:cover;display:grid;place-items:center;background:var(--hot);font-size:2.4rem;font-weight:800;flex:none}
+.pi{min-width:0;flex:1;display:grid;gap:8px}.pi h2{font-size:1.4rem;line-height:1.1;overflow-wrap:anywhere}.pu{color:var(--mut)}
+.ps{display:flex;gap:16px;flex-wrap:wrap;color:var(--mut);font-size:.9rem}.ps b{color:var(--tx);font-size:1.05rem}
+.pa{display:flex;gap:8px;flex-wrap:wrap}.pa .btn{width:auto;padding:9px 16px}
+.pbio{overflow-wrap:anywhere}.pi a{color:var(--ok);font-weight:700;text-decoration:none;overflow-wrap:anywhere}
+.pt{display:flex;max-width:760px;margin:8px auto 0;border-bottom:1px solid var(--line)}
+.pt button{flex:1;padding:12px;color:var(--mut);font-weight:700}.pt button.on{color:var(--tx);box-shadow:inset 0 -2px var(--tx)}
+.pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;padding:12px 20px 24px;max-width:760px;margin:0 auto}
+.pg .empty{grid-column:1/-1;padding:40px 10px}
+.pb{color:var(--mut);padding:0 0 4px;text-align:left;font-weight:700}
+img.av{object-fit:cover;display:block;background:var(--panel)}
+.uo{display:flex;align-items:center;gap:8px;font-weight:800;text-shadow:inherit}
+dialog{background:var(--panel);color:var(--tx);border:1px solid var(--line);border-radius:14px;padding:18px;width:min(380px,92vw);margin:auto}
+dialog::backdrop{background:#000a}dialog form{display:grid;gap:10px}dialog h3{font-size:1.2rem}
+dialog label{display:grid;gap:4px;color:var(--mut);font-size:.85rem}
+dialog input,dialog textarea{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;resize:none;font:inherit;color:var(--tx)}
+dialog input:disabled{opacity:.6}.er{display:flex;gap:8px;align-items:center}.er .btn{width:auto;padding:9px 12px}
+.er .pav{width:64px;height:64px;font-size:1.6rem}
+@media (max-width:820px){.ph{flex-direction:column;align-items:center;text-align:center}.ps,.pa{justify-content:center}.pg{padding:10px 8px 24px}}
+/* ===== EN VIVO ===== */
+#lives{display:none;height:100%;overflow:auto;padding:20px}
+#main.lv #lives{display:block}#main.lv #feed,#main.lv #nav,#main.lv #grid,#main.lv #prof{display:none}
+.lvw{max-width:560px;margin:0 auto;display:grid;gap:14px}.lvw h2{font-size:1.6rem}.lvw p,.lvw h3{color:var(--mut)}.lvw h3{font-size:1rem;margin-top:6px}
+.lvj{display:flex;gap:8px}.lvj .btn{width:auto;padding:11px 18px}
+.lvi{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.lvi .t{flex:1;min-width:0}.lvi b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lvi small{color:var(--mut)}
+.lvi .btn{width:auto;padding:8px 14px}
+.lvb{background:linear-gradient(90deg,var(--hot),#ff4d8d);color:#fff;border-radius:6px;padding:2px 8px;font-size:.7rem;font-weight:800;white-space:nowrap}
+#lvbar{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:70;background:linear-gradient(90deg,var(--hot),#ff4d8d);color:#fff;font-weight:800;padding:8px 16px;border-radius:99px;box-shadow:0 6px 24px #000a;animation:lvp 1.6s infinite}
+@keyframes lvp{50%{box-shadow:0 0 0 8px #ff3d6840}}
+#live{position:fixed;inset:0;z-index:85;background:#000}
+#live video{width:100%;height:100%;object-fit:contain;background:#000}#live video.me{transform:scaleX(-1)}
+#lvtop{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;gap:10px;padding:14px;background:linear-gradient(#000a,transparent)}
+#lvtop b{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#lvx{width:40px;height:40px;border-radius:50%;background:#fff2;font-size:1.1rem}
+#lvbot{position:absolute;bottom:0;left:0;right:0;padding:16px;display:grid;justify-items:center}#lvbot .btn{width:min(320px,100%)}
+#lvs{position:absolute;left:0;right:0;top:50%;text-align:center;color:var(--mut);pointer-events:none}
+.pwrap{position:relative;flex:none}
+.pwrap.on .pav{box-shadow:0 0 0 3px var(--bg),0 0 0 6px var(--hot)}
+.lvtag{position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);background:linear-gradient(90deg,var(--hot),#ff4d8d);color:#fff;font-size:.65rem;font-weight:800;padding:2px 8px;border-radius:6px;white-space:nowrap}
+
+/* ===== EN VIVO (estilo TikTok) ===== */
+#lvrow{position:absolute;top:10px;left:12px;right:12px;z-index:6;display:flex;gap:14px;overflow-x:auto;pointer-events:none;scrollbar-width:none;padding-bottom:8px}
+#lvrow>button{pointer-events:auto;display:grid;justify-items:center;gap:6px;font-size:.68rem;text-shadow:0 1px 4px #000;max-width:58px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#lvrow .pav{width:46px;height:46px;font-size:1.2rem}#lvrow .lvtag{font-size:.55rem;padding:1px 6px}
+#main.ex #lvrow,#main.pr #lvrow,#main.lv #lvrow{display:none}
+.lvg{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.lvc{position:relative;aspect-ratio:9/16;border-radius:14px;overflow:hidden;display:grid;place-items:center;text-align:left}
+.lvc .pav{width:84px;height:84px;font-size:2.2rem}.lvc .lvb{position:absolute;left:8px;top:8px}
+.lvc .vw{position:absolute;right:8px;top:8px;background:#0007;border-radius:6px;padding:2px 7px;font-size:.72rem}
+.lvc .lt{position:absolute;left:10px;right:10px;bottom:10px;display:block;text-shadow:0 1px 6px #000;font-size:.82rem}
+.lvgo{font-size:1.1rem;padding:16px!important;border-radius:99px!important}
+#live{display:grid;place-items:center}#live video{object-fit:cover}
+.lvst{position:relative;height:100%;aspect-ratio:9/16;max-width:100%;overflow:hidden;background:#000}
+@media (max-width:820px){.lvst{width:100%;aspect-ratio:auto}}
+#lvn{background:#0007;border-radius:6px;padding:2px 8px;font-size:.8rem}
+#lvchat{position:absolute;left:12px;right:70px;bottom:70px;max-height:36%;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;gap:4px;pointer-events:none;-webkit-mask-image:linear-gradient(transparent,#000 40%);mask-image:linear-gradient(transparent,#000 40%)}
+#lvchat div{background:#0006;border-radius:12px;padding:4px 10px;font-size:.88rem;width:fit-content;max-width:100%;overflow-wrap:anywhere;text-shadow:0 1px 3px #000}#lvchat b{color:var(--ok)}
+#lvin{position:absolute;left:12px;right:12px;bottom:12px;display:flex;gap:8px}
+#lvin input{border-radius:99px;background:#0008;border-color:#fff3}#lvin .btn{width:auto;border-radius:99px;padding:10px 16px}
+#lvtools{position:absolute;right:12px;bottom:70px;display:grid;gap:10px}#lvtools button{width:44px;height:44px;border-radius:50%;background:#0007;font-size:1.2rem}
+</style>
+</head>
+<body>
+<div id="splash" aria-hidden="true">
+ <div class="sl">
+  <svg viewBox="0 0 96 96"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff3d68"/><stop offset="1" stop-color="#8a2cff"/></linearGradient></defs><circle class="rg" cx="48" cy="48" r="40" fill="none" stroke="#ff3d68" stroke-width="3"/><circle cx="48" cy="48" r="40" fill="url(#lg)"/><path d="M39 30 L68 48 L39 66 Z" fill="#fff"/></svg>
+  <div class="wm"><span style="--i:0">L</span><span style="--i:1">i</span><span style="--i:2">v</span><span style="--i:3">e</span><span style="--i:4">Y</span><span style="--i:5">o</span><span style="--i:6">u</span><span class="dot" style="--i:7">.</span></div>
+ </div>
+</div>
+<div id="auth">
+ <section class="ah">
+  <i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i>
+  <div class="brand"><svg viewBox="0 0 96 96" aria-hidden="true"><circle cx="48" cy="48" r="42" fill="#fff"/><path d="M39 30 L68 48 L39 66 Z" fill="#ff3d68"/></svg><span>LiveYou<b>.</b></span></div>
+  <h2>Crea, mira y transmite videos cortos en vivo</h2>
+  <div class="sub">Tu comunidad, tu cámara, tu momento.</div>
+ </section>
+ <section class="ar">
+ <form id="f" autocomplete="off">
+  <h3>Iniciar sesión</h3><p>Videos cortos. Tu cuenta y tus datos se quedan en este dispositivo.</p>
+  <input id="u" placeholder="Nombre de usuario" required minlength="3" maxlength="20" autocomplete="username">
+  <input id="p" type="password" placeholder="Contraseña (mínimo 6)" required minlength="6" autocomplete="current-password">
+  <div id="err" role="alert"></div>
+  <button class="btn" id="go">Entrar</button>
+  <button class="btn alt" type="button" id="sw">Crear cuenta nueva</button>
+  <button class="btn gg" type="button" id="gg" hidden><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.6 5.9c4.4-4.1 7-10.1 7-17.6z"/><path fill="#FBBC05" d="M10.5 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7l-7.9-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.6-5.9c-2.1 1.4-4.9 2.3-8.3 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>Continuar con Google</button>
+  <div id="g"></div>
+ </form>
+ </section>
+</div>
+
+<div id="app">
+ <nav id="side" aria-label="Principal">
+  <div class="logo">LiveYou<b>.</b></div>
+  <input id="q" type="search" placeholder="Buscar o pegar código">
+  <button class="nv on" data-v="for"><i>🏠</i>Para ti</button>
+  <button class="nv" data-v="ex"><i>🧭</i>Explorar</button>
+  <button class="nv" data-v="live"><i>🔴</i>En vivo</button>
+  <button class="nv" data-v="fol"><i>👥</i>Siguiendo</button>
+  <button class="nv" data-v="up"><i>＋</i>Cargar</button>
+  <button class="nv" data-v="chat"><i>✉️</i>Mensajes</button>
+  <button class="nv" data-v="me"><i>👤</i>Perfil</button>
+ </nav>
+ <div id="main">
+  <main id="feed" aria-label="Videos"></main>
+  <div id="grid"></div>
+  <div id="prof"></div>
+  <div id="lives"></div>
+  <div id="lvrow"></div>
+  <div id="nav"><button id="up" aria-label="Anterior">⌃</button><button id="dn" aria-label="Siguiente">⌄</button></div>
+ </div>
+</div>
+
+<button id="lvbar" hidden>🔴 EN VIVO</button>
+<div id="live" hidden><div class="lvst">
+ <video id="lvv" playsinline autoplay></video>
+ <div id="lvs"></div>
+ <div id="lvtop"><span class="lvb">🔴 EN VIVO</span><b id="lvt"></b><span id="lvn"></span><button class="btn" id="lvfol" hidden style="width:auto;padding:6px 12px">Seguir</button><button id="lvx" aria-label="Cerrar">✕</button></div>
+ <div id="lvchat" aria-live="polite"></div>
+ <div id="lvtools" hidden><button id="lvflip" aria-label="Girar cámara">🔄</button><button id="lvmic" aria-label="Micrófono">🎤</button></div>
+ <form id="lvin"><input id="lvm" placeholder="Escribe un comentario…" maxlength="200" autocomplete="off"><button class="btn">Enviar</button></form>
+</div></div>
+<aside id="dock" hidden>
+ <header><strong id="dt">Mi espacio</strong><button id="bmin" aria-label="Minimizar">–</button><button id="bmax" aria-label="Maximizar">⤢</button></header>
+ <nav><button data-t="chat" class="on">Mensajes</button><button data-t="up">Subir</button><button data-t="me">Mi cuenta</button></nav>
+ <div class="body" id="body"></div>
+</aside>
+<dialog id="ed"><form id="edf" method="dialog">
+ <h3>Editar perfil</h3>
+ <div class="er"><span id="eprev"></span><button class="btn alt" type="button" id="epick">Cambiar foto</button><button class="btn alt" type="button" id="erm">Quitar</button></div>
+ <label>Nombre<input id="edn" maxlength="30" placeholder="Tu nombre"></label>
+ <label>Usuario (no se puede cambiar)<input id="edu" disabled></label>
+ <label>Biografía<textarea id="edb" maxlength="150" rows="3" placeholder="Cuéntanos algo de ti"></textarea></label>
+ <label>Enlace<input id="edl" maxlength="100" inputmode="url" placeholder="https://…"></label>
+ <div id="eerr" role="alert" style="color:var(--hot);min-height:1.2em;font-size:.9rem"></div>
+ <div class="row"><button class="btn alt" type="button" id="ecan">Cancelar</button><button class="btn" id="esv">Guardar</button></div>
+</form></dialog>
+<input type="file" id="afile" accept="image/*" hidden>
+<input type="file" id="file" accept="video/*" hidden>
+
+<script>
+"use strict";
+/* Solo para el modo local (sin Supabase). Con Supabase, Google se configura dentro de Supabase
+   (Authentication → Providers → Google) y esta línea no se usa. */
+const GOOGLE_CLIENT_ID = "";
+
+/* ===== NUBE (Supabase) =====
+   Pega aquí los dos datos de tu proyecto (Project Settings → API). Si los dejas vacíos, la app funciona en modo local. */
+const SUPA_URL = "";   /* ejemplo: https://abcdefgh.supabase.co */
+const SUPA_KEY = "";   /* la clave "anon public" (es pública por diseño; la protegen las reglas del archivo supabase-setup.sql) */
+const cloud = !!(SUPA_URL && SUPA_KEY);
+let sb;
+const ready = cloud ? import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm").then(m => { sb = m.createClient(SUPA_URL, SUPA_KEY); }) : Promise.resolve();
+
+const $ = s => document.querySelector(s);
+/* aviso de error al guardar en la nube */
+const cw = async p => { try { const r = await p; if (r.error) throw r.error; return r; } catch (e) { alert("No se pudo guardar: " + (e.message || e)); } };
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const jget = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d } catch { return d } };
+const jset = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)) } catch {} };
+const hex = b => [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join("");
+async function hash(pw, salt) {
+  const k = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveBits"]);
+  return hex(await crypto.subtle.deriveBits({name:"PBKDF2", salt:new TextEncoder().encode(salt), iterations:150000, hash:"SHA-256"}, k, 256));
+}
+/* código único = SHA-256 del video ya transformado (64 caracteres). No contiene el video: es la llave para encontrarlo. */
+const sha = async buf => hex(await crypto.subtle.digest("SHA-256", buf));
+/* huella rápida del archivo original (tamaño + 8 trozos) para detectar que ya lo subiste, sin cargar 250 MB en memoria */
+async function quick(f) {
+ const ch = 262144, p = [new TextEncoder().encode(f.size + ":")];
+ for (let i = 0; i < 8; i++) { const o = Math.max(0, Math.floor((f.size - ch) * i / 7)); p.push(new Uint8Array(await f.slice(o, o + ch).arrayBuffer())); }
+ return sha(await new Blob(p).arrayBuffer());
+}
+const tm = v => v.t || parseInt(v.id, 36) || 0;
+const tags = t => esc(t).replace(/#([\p{L}\p{N}_]+)/gu, '<a href="#" data-h="$1">#$1</a>');
+const mb = n => (n / 1048576).toFixed(1) + " MB";
+const idb = new Promise((ok, no) => { const r = indexedDB.open("vuelta", 1); r.onupgradeneeded = () => r.result.createObjectStore("videos", {keyPath:"id"}); r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error); });
+const tx = (m, f) => idb.then(d => new Promise((ok, no) => { const r = f(d.transaction("videos", m).objectStore("videos")); r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error); }));
+
+let uid, stats = {}, me, signup = false, data, videos = [], view = "for", autoNext = true, speed = 1, muted = true;
+const demos = [
+ {id:"d1", owner:"liveyou", cap:"Bienvenido 👋 Desliza hacia abajo #parati", art:"🌅", bg:"#ff3d68,#5b1a8f"},
+ {id:"d2", owner:"liveyou", cap:"Sube tu primer video desde Cargar #crea", art:"🎬", bg:"#3df5c8,#0b3d5c"},
+ {id:"d3", owner:"liveyou", cap:cloud ? "Tus videos se suben a la nube y todos pueden verlos #comunidad" : "Tus datos nunca salen de tu dispositivo #privacidad", art:"🔒", bg:"#ffb703,#8a2c0d"}
+];
+
+/* acceso */
+$("#sw").onclick = () => { signup = !signup; $("#go").textContent = signup ? "Crear cuenta" : "Entrar"; $("#sw").textContent = signup ? "Ya tengo cuenta" : "Crear cuenta nueva"; $("#err").textContent = ""; };
+$("#f").onsubmit = async e => {
+ e.preventDefault();
+ const n = $("#u").value.trim().toLowerCase(), p = $("#p").value, us = jget("v_users", {});
+ if (!/^[a-z0-9_.]{3,20}$/.test(n)) return $("#err").textContent = "Usa 3–20 letras, números, punto o guion bajo.";
+ if (signup) {
+  if (us[n]) return $("#err").textContent = "Ese nombre ya existe en este dispositivo.";
+  const salt = hex(crypto.getRandomValues(new Uint8Array(16)));
+  us[n] = {salt, h: await hash(p, salt)}; jset("v_users", us);
+ } else { const u = us[n]; if (!u || u.h !== await hash(p, u.salt)) return $("#err").textContent = "Usuario o contraseña incorrectos."; }
+ sessionStorage.setItem("v_me", n); start(n);
+};
+if (cloud) {
+ ["#u", "#p", "#go", "#sw"].forEach(x => $(x).style.display = "none");
+ $("#gg").hidden = false;
+ $("#auth p").textContent = "Entra con tu cuenta de Google. Tus videos, me gusta y guardados quedan en tu cuenta.";
+ $("#gg").onclick = async () => {
+  try {
+   await ready;
+   const r = await sb.auth.signInWithOAuth({provider:"google", options:{redirectTo: location.origin + location.pathname}});
+   if (r.error) $("#err").textContent = r.error.message;
+  } catch (x) { $("#err").textContent = "No se pudo conectar: " + x.message; }
+ };
+}
+if (GOOGLE_CLIENT_ID && !cloud) {
+ const s = document.createElement("script"); s.src = "https://accounts.google.com/gsi/client"; s.async = true;
+ s.onload = () => { google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID, callback:r => {
+  const p = JSON.parse(decodeURIComponent(escape(atob(r.credential.split(".")[1].replace(/-/g,"+").replace(/_/g,"/")))));
+  const n = "g_" + (p.email || p.sub).split("@")[0].toLowerCase().replace(/[^a-z0-9_.]/g, "");
+  sessionStorage.setItem("v_me", n); start(n); }});
+  google.accounts.id.renderButton($("#g"), {theme:"filled_black", size:"large", locale:"es"}); };
+ document.head.appendChild(s);
+}
+const mapVid = r => ({id:r.id, owner:r.owner, cap:r.cap, size:r.size, src:r.src, path:r.path, t:Date.parse(r.created_at), url:sb.storage.from("videos").getPublicUrl(r.path).data.publicUrl});
+async function loadCloud() {
+ const {data, error} = await sb.from("videos").select("*").order("created_at", {ascending:false}).limit(100);
+ if (error) { alert("No se pudieron cargar los videos: " + error.message); return []; }
+ return data.map(mapVid);
+}
+/* trae TODOS los videos de un usuario (el feed solo carga los 100 más recientes) y los une a la lista */
+async function loadUserVids(name) {
+ const {data, error} = await sb.from("videos").select("*").eq("owner", name).order("created_at", {ascending:false}).limit(200);
+ if (error || !data) return;
+ const have = new Set(videos.map(v => v.id));
+ data.filter(r => !have.has(r.id)).forEach(r => videos.push(mapVid(r)));
+ videos.sort((a, b) => tm(b) - tm(a));
+}
+async function loadMine() {
+ const [l, sv, f, nt, sx] = await Promise.all([
+  sb.from("likes").select("video_id").eq("user_id", uid), sb.from("saves").select("video_id").eq("user_id", uid),
+  sb.from("follows").select("owner").eq("user_id", uid), sb.from("notes").select("text").eq("user_id", uid).order("created_at"),
+  sb.from("video_stats").select("*")]);
+ const bad = [l, sv, f, nt, sx].find(x => x.error);
+ if (bad) alert("No se pudieron cargar tus datos: " + bad.error.message);
+ data.likes = (l.data || []).map(x => x.video_id); data.saves = (sv.data || []).map(x => x.video_id);
+ data.follows = (f.data || []).map(x => x.owner); data.inbox = (nt.data || []).map(x => ({u:me, t:x.text}));
+ stats = Object.fromEntries((sx.data || []).map(x => [x.video_id, {likes:Number(x.likes), comments:Number(x.comments)}]));
+}
+const lc = id => cloud ? (stats[id]?.likes || 0) : (data.likes.includes(id) ? 1 : 0);
+const cc = id => cloud ? (stats[id]?.comments || 0) : (data.comments[id] || []).length;
+const st = id => stats[id] ||= {likes:0, comments:0};
+async function upCloud(blob, id, cap, src) {
+ const {data:{user}} = await sb.auth.getUser(), path = `${user.id}/${id}.${blob.type.includes("mp4") ? "mp4" : "webm"}`;
+ let r = await sb.storage.from("videos").upload(path, blob, {contentType:blob.type});
+ if (r.error) throw new Error(/exists/i.test(r.error.message) ? "Este video ya estaba subido (no se repite)." : r.error.message);
+ r = await sb.from("videos").insert({id, owner:me, cap, size:blob.size, path, src});
+ if (r.error) { await sb.storage.from("videos").remove([path]); throw new Error(r.error.code === "23505" ? "Este video ya estaba subido (no se repite)." : r.error.message); }
+}
+async function delVid(v) {
+ if (!v) return;
+ if (cloud) { await sb.from("videos").delete().eq("id", v.id); await sb.storage.from("videos").remove([v.path]); }
+ else await tx("readwrite", s => s.delete(v.id));
+}
+async function start(n) {
+ me = n; data = Object.assign({likes:[], follows:[], saves:[], comments:{}, inbox:[], prof:{}}, cloud ? {} : jget("v_data_" + n, {}));
+ $("#auth").style.display = "none"; $("#dock").hidden = false;
+ if (innerWidth > 820) $("#dock").classList.add("min");
+ if (cloud) $("#auth p").textContent = "Videos cortos. Tu cuenta es en línea y tus videos los puede ver todo el mundo.";
+ if (cloud) await loadMine();
+ videos = cloud ? await loadCloud() : (await tx("readonly", s => s.getAll())).sort((a, b) => tm(b) - tm(a));
+ if (cloud) await loadProfs(); else profs[me] = data.prof;
+ render(); tab("chat"); if (!cloud) p2p(); deepLink();
+ if (cloud) joinLobby();
+}
+const save = () => { if (!cloud) jset("v_data_" + me, data); };
+const toggle = (a, x) => { const i = a.indexOf(x); i < 0 ? a.push(x) : a.splice(i, 1); };
+const fmt = s => isFinite(s) ? Math.floor(s/60) + ":" + String(Math.floor(s%60)).padStart(2, "0") : "0:00";
+const all = () => {
+ const have = new Set(videos.map(v => v.id)), seen = new Set(), rem = [];
+ for (const [peer, l] of Object.entries(remote)) for (const m of l) if (!have.has(m.id) && !seen.has(m.id)) { seen.add(m.id); rem.push({...m, remote:true, peer, art:"📡", bg:"#3a2a6a,#0d0a16"}); }
+ return [...videos.map(v => ({...v, url:v.url || (v.url = URL.createObjectURL(v.blob))})), ...rem, ...demos];
+};
+
+/* navegación lateral */
+document.querySelectorAll(".nv").forEach(b => b.onclick = () => {
+ const v = b.dataset.v;
+ if (v === "me") return openProf(me);
+ if (["up","chat"].includes(v)) { $("#dock").classList.remove("min"); return tab(v); }
+ view = v; document.querySelectorAll(".nv").forEach(x => x.classList.toggle("on", x === b)); render();
+});
+$("#q").oninput = () => { if (view === "prof") { view = "for"; setNav("for"); } render(); };
+
+function list() {
+ const q = $("#q").value.trim().toLowerCase();
+ let l = all();
+ if (view === "fol") l = l.filter(v => data.follows.includes(v.owner));
+ if (q) l = l.filter(v => (v.cap + v.owner).toLowerCase().includes(q) || (/^[a-f0-9]{6,64}$/.test(q) && v.id.startsWith(q)));
+ return l;
+}
+const io = new IntersectionObserver(es => es.forEach(e => {
+ const v = e.target.querySelector("video"); if (!v) return;
+ if (e.isIntersecting) { v.muted = muted; v.playbackRate = speed; v.play().catch(() => {}); } else v.pause();
+}), {threshold:.7});
+
+function render() {
+ const m = $("#main"), f = $("#feed"), l = list(); f.innerHTML = ""; $("#grid").innerHTML = "";
+ m.classList.toggle("ex", view === "ex"); m.classList.toggle("pr", view === "prof"); m.classList.toggle("lv", view === "live");
+ if (view === "prof") return renderProf();
+ if (view === "live") return renderLives();
+ if (view === "ex") {
+  l.forEach(v => { const t = document.createElement("button"); t.className = "tile";
+   t.innerHTML = (v.url ? `<video src="${v.url}" muted preload="metadata"></video>` : `<div class="bgart" style="position:absolute;inset:0;background:linear-gradient(160deg,${v.bg})"></div><div class="art" style="position:absolute;inset:0;display:grid;place-items:center;font-size:3rem">${v.art}</div>`) + `<span>${esc(v.cap)}</span>`;
+   t.onclick = () => { view = "for"; document.querySelectorAll(".nv").forEach(x => x.classList.toggle("on", x.dataset.v === "for")); $("#q").value = ""; render(); const i = all().findIndex(x => x.id === v.id); f.scrollTop = i * f.clientHeight; };
+   $("#grid").appendChild(t); });
+  if (!l.length) $("#grid").innerHTML = '<div class="empty">No hay resultados.</div>'; return;
+ }
+ if (!l.length) { f.innerHTML = '<div class="empty"><p>' + (view === "fol" ? "Aún no sigues a nadie. Toca Seguir en un video." : "No hay videos con esa búsqueda.") + "</p></div>"; return; }
+ l.forEach(v => {
+  const c = document.createElement("section"); c.className = "card";
+  const liked = data.likes.includes(v.id), fo = data.follows.includes(v.owner);
+  c.innerHTML = `<div class="stage">${v.url ? `<video src="${v.url}" playsinline></video>` : v.remote ? `<div class="bgart" style="background:linear-gradient(160deg,#3a2a6a,#0d0a16)"></div><div class="art"><button class="btn" style="width:auto;padding:12px 20px" data-a="get">▶ Cargar video · ${(v.size / 1048576).toFixed(1)} MB</button></div>` : `<div class="bgart" style="background:linear-gradient(160deg,${v.bg})"></div><div class="art">${v.art}</div>`}
+   <div class="shade"></div>
+   <div class="info"><div class="u"><button class="uo" data-a="prof">${av(v.owner)}${esc(v.owner)}</button> ${v.owner !== me ? `<button class="fol ${fo ? "on" : ""}" data-a="follow">${fo ? "Siguiendo" : "Seguir"}</button>` : ""}</div>${tags(v.cap)}${v.id.length === 64 ? `<br><span class="cd" data-code="${v.id}">🔑 ${v.id.slice(0, 8)}… copiar código</span>` : ""}</div>
+   ${v.url ? `<div class="ctl"><button data-a="pp">⏸</button><input type="range" min="0" max="1000" value="0" aria-label="Progreso"><span class="t">0:00 / 0:00</span><button data-a="auto" title="Pasar automáticamente">${autoNext ? "⏭" : "⏹"}</button><button data-a="spd">${speed}x</button><button data-a="mute">${muted ? "🔇" : "🔊"}</button></div>` : ""}</div>
+   <div class="acts" style="--w:${Math.round((f.clientHeight - 12) * 9 / 16)}px">
+    <button data-a="like" class="${liked ? "on" : ""}"><b>♥</b><i>${lc(v.id)}</i></button>
+    <button data-a="com"><b>💬</b>${cc(v.id)}</button>
+    <button data-a="sav" class="${data.saves.includes(v.id) ? "on" : ""}"><b>🔖</b>Guardar</button>
+    <button data-a="share"><b>↗</b>Compartir</button></div>`;
+  const vd = c.querySelector("video"), rg = c.querySelector("input[type=range]"), tm = c.querySelector(".t");
+  if (vd) {
+   vd.ontimeupdate = () => { rg.value = vd.currentTime / vd.duration * 1000 || 0; tm.textContent = fmt(vd.currentTime) + " / " + fmt(vd.duration); };
+   vd.onended = () => { if (autoNext) c.nextElementSibling?.scrollIntoView({behavior:"smooth"}); else vd.play(); };
+   rg.oninput = () => vd.currentTime = rg.value / 1000 * vd.duration;
+   let lt = 0, tt;
+   vd.onclick = () => {
+    const n = Date.now();
+    if (n - lt < 300) { clearTimeout(tt); lt = 0; const h = document.createElement("span"); h.className = "pop"; h.textContent = "♥"; c.querySelector(".stage").appendChild(h); setTimeout(() => h.remove(), 700); if (!data.likes.includes(v.id)) c.querySelector("[data-a=like]").click(); }
+    else { lt = n; tt = setTimeout(() => vd.paused ? vd.play() : vd.pause(), 300); }
+   };
+   vd.onplay = () => c.querySelector('[data-a=pp]').textContent = "⏸"; vd.onpause = () => c.querySelector('[data-a=pp]').textContent = "▶";
+  }
+  c.onclick = e => {
+   const h = e.target.closest("[data-h]");
+   if (h) { e.preventDefault(); $("#q").value = "#" + h.dataset.h; return render(); }
+   const cd = e.target.closest("[data-code]");
+   if (cd) { navigator.clipboard?.writeText(cd.dataset.code); cd.textContent = "✓ código copiado"; return; }
+   const b = e.target.closest("button"); if (!b) return; const a = b.dataset.a;
+   if (a === "prof") return openProf(v.owner);
+   if (a === "like") {
+    toggle(data.likes, v.id); const on = data.likes.includes(v.id); b.classList.toggle("on", on);
+    if (cloud) { st(v.id).likes = Math.max(0, st(v.id).likes + (on ? 1 : -1)); cw(on ? sb.from("likes").insert({video_id:v.id}) : sb.from("likes").delete().eq("video_id", v.id).eq("user_id", uid)); }
+    b.querySelector("i").textContent = lc(v.id); save();
+   }
+   if (a === "sav") {
+    toggle(data.saves, v.id); const on = data.saves.includes(v.id); b.classList.toggle("on", on);
+    if (cloud) cw(on ? sb.from("saves").insert({video_id:v.id}) : sb.from("saves").delete().eq("video_id", v.id).eq("user_id", uid));
+    save();
+   }
+   if (a === "follow") {
+    toggle(data.follows, v.owner); const on = data.follows.includes(v.owner);
+    if (cloud) cw(on ? sb.from("follows").insert({owner:v.owner}) : sb.from("follows").delete().eq("owner", v.owner).eq("user_id", uid));
+    save(); const y = f.scrollTop; render(); f.scrollTop = y; }
+   if (a === "com") { curCom = v; $("#dock").classList.remove("min"); tab("com"); }
+   if (a === "share") { const t = "Mira este video en LiveYou: " + v.cap + (v.id.length === 64 ? " · Código: " + v.id : ""); navigator.share ? navigator.share({text:t, url:location.href}).catch(() => {}) : navigator.clipboard?.writeText(t + " " + location.href); }
+   if (a === "pp") vd.paused ? vd.play() : vd.pause();
+   if (a === "get") { b.textContent = "Descargando…"; sendReq && sendReq(v.id, v.peer); }
+   if (a === "auto") { autoNext = !autoNext; b.textContent = autoNext ? "⏭" : "⏹"; }
+   if (a === "spd") { speed = speed >= 2 ? .5 : speed + .5; document.querySelectorAll("video").forEach(x => x.playbackRate = speed); document.querySelectorAll('[data-a=spd]').forEach(x => x.textContent = speed + "x"); }
+   if (a === "mute") { muted = !muted; document.querySelectorAll("video").forEach(x => x.muted = muted); document.querySelectorAll('[data-a=mute]').forEach(x => x.textContent = muted ? "🔇" : "🔊"); }
+  };
+  f.appendChild(c); io.observe(c);
+ });
+}
+$("#up").onclick = () => $("#feed").scrollBy({top:-$("#feed").clientHeight, behavior:"smooth"});
+$("#dn").onclick = () => $("#feed").scrollBy({top:$("#feed").clientHeight, behavior:"smooth"});
+addEventListener("keydown", e => { if (/INPUT|TEXTAREA/.test(e.target.tagName)) return; if (e.key === "ArrowDown") $("#dn").click(); if (e.key === "ArrowUp") $("#up").click(); });
+
+/* panel abajo-izquierda */
+const dock = $("#dock"); let curCom = null;
+$("#bmin").onclick = () => { dock.classList.toggle("min"); dock.classList.remove("max"); };
+$("#bmax").onclick = () => { dock.classList.toggle("max"); dock.classList.remove("min"); };
+$("#dt").onclick = () => dock.classList.remove("min");
+dock.querySelectorAll("nav button").forEach(b => b.onclick = () => tab(b.dataset.t));
+function chatBox(L, ph, key, kind) {
+ $("#body").innerHTML = L.map(m => `<div class="msg"><b>@${esc(m.u)}</b><br>${esc(m.t)}</div>`).join("") + `<div class="row"><input id="mi" placeholder="${ph}" maxlength="200"><button class="btn" id="ms">Enviar</button></div>`;
+ const send = async () => {
+  const x = $("#mi").value.trim(); if (!x) return; L.push({u:me, t:x});
+  if (cloud) {
+   const r = await cw(kind === "com" ? sb.from("comments").insert({video_id:curCom.id, username:me, text:x}) : sb.from("notes").insert({text:x}));
+   if (r && kind === "com") st(curCom.id).comments++;
+  } else save();
+  key();
+ };
+ $("#ms").onclick = send; $("#mi").onkeydown = e => e.key === "Enter" && send();
+}
+async function tab(t) {
+ dock.querySelectorAll("nav button").forEach(b => b.classList.toggle("on", b.dataset.t === t));
+ const B = $("#body");
+ if (t === "chat") { chatBox(data.inbox, "Escribe una nota…", () => tab("chat"), "note"); B.insertAdjacentHTML("afterbegin", `<small>${cloud ? "Notas guardadas en tu cuenta (solo tú las ves)." : "Notas guardadas solo en este dispositivo."}</small>`); }
+ if (t === "com") {
+  const vid = curCom.id;
+  if (cloud) {
+   B.innerHTML = "<small>Cargando comentarios…</small>";
+   const r = await sb.from("comments").select("username,text").eq("video_id", vid).order("created_at").limit(200);
+   if (curCom.id !== vid) return;
+   data.comments[vid] = (r.data || []).map(x => ({u:x.username, t:x.text})); st(vid).comments = data.comments[vid].length;
+  }
+  chatBox(data.comments[vid] ||= [], "Comentar…", () => { const y = $("#feed").scrollTop; render(); $("#feed").scrollTop = y; tab("com"); }, "com");
+  B.insertAdjacentHTML("afterbegin", `<small>Comentarios · ${esc(curCom.cap)}</small>`);
+ }
+ if (t === "up") {
+  B.innerHTML = `<input id="cap" placeholder="Descripción y #hashtags" maxlength="100"><button class="btn" id="pick">Elegir video y publicar</button><small>El video se transforma en tu dispositivo (más liviano) y recibe un código único de 64 caracteres: si lo subes dos veces, no se repite. Pega el código en Buscar para encontrarlo. Mantén esta pestaña abierta mientras se transforma.${cloud ? " Se sube a la nube y todos pueden verlo." : " Se comparte directo con quien lo pida mientras estés en línea. No pasa por GitHub."}</small>` +
+   videos.filter(v => v.owner === me).map(v => `<div class="vid"><span>${esc(v.cap)}<br><small>${v.orig ? mb(v.orig) + " → " : ""}${mb(v.size || v.blob.size)} · Código ${v.id.slice(0, 12)}…</small></span><span><button data-c="${v.id}" aria-label="Copiar código">📋</button><button data-d="${v.id}" aria-label="Borrar">🗑</button></span></div>`).join("");
+  $("#pick").onclick = () => $("#file").click();
+  B.querySelectorAll("[data-c]").forEach(b => b.onclick = () => { navigator.clipboard?.writeText(b.dataset.c); b.textContent = "✓"; });
+  B.querySelectorAll("[data-d]").forEach(b => b.onclick = async () => { await delVid(videos.find(v => v.id === b.dataset.d)); videos = videos.filter(v => v.id !== b.dataset.d); render(); tab("up"); });
+ }
+ if (t === "me") {
+  B.innerHTML = `<b>@${esc(me)}</b><small>Sigues a ${data.follows.length} · ${data.likes.length} me gusta · ${data.saves.length} guardados</small>
+   <button class="btn alt" id="mp">Ver mi perfil</button><button class="btn alt" id="ex">Descargar mis datos</button><button class="btn alt" id="out">Cerrar sesión</button><button class="btn alt" id="del" style="color:var(--hot)">${cloud ? "Borrar mi cuenta" : "Borrar mi cuenta de este dispositivo"}</button>`;
+  $("#out").onclick = async () => { await stopLive(); await sb?.auth.signOut(); sessionStorage.removeItem("v_me"); location.reload(); };
+  $("#mp").onclick = () => openProf(me);
+  $("#ex").onclick = () => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], {type:"application/json"})); a.download = `liveyou-${me}.json`; a.click(); };
+  $("#del").onclick = async () => {
+   if (!confirm(cloud ? "Se borrarán tu cuenta, tus videos, tus me gusta, guardados y comentarios de la nube. No se puede deshacer. ¿Continuar?" : "Se borrarán tu cuenta, tus datos y tus videos de este dispositivo. ¿Continuar?")) return;
+   if (cloud) {
+    try {
+     for (const v of videos.filter(v => v.owner === me)) await delVid(v);
+     await sb.storage.from("avatars").remove([uid + "/avatar.jpg"]);
+     const r = await sb.rpc("delete_my_account"); if (r.error) throw r.error;
+     await sb.auth.signOut().catch(() => {});
+    } catch (x) { return alert("No se pudo borrar la cuenta: " + x.message); }
+    sessionStorage.removeItem("v_me"); location.reload(); return;
+   }
+   const u = jget("v_users", {}); delete u[me]; jset("v_users", u); localStorage.removeItem("v_data_" + me);
+   for (const v of videos.filter(v => v.owner === me)) await delVid(v);
+   if (cloud) await sb.auth.signOut();
+   sessionStorage.removeItem("v_me"); location.reload();
+  };
+ }
+}
+/* ===== TRANSFORMADOR: reduce el video a 360x640, ~0.5 Mbps (≈4 MB por minuto) ===== */
+async function compress(file, cb) {
+ const url = URL.createObjectURL(file), v = document.createElement("video");
+ v.src = url; v.playsInline = true;
+ await new Promise((ok, no) => { v.onloadedmetadata = ok; v.onerror = () => no(new Error("No se pudo leer ese video.")); });
+ if (v.duration > 60) throw new Error("El video dura más de 60 segundos.");
+ const W = 360, H = 640, c = document.createElement("canvas"); c.width = W; c.height = H;
+ const g = c.getContext("2d"), st = c.captureStream(24);
+ try { const ac = new AudioContext(), dst = ac.createMediaStreamDestination(); ac.createMediaElementSource(v).connect(dst); await ac.resume(); dst.stream.getAudioTracks().forEach(t => st.addTrack(t)); } catch {}
+ const mime = ["video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm", "video/mp4"].find(m => MediaRecorder.isTypeSupported(m));
+ if (!mime) throw new Error("Tu navegador no puede transformar video.");
+ const rec = new MediaRecorder(st, {mimeType:mime, videoBitsPerSecond:500000, audioBitsPerSecond:48000}), parts = [];
+ rec.ondataavailable = e => e.data.size && parts.push(e.data);
+ const done = new Promise(ok => rec.onstop = ok);
+ const draw = () => {
+  const r = Math.max(W / v.videoWidth, H / v.videoHeight), w = v.videoWidth * r, h = v.videoHeight * r;
+  g.fillStyle = "#000"; g.fillRect(0, 0, W, H); g.drawImage(v, (W - w) / 2, (H - h) / 2, w, h);
+  cb(v.currentTime / v.duration); if (!v.ended) requestAnimationFrame(draw);
+ };
+ rec.start(500); await v.play(); draw();
+ await new Promise(ok => v.onended = ok); rec.stop(); await done; URL.revokeObjectURL(url);
+ return new Blob(parts, {type:mime.split(";")[0]});
+}
+$("#file").onchange = async e => {
+ const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+ if (f.size > 300 * 1024 * 1024) return alert("El video pesa más de 300 MB.");
+ const cap = ($("#cap")?.value || "Sin descripción").trim(), btn = $("#pick");
+ let wl; try { wl = await navigator.wakeLock?.request("screen"); } catch {}
+ try {
+  if (btn) btn.textContent = "Calculando huella…";
+  const fp = await quick(f), dup = videos.find(v => v.src === fp);
+  if (dup) { alert("Este video ya estaba subido (no se repite).\nCódigo: " + dup.id); return tab("up"); }
+  const blob = await compress(f, p => btn && (btn.textContent = "Transformando… " + Math.round(p * 100) + "%"));
+  const id = await sha(await blob.arrayBuffer());
+  if (videos.some(v => v.id === id)) { alert("Este video ya estaba subido (no se repite).\nCódigo: " + id); return tab("up"); }
+  if (cloud) { if (btn) btn.textContent = "Subiendo a la nube…"; await upCloud(blob, id, cap, fp); videos = await loadCloud(); }
+  else { const rec = {id, owner:me, cap, blob, src:fp, orig:f.size, t:Date.now()}; await tx("readwrite", s => s.put(rec)); videos.unshift(rec); sendCat && sendCat(meta()); }
+  view = "for"; render(); $("#feed").scrollTop = 0; tab("up");
+ } catch (err) { alert(err.message); tab("up"); } finally { wl?.release?.(); }
+};
+
+/* ===== RED ENTRE DISPOSITIVOS (sin servidor propio) =====
+   Trystero usa relays públicos solo para que los navegadores se encuentren;
+   luego el video viaja directo de dispositivo a dispositivo. */
+let room, sendCat, sendReq, sendVid, remote = {}, peers = new Set(), sig = "", started = false;
+const meta = () => videos.map(v => ({id:v.id, owner:v.owner, cap:v.cap, size:v.blob.size}));
+const clean = l => Array.isArray(l) ? l.filter(m => m && /^[a-z0-9]{1,64}$/.test(m.id) && /^[a-z0-9_.]{1,24}$/.test(m.owner) && typeof m.cap === "string" && m.size > 0 && m.size < 80e6).map(m => ({id:m.id, owner:m.owner, cap:m.cap.slice(0, 100), size:m.size})).slice(0, 100) : [];
+const keep = () => { const f = $("#feed"), y = f.scrollTop; render(); f.scrollTop = y; };
+const status = () => $("#dt").textContent = "Mi espacio · " + peers.size + " en línea";
+function refresh() { const x = JSON.stringify(Object.values(remote).flat().map(m => m.id).sort()); if (x !== sig) { sig = x; keep(); } }
+async function p2p() {
+ if (started) return; started = true;
+ try {
+  const {joinRoom} = await import("https://cdn.jsdelivr.net/npm/trystero/+esm");
+  room = joinRoom({appId:"vuelta-plaza-v1"}, "plaza");
+  let getCat, getReq, getVid, getLive;
+  [sendCat, getCat] = room.makeAction("catalogo"); [sendReq, getReq] = room.makeAction("pedir"); [sendVid, getVid] = room.makeAction("video");
+  room.onPeerJoin(id => { peers.add(id); sendCat(meta(), id); status(); });
+  room.onPeerLeave(id => { peers.delete(id); delete remote[id]; status(); refresh(); });
+  getCat((l, id) => { remote[id] = clean(l); refresh(); });
+  getReq((vid, id) => { const v = videos.find(x => x.id === vid); if (v) v.blob.arrayBuffer().then(b => sendVid(b, id, {id:v.id, owner:v.owner, cap:v.cap, type:v.blob.type})); });
+  getVid(async (buf, id, m) => {
+   const ok = clean([{...m, size:buf.byteLength}])[0]; if (!ok || videos.some(v => v.id === ok.id)) return;
+   if (ok.id.length === 64 && await sha(buf) !== ok.id) return; /* el código no coincide: video alterado o dañado, se descarta */
+   const rec = {id:ok.id, t:Date.now(), owner:ok.owner, cap:ok.cap, blob:new Blob([buf], {type:m.type === "video/mp4" ? "video/mp4" : "video/webm"})};
+   await tx("readwrite", s => s.put(rec)); videos.unshift(rec); sendCat(meta()); keep();
+  });
+  status();
+ } catch { $("#dt").textContent = "Mi espacio · sin red"; }
+}
+/* ===== PERFIL (estilo TikTok) ===== */
+let profUser = null, profTab = "vid", avBlob = null, avClear = false; const profs = {};
+const okAv = u => typeof u === "string" && (u.startsWith("https://lh3.googleusercontent.com/") || (SUPA_URL && u.startsWith(SUPA_URL + "/storage/")) || /^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(u));
+const av = (o, c = "av") => { const a = profs[o]?.avatar; return okAv(a) ? `<img class="${c}" src="${esc(a)}" alt="">` : `<span class="${c}">${esc(o[0].toUpperCase())}</span>`; };
+const setNav = v => document.querySelectorAll(".nv").forEach(x => x.classList.toggle("on", x.dataset.v === v));
+const goVid = v => { view = "for"; setNav("for"); $("#q").value = ""; render(); const i = list().findIndex(x => x.id === v.id); $("#feed").scrollTop = Math.max(0, i) * $("#feed").clientHeight; };
+const doFollow = o => { const on = !data.follows.includes(o); toggle(data.follows, o); if (cloud) cw(on ? sb.from("follows").insert({owner:o}) : sb.from("follows").delete().eq("owner", o).eq("user_id", uid)); save(); return on; };
+async function loadProfs() {
+ const o = [...new Set(videos.map(v => v.owner).concat(me))];
+ const r = await sb.from("profiles").select("username,display_name,avatar").in("username", o);
+ (r.data || []).forEach(x => profs[x.username] = Object.assign(profs[x.username] || {}, x));
+}
+function openProf(name) { if (!/^[a-z0-9_.]{1,24}$/.test(name)) return; profUser = name; profTab = "vid"; view = "prof"; setNav(name === me ? "me" : ""); render(); }
+function deepLink() { const m = /^#u=([a-z0-9_.]{1,24})$/.exec(location.hash); if (m) openProf(m[1]); }
+async function getProfile(n) {
+ const b = {username:n, display_name:"", bio:"", link:"", avatar:"", followers:0, following:0, likes:0, videos:0};
+ if (!cloud) return Object.assign(b, n === me ? data.prof : {}, {videos: videos.filter(v => v.owner === n).length, following: n === me ? data.follows.length : 0});
+ const [a, c] = await Promise.all([sb.from("profiles").select("username,display_name,bio,link,avatar").eq("username", n).maybeSingle(), sb.rpc("profile_stats", {p_username:n})]);
+ const t = Array.isArray(c.data) ? c.data[0] : c.data;
+ return Object.assign(b, a.data || {}, t ? {followers:Number(t.followers), following:Number(t.following), likes:Number(t.likes), videos:Number(t.videos)} : {});
+}
+async function renderProf(cached) {
+ const P = $("#prof"), name = profUser, mine = name === me;
+ if (!cached) P.innerHTML = '<div class="empty">Cargando perfil…</div>';
+ const p = cached || await getProfile(name); if (view !== "prof" || profUser !== name) return;
+ if (cloud && !cached) { await loadUserVids(name); if (view !== "prof" || profUser !== name) return; }
+ profs[name] = Object.assign(profs[name] || {}, {username:name, display_name:p.display_name, avatar:p.avatar});
+ const fo = data.follows.includes(name), tb = mine ? profTab : "vid";
+ const l = tb === "like" ? all().filter(v => data.likes.includes(v.id)) : tb === "sav" ? all().filter(v => data.saves.includes(v.id)) : all().filter(v => v.owner === name && !v.remote);
+ const lk = /^https?:\/\/\S+$/i.test(p.link || "") ? `<a href="${esc(p.link)}" target="_blank" rel="noopener noreferrer nofollow">🔗 ${esc(p.link.replace(/^https?:\/\//i, ""))}</a>` : "";
+ const tabs = [["vid", "Videos"]].concat(mine ? [["like", "♥ Me gusta"], ["sav", "🔖 Guardados"]] : []);
+ lastProf = p; const lv = liveOf(name);
+ P.innerHTML = `<div class="ph"><div class="pwrap ${lv ? "on" : ""}">${av(name, "pav")}${lv ? '<span class="lvtag">EN VIVO</span>' : ""}</div><div class="pi">${mine ? "" : '<button class="pb" data-p="back">← Volver</button>'}
+  <h2>${esc(p.display_name || name)}</h2><div class="pu">@${esc(name)}</div>
+  <div class="ps"><span><b>${p.following}</b> Siguiendo</span><span><b>${p.followers}</b> Seguidores</span><span><b>${p.likes}</b> Me gusta</span></div>
+  <div class="pa">${mine ? '<button class="btn" data-p="edit">Editar perfil</button><button class="btn alt" data-p="acct">⚙ Cuenta</button>' : `<button class="btn ${fo ? "alt" : ""}" data-p="fol">${fo ? "Siguiendo" : "Seguir"}</button>`}${lv ? '<button class="btn" data-p="watch">🔴 Ver directo</button>' : (mine ? '<button class="btn alt" data-p="golive">🔴 Transmitir</button>' : "")}<button class="btn alt" data-p="share">Compartir perfil</button></div>
+  ${p.bio ? `<p class="pbio">${esc(p.bio).replace(/\n/g, "<br>")}</p>` : (mine ? '<p class="pbio" style="color:var(--mut)">Aún no tienes biografía. Toca «Editar perfil».</p>' : "")}${lk}</div></div>
+  <div class="pt">${tabs.map(([k, t]) => `<button data-pt="${k}" class="${k === tb ? "on" : ""}">${t}</button>`).join("")}</div>
+  <div class="pg">${l.length ? l.map(v => `<button class="tile" data-id="${esc(v.id)}">${v.url ? `<video src="${v.url}" muted preload="metadata"></video>` : `<div class="bgart" style="position:absolute;inset:0;background:linear-gradient(160deg,${v.bg || "#3a2a6a,#0d0a16"})"></div><div class="art" style="position:absolute;inset:0;display:grid;place-items:center;font-size:3rem">${v.art || "🎬"}</div>`}<span>${esc(v.cap)}</span></button>`).join("") : `<div class="empty">${tb === "vid" ? "Aún no hay videos." : "Nada por aquí todavía."}</div>`}</div>`;
+ P.onclick = e => {
+  const t = e.target.closest(".tile"); if (t) { const v = l.find(x => x.id === t.dataset.id); return v && goVid(v); }
+  const k = e.target.closest("[data-pt]"); if (k) { profTab = k.dataset.pt; return renderProf(p); }
+  const b = e.target.closest("[data-p]"); if (!b) return; const a = b.dataset.p;
+  if (a === "back") { view = "for"; setNav("for"); render(); }
+  if (a === "edit") openEdit(p);
+  if (a === "watch") watchLive(liveOf(name));
+  if (a === "golive") startLive();
+  if (a === "acct") { $("#dock").classList.remove("min"); tab("me"); }
+  if (a === "fol") { const on = doFollow(name); p.followers = Math.max(0, p.followers + (on ? 1 : -1)); renderProf(p); }
+  if (a === "share") { const u = location.origin + location.pathname + "#u=" + name; navigator.share ? navigator.share({title:"@" + name + " en LiveYou", url:u}).catch(() => {}) : (navigator.clipboard?.writeText(u), b.textContent = "✓ Enlace copiado"); }
+ };
+}
+/* editar perfil */
+const squareJpeg = async f => { const bm = await createImageBitmap(f), m = Math.min(bm.width, bm.height), c = document.createElement("canvas"); c.width = c.height = 256; c.getContext("2d").drawImage(bm, (bm.width - m) / 2, (bm.height - m) / 2, m, m, 0, 0, 256, 256); return new Promise(ok => c.toBlob(ok, "image/jpeg", .85)); };
+const toURL = b => new Promise(ok => { const r = new FileReader(); r.onload = () => ok(r.result); r.readAsDataURL(b); });
+function prevAv(src) { $("#eprev").innerHTML = src ? `<img class="pav" src="${src}" alt="">` : av(me, "pav"); }
+function openEdit(p) {
+ avBlob = null; avClear = false; $("#eerr").textContent = "";
+ $("#edn").value = p.display_name || ""; $("#edu").value = "@" + me; $("#edb").value = p.bio || ""; $("#edl").value = p.link || "";
+ prevAv(null); $("#ed").showModal();
+}
+$("#epick").onclick = () => $("#afile").click();
+$("#erm").onclick = () => { avBlob = null; avClear = true; $("#eprev").innerHTML = `<span class="pav">${esc(me[0].toUpperCase())}</span>`; };
+$("#afile").onchange = async e => {
+ const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+ try { avBlob = await squareJpeg(f); avClear = false; prevAv(URL.createObjectURL(avBlob)); } catch { $("#eerr").textContent = "No se pudo leer esa imagen."; }
+};
+$("#ecan").onclick = () => $("#ed").close();
+$("#edf").onsubmit = async e => {
+ e.preventDefault();
+ const dn = $("#edn").value.trim(), bio = $("#edb").value.trim(), link = $("#edl").value.trim();
+ if (link && !/^https?:\/\/\S+$/i.test(link)) return $("#eerr").textContent = "El enlace debe empezar con https://";
+ const patch = {display_name: dn || null, bio: bio || null, link: link || null}; $("#esv").disabled = true;
+ try {
+  if (cloud) {
+   if (avBlob) {
+    const path = uid + "/avatar.jpg", r = await sb.storage.from("avatars").upload(path, avBlob, {contentType:"image/jpeg", upsert:true}); if (r.error) throw r.error;
+    patch.avatar = sb.storage.from("avatars").getPublicUrl(path).data.publicUrl + "?v=" + Date.now();
+   } else if (avClear) patch.avatar = null;
+   const r = await sb.from("profiles").update(patch).eq("id", uid); if (r.error) throw r.error;
+  } else { if (avBlob) patch.avatar = await toURL(avBlob); else if (avClear) patch.avatar = null; }
+  Object.assign(profs[me] ||= {}, patch); if (!cloud) { Object.assign(data.prof, patch); save(); }
+  $("#ed").close(); render();
+ } catch (x) { $("#eerr").textContent = "No se pudo guardar: " + (x.message || x); }
+ $("#esv").disabled = false;
+};
+
+
+/* ===== EN VIVO: lista y chat por Supabase Realtime, video directo por WebRTC ===== */
+const ICE = {iceServers:[{urls:"stun:stun.l.google.com:19302"}]}, MAXV = 8, NAME = /^[a-z0-9_.]{1,24}$/;
+let lives = {}, lobby = null, myLive = null, watching = null, lastProf, lobT, lastMsg = 0;
+const liveOf = n => Object.values(lives).find(l => l.owner === n) || null;
+const hue = t => [...t].reduce((a, c) => a + c.charCodeAt(0), 0) * 47 % 360;
+const lsend = (s, event, payload) => s.ch.send({type:"broadcast", event, payload});
+function joinLobby() {
+ if (!cloud || lobby) return;
+ lobby = sb.channel("liveyou-lobby", {config:{presence:{key:uid}}});
+ lobby.on("presence", {event:"sync"}, () => {
+  lives = {};
+  for (const [k, ms] of Object.entries(lobby.presenceState())) { const m = ms.find(x => x.live && NAME.test(x.owner || "")); if (m) lives[k] = {key:k, owner:m.owner, title:String(m.title || "").slice(0, 60), viewers:Number(m.viewers) || 0}; }
+  const need = Object.values(lives).map(x => x.owner).filter(o => !profs[o]); need.forEach(o => profs[o] = {});
+  if (need.length) sb.from("profiles").select("username,display_name,avatar").in("username", need).then(r => { (r.data || []).forEach(x => profs[x.username] = x); liveUI(); });
+  liveUI();
+  if (watching && !watching.ending && !liveOf(watching.owner)) endWatch("La transmisión terminó.");
+ }).subscribe();
+}
+function liveUI() {
+ const l = Object.values(lives).filter(x => x.owner !== me);
+ $("#lvrow").innerHTML = l.map(x => `<button data-o="${esc(x.owner)}"><div class="pwrap on">${av(x.owner, "pav")}<span class="lvtag">EN VIVO</span></div>${esc(x.owner)}</button>`).join("");
+ const nv = document.querySelector('.nv[data-v="live"]'); nv.querySelector("em")?.remove();
+ if (l.length) nv.insertAdjacentHTML("beforeend", `<em>${l.length}</em>`);
+ if (watching) $("#lvn").textContent = "👁 " + (liveOf(watching.owner)?.viewers ?? "");
+ if (view === "live" && !myLive) renderLives();
+}
+$("#lvrow").onclick = e => { const b = e.target.closest("[data-o]"); if (b) watchLive(liveOf(b.dataset.o)); };
+function renderLives() {
+ const L = $("#lives");
+ if (!cloud) { L.innerHTML = '<div class="empty">Las transmisiones en vivo necesitan la nube (Supabase). Configura SUPA_URL y SUPA_KEY.</div>'; return; }
+ const l = Object.values(lives).filter(x => x.owner !== me);
+ L.innerHTML = `<div class="lvw" style="max-width:900px"><h2>🔴 En vivo</h2><button class="btn lvgo" id="golive">🔴 Transmitir en vivo</button>${l.length ? `<div class="lvg">${l.map(x => `<button class="lvc" data-o="${esc(x.owner)}" style="background:linear-gradient(160deg,hsl(${hue(x.owner)} 70% 40%),#0d0a16)">${av(x.owner, "pav")}<span class="lvb">EN VIVO</span><span class="vw">👁 ${x.viewers}</span><span class="lt"><b>@${esc(x.owner)}</b><br>${esc(x.title)}</span></button>`).join("")}</div>` : "<p>Nadie está en vivo ahora. ¡Sé el primero!</p>"}</div>`;
+ $("#golive").onclick = startLive;
+ L.querySelectorAll("[data-o]").forEach(b => b.onclick = () => watchLive(liveOf(b.dataset.o)));
+}
+function pushLobby(s, now) { clearTimeout(lobT); lobT = setTimeout(() => myLive === s && lobby?.track({live:true, owner:s.owner, title:s.title, viewers:s.viewers}), now ? 0 : 2000); }
+function addChat(u, t) {
+ if (!NAME.test(u) || typeof t !== "string") return;
+ const d = document.createElement("div"), b = document.createElement("b"); b.textContent = "@" + u + " "; d.append(b, t.slice(0, 200));
+ const C = $("#lvchat"); C.append(d); while (C.children.length > 40) C.firstChild.remove();
+}
+function newPC(s, peer, from) {
+ const pc = new RTCPeerConnection(ICE); pc.q = [];
+ pc.onicecandidate = e => e.candidate && lsend(s, "ice", {to:peer, from, c:e.candidate.toJSON()});
+ pc.onconnectionstatechange = () => { if (pc.connectionState === "failed" || pc.connectionState === "closed") { pc.close(); if (s.pcs[peer] === pc) delete s.pcs[peer]; } };
+ return pc;
+}
+const addIce = (pc, c) => { if (!pc || !c) return; pc.remoteDescription ? pc.addIceCandidate(c).catch(() => {}) : pc.q.push(c); };
+const flush = pc => pc.q.splice(0).forEach(c => pc.addIceCandidate(c).catch(() => {}));
+function openLiveUI(host, title) {
+ $("#live").hidden = false; $("#lvt").textContent = title; $("#lvchat").innerHTML = ""; $("#lvn").textContent = host ? "👁 0" : ""; $("#lvs").textContent = ""; $("#lvtools").hidden = !host;
+ const f = $("#lvfol"); f.hidden = host; if (!host) f.textContent = data.follows.includes(watching.owner) ? "Siguiendo" : "Seguir";
+}
+/* ----- transmitir: al tocar el botón se abre la cámara y empieza el directo ----- */
+async function startLive() {
+ if (!cloud) return alert("Las transmisiones en vivo necesitan la nube (Supabase).");
+ if (myLive || watching) return;
+ let stream;
+ try { stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:"user", width:{ideal:720}, height:{ideal:1280}}, audio:true}); }
+ catch (e) { return alert(e.name === "NotAllowedError" ? "Permite el acceso a la cámara y al micrófono para transmitir." : "No se pudo abrir la cámara: " + (e.message || e.name)); }
+ const s = myLive = {host:true, owner:me, title:"En vivo de @" + me, stream, pcs:{}, face:"user", viewers:0};
+ const v = $("#lvv"); v.srcObject = stream; v.muted = true; v.className = "me"; v.play().catch(() => {});
+ openLiveUI(true, "@" + me); $("#lvmic").textContent = "🎤";
+ s.ch = sb.channel("live-" + me, {config:{presence:{key:"host"}, broadcast:{self:false}}});
+ s.ch.on("broadcast", {event:"join"}, ({payload:p}) => hostJoin(s, p).catch(() => {}))
+  .on("broadcast", {event:"answer"}, ({payload:p}) => { const pc = p.to === "host" && s.pcs[p.from]; if (pc) pc.setRemoteDescription(p.sdp).then(() => flush(pc)).catch(() => {}); })
+  .on("broadcast", {event:"ice"}, ({payload:p}) => p.to === "host" && addIce(s.pcs[p.from], p.c))
+  .on("broadcast", {event:"chat"}, ({payload:p}) => addChat(p.u, p.t))
+  .on("presence", {event:"sync"}, () => { s.viewers = Object.keys(s.ch.presenceState()).filter(k => k !== "host").length; $("#lvn").textContent = "👁 " + s.viewers; pushLobby(s); })
+  .subscribe(async st => { if (st === "SUBSCRIBED") { await s.ch.track({host:true}); pushLobby(s, true); } });
+}
+async function hostJoin(s, p) {
+ const id = p?.from; if (typeof id !== "string" || !/^[\w-]{1,40}$/.test(id) || myLive !== s) return;
+ if (!s.pcs[id] && Object.keys(s.pcs).length >= MAXV) return lsend(s, "full", {to:id});
+ s.pcs[id]?.close();
+ const pc = s.pcs[id] = newPC(s, id, "host"); s.stream.getTracks().forEach(t => pc.addTrack(t, s.stream));
+ await pc.setLocalDescription(await pc.createOffer());
+ lsend(s, "offer", {to:id, from:"host", sdp:pc.localDescription});
+}
+async function stopLive() {
+ const s = myLive; if (!s) return; myLive = null; clearTimeout(lobT);
+ try { await lsend(s, "end", {}); } catch {}
+ Object.values(s.pcs).forEach(p => p.close()); s.stream.getTracks().forEach(t => t.stop());
+ lobby?.untrack(); sb.removeChannel(s.ch);
+ $("#lvv").srcObject = null; $("#live").hidden = true; if (view === "live") renderLives();
+}
+/* ----- ver el directo de otra persona ----- */
+function watchLive(l) {
+ if (!l || myLive || watching) return;
+ const vid = "v" + crypto.randomUUID().replace(/-/g, "").slice(0, 14), s = watching = {host:false, owner:l.owner, id:vid, pcs:{}, early:[]}, v = $("#lvv");
+ v.className = ""; v.muted = false; v.srcObject = null; openLiveUI(false, "@" + l.owner); $("#lvs").textContent = "Conectando…";
+ s.ch = sb.channel("live-" + l.owner, {config:{broadcast:{self:false}, presence:{key:vid}}});
+ s.ch.on("broadcast", {event:"offer"}, async ({payload:p}) => {
+   if (p.to !== vid) return;
+   try {
+    s.pcs.host?.close(); const pc = s.pcs.host = newPC(s, "host", vid); pc.q.push(...s.early.splice(0));
+    pc.ontrack = e => { v.srcObject = e.streams[0]; v.play().catch(() => {}); $("#lvs").textContent = ""; clearTimeout(s.to); clearTimeout(s.rt); };
+    await pc.setRemoteDescription(p.sdp); flush(pc);
+    await pc.setLocalDescription(await pc.createAnswer());
+    lsend(s, "answer", {to:"host", from:vid, sdp:pc.localDescription});
+   } catch { $("#lvs").textContent = "No se pudo conectar."; }
+  })
+  .on("broadcast", {event:"ice"}, ({payload:p}) => { if (p.to === vid) s.pcs.host ? addIce(s.pcs.host, p.c) : s.early.push(p.c); })
+  .on("broadcast", {event:"chat"}, ({payload:p}) => addChat(p.u, p.t))
+  .on("broadcast", {event:"full"}, ({payload:p}) => p.to === vid && endWatch("La transmisión está llena."))
+  .on("broadcast", {event:"end"}, () => endWatch("La transmisión terminó."))
+  .subscribe(async st => {
+   if (st !== "SUBSCRIBED") return;
+   await s.ch.track({u:me}); lsend(s, "join", {from:vid});
+   s.rt = setTimeout(() => !v.srcObject && lsend(s, "join", {from:vid}), 5000);
+   s.to = setTimeout(() => { if (!v.srcObject) $("#lvs").textContent = "No se pudo conectar. Tu red puede bloquear la conexión directa."; }, 15000);
+  });
+}
+async function endWatch(msg) {
+ const s = watching; if (!s || s.ending) return; s.ending = true; clearTimeout(s.to); clearTimeout(s.rt);
+ if (msg) { $("#lvs").textContent = msg; await new Promise(r => setTimeout(r, 1800)); }
+ Object.values(s.pcs).forEach(p => p.close()); sb.removeChannel(s.ch);
+ $("#lvv").srcObject = null; $("#live").hidden = true; watching = null;
+}
+$("#lvx").onclick = () => myLive ? (confirm("¿Terminar la transmisión?") && stopLive()) : endWatch();
+$("#lvfol").onclick = e => { if (watching) e.currentTarget.textContent = doFollow(watching.owner) ? "Siguiendo" : "Seguir"; };
+$("#lvin").onsubmit = e => {
+ e.preventDefault(); const i = $("#lvm"), t = i.value.trim(), s = myLive || watching;
+ if (!t || !s || Date.now() - lastMsg < 700) return; lastMsg = Date.now(); i.value = ""; addChat(me, t); lsend(s, "chat", {u:me, t});
+};
+$("#lvmic").onclick = e => { const t = myLive?.stream.getAudioTracks()[0]; if (t) { t.enabled = !t.enabled; e.currentTarget.textContent = t.enabled ? "🎤" : "🔇"; } };
+$("#lvflip").onclick = async () => {
+ const s = myLive; if (!s) return; const f = s.face === "user" ? "environment" : "user";
+ try {
+  const nt = (await navigator.mediaDevices.getUserMedia({video:{facingMode:f, width:{ideal:720}, height:{ideal:1280}}})).getVideoTracks()[0], old = s.stream.getVideoTracks()[0];
+  Object.values(s.pcs).forEach(pc => pc.getSenders().find(x => x.track?.kind === "video")?.replaceTrack(nt));
+  s.stream.removeTrack(old); old.stop(); s.stream.addTrack(nt); s.face = f; $("#lvv").classList.toggle("me", f === "user");
+ } catch {}
+};
+addEventListener("pagehide", () => { if (myLive) try { lsend(myLive, "end", {}); } catch {} });
+
+(async () => {
+ if (!cloud) { const s = sessionStorage.getItem("v_me"); if (s) start(s); return; }
+ try {
+  await ready; const {data:ses} = await sb.auth.getSession();
+  if (ses.session) {
+   uid = ses.session.user.id;
+   const r = await sb.rpc("ensure_profile"); if (r.error) throw r.error;
+   start(r.data);
+  }
+ } catch (x) { $("#err").textContent = "No se pudo iniciar sesión: " + x.message; }
+})();
+</script>
+</body>
+</html>
