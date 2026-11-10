@@ -6,6 +6,7 @@
 <title>LiveYou · videos cortos</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flv.js@1.6.2/dist/flv.min.js"></script>
 <style>
   :root{--bg:#0b0a12;--panel:#14121f;--line:#2a2740;--text:#f3f1fa;--muted:#9a96b5;--pink:#ff3d6e;--violet:#5b1f9e;--teal:#2fe3c2}
   *{box-sizing:border-box;margin:0}
@@ -98,6 +99,23 @@
     .side .logo,.nav span{display:none}.side .who{margin-top:0}.nav{justify-content:center;width:auto}}
   @media(max-width:760px){.login{grid-template-columns:1fr}.hero{padding:8vh 8%}}
   @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+  .logo{cursor:pointer}.side{overflow-y:auto}
+  .reel{height:calc(100vh - 56px);max-width:460px;margin:0 auto;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none;border-radius:16px}
+  .reel::-webkit-scrollbar{display:none}
+  .slide{position:relative;height:100%;scroll-snap-align:start;scroll-snap-stop:always;background:#000;border-radius:16px;overflow:hidden}
+  .slide video{width:100%;height:100%;object-fit:contain;display:block;background:#000;cursor:pointer}
+  .sinfo{position:absolute;left:14px;right:80px;bottom:56px;text-shadow:0 1px 3px #000}
+  .sinfo .btn{padding:4px 14px;font-size:.85rem}.sinfo .av{width:36px;height:36px}.sinfo p{margin-top:8px;font-size:.92rem}
+  .sact{position:absolute;right:10px;bottom:64px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;font-size:.72rem}
+  .sact button{background:rgba(255,255,255,.16);border:0;color:#fff;width:46px;height:46px;border-radius:50%;cursor:pointer;display:grid;place-items:center;margin-bottom:2px}
+  .sact button.on{color:var(--pink)}
+  .sbar{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(255,255,255,.25)}.sbar i{display:block;height:100%;width:0;background:var(--pink)}
+  .sctl{position:absolute;left:12px;right:12px;bottom:12px;display:flex;gap:8px;align-items:center;font-size:.78rem;color:#ddd}
+  .sctl button{background:none;border:0;color:#fff;cursor:pointer;padding:2px 6px}.sctl label{margin:0 0 0 auto;color:#ddd;display:flex;gap:6px;align-items:center}.sctl input{width:auto}
+  .reelnav{position:fixed;right:max(16px,3vw);top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:12px}
+  .reelnav .btn{width:46px;height:46px;padding:0;border-radius:50%}
+  .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:rgba(0,0,0,.85);padding:8px 16px;border-radius:999px;z-index:30;font-size:.9rem}
+  @media(max-width:760px){.reel{height:calc(100vh - 130px)}.reelnav,.nav.soon{display:none}}
 </style>
 </head>
 <body>
@@ -143,19 +161,23 @@
 <!-- ========== APP ========== -->
 <section id="app" class="app hidden">
   <aside class="side">
-    <div class="logo">LiveYou<i>.</i></div>
+    <div class="logo" id="sideLogo" role="button" tabindex="0" title="Ir a Para ti">LiveYou<i>.</i></div>
     <button class="nav on" id="navFeed"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10H3z"/></svg><span>Para ti</span></button>
+    <button class="nav soon" data-soon="Explorar"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 100 18 9 9 0 000-18zM15 9l-2 6-4 0 2-6z"/></svg><span>Explorar</span></button>
+    <button class="nav soon" data-soon="Siguiendo"><svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 100-8 4 4 0 000 8zM3 21c0-4 3-6 7-6s7 2 7 6"/></svg><span>Siguiendo</span></button>
+    <button class="nav soon" data-soon="Amigos"><svg viewBox="0 0 24 24"><path d="M9 11a3 3 0 100-6 3 3 0 000 6zM2 20c0-3 3-5 7-5s7 2 7 5M17 11a3 3 0 100-6M22 20c0-3-2-4-4-5"/></svg><span>Amigos</span></button>
     <button class="nav" id="navLive"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M6 6a8 8 0 000 12M18 6a8 8 0 010 12"/></svg><span>En vivo</span></button>
     <button class="nav" id="navUpload"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg><span>Subir video</span></button>
     <button class="nav" id="navProfile"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>Perfil</span></button>
     <button class="nav" id="navInbox"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span>Bandeja de entrada</span></button>
+    <button class="nav soon" data-soon="Actividad"><svg viewBox="0 0 24 24"><path d="M12 3l2.5 6 6.500.5-5 4.500 1.500 6.500L12 17l-5.500 3.500L8 14 3 9.500 9.500 9z"/></svg><span>Actividad</span></button>
     <button class="nav" id="btnLogout2"><svg viewBox="0 0 24 24"><path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/></svg><span>Cerrar sesión</span></button>
     <button class="nav who" id="btnWho"><img class="av" id="hAvatar" alt="Tu foto"><span id="hName"></span></button>
   </aside>
   <main>
     <div id="vFeed">
-      <h2 style="margin-bottom:14px">Para ti</h2>
-      <div id="feedGrid" class="grid"></div>
+      <div id="feedBox" class="reel"></div>
+      <div class="reelnav"><button class="btn ghost" id="rUp" aria-label="Video anterior">▲</button><button class="btn ghost" id="rDown" aria-label="Video siguiente">▼</button></div>
     </div>
 
     <div id="vLive" class="hidden">
@@ -244,9 +266,11 @@
   </main>
 </section>
 
+<div id="toast" class="toast hidden" role="status"></div>
+
 <div id="mUpload" class="modal hidden"><form class="mbox" id="upForm">
   <h2>Subir video</h2>
-  <label for="upFile">Video (máximo 50 MB)</label><input id="upFile" type="file" accept="video/*">
+  <label for="upFile">Video MP4 o FLV (máximo 50 MB)</label><input id="upFile" type="file" accept="video/*,.flv,.mp4">
   <label for="upCap">Descripción</label><textarea id="upCap" maxlength="200"></textarea>
   <p class="msg" id="upMsg" role="status"></p>
   <div class="actions"><button class="btn main" type="submit" id="upBtn">Publicar</button><button class="btn ghost" type="button" data-close="mUpload">Cancelar</button></div>
@@ -362,6 +386,8 @@ function show(v){
   if (v === "Live"){ loadLives(); livePoll = setInterval(loadLives, 15000); }
 }
 $("navFeed").onclick = () => show("Feed");
+$("sideLogo").onclick = () => show("Feed");
+$("sideLogo").onkeydown = e => { if (e.key === "Enter" || e.key === " ") show("Feed"); };
 $("navLive").onclick = () => show("Live");
 
 /* ---------- Crear perfil (primera vez) ---------- */
@@ -461,14 +487,19 @@ function chips(el, list, cur, pick){
 }
 document.querySelectorAll("[data-close]").forEach(b => b.onclick = () => {
   closeM(b.dataset.close);
-  if (b.dataset.close === "mPlayer"){ const v = $("pVideo"); v.pause(); v.removeAttribute("src"); v.load(); }
+  if (b.dataset.close === "mPlayer"){ const v = $("pVideo"); killFlv(); v.pause(); v.removeAttribute("src"); v.load(); }
 });
 
 /* ---------- Videos ---------- */
+const MAX_VIDEO = 50*1024*1024;
+const isFlv = u => /\.flv(\?|#|$)/i.test(u || "");
+let flvP = null;
+function killFlv(){ if (flvP){ try { flvP.destroy(); } catch (e) {} flvP = null; } }
 function vcard(v, a, withAuthor){
   const b = document.createElement("button"); b.className = "vcard"; b.type = "button";
   const vid = document.createElement("video");
-  vid.src = v.url + "#t=0.1"; vid.preload = "metadata"; vid.muted = true; vid.playsInline = true;
+  if (!isFlv(v.url)){ vid.src = v.url + "#t=0.1"; vid.preload = "metadata"; vid.muted = true; vid.playsInline = true; }
+  else { vid.style.background = "linear-gradient(135deg,#ff3d6e,#5b1f9e)"; }
   const m = document.createElement("div"); m.className = "vmeta";
   m.textContent = (withAuthor ? nameOf(a) + " · " : "") + "▷ " + (v.views || 0);
   b.append(vid, m); b.onclick = () => openPlayer(v, a);
@@ -482,15 +513,86 @@ async function fillVideos(box, query, withAuthor, emptyText){
   const au = await withAuthors(data, "user_id");
   data.forEach(v => box.append(vcard(v, au[v.user_id], withAuthor)));
 }
-const loadFeed = () => fillVideos($("feedGrid"),
-  sb.from("videos").select("*").order("created_at", { ascending:false }).limit(60), true,
-  "Aún no hay videos. Sube el primero con el botón Subir video.");
+/* --- Feed estilo TikTok --- */
+let feedMuted = true, autoNext = true, feedIO = null, curSlide = null;
+const sv = d => '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="' + d + '"/></svg>';
+const IC = { heart:"M12 21l-1.5-1.3C5.4 15.100 2 12.100 2 8.500 2 5.500 4.300 3.500 7 3.500c1.700 0 3.400.8 5 2.500 1.600-1.700 3.300-2.500 5-2.500 2.700 0 5 2 5 5 0 3.600-3.400 6.600-8.500 11.200z",
+  chat:"M4 4h16a2 2 0 012 2v10a2 2 0 01-2 2H9l-5 4v-4a2 2 0 01-2-2V6a2 2 0 012-2z", save:"M6 3h12a1 1 0 011 1v17l-7-4-7 4V4a1 1 0 011-1z", share:"M14 3l8 8-8 8v-5c-6 0-10 2-12 6 1-7 5-12 12-13z" };
+function soon(t){ const d = $("toast"); d.textContent = "Pronto: " + t; d.classList.remove("hidden"); clearTimeout(d._t); d._t = setTimeout(() => d.classList.add("hidden"), 1800); }
+document.addEventListener("click", e => { const b = e.target.closest("[data-soon]"); if (b) soon(b.dataset.soon); });
+function killFeed(){
+  if (feedIO){ feedIO.disconnect(); feedIO = null; }
+  $("feedBox").querySelectorAll(".slide").forEach(s => { if (s._flv){ try { s._flv.destroy(); } catch (e) {} s._flv = null; } });
+  curSlide = null;
+}
+function step(dir){ if (!curSlide) return; const t = dir > 0 ? curSlide.nextElementSibling : curSlide.previousElementSibling; if (t) t.scrollIntoView({ behavior:"smooth" }); }
+$("rUp").onclick = () => step(-1); $("rDown").onclick = () => step(1);
+function syncCtl(){
+  document.querySelectorAll("#feedBox .slide").forEach(s => {
+    s.querySelector("video").muted = feedMuted; s.querySelector('[data-a="mute"]').textContent = feedMuted ? "🔇" : "🔊";
+    s.querySelector("input").checked = autoNext;
+  });
+}
+function activate(s, on){
+  const vid = s.querySelector("video");
+  if (on){
+    curSlide = s;
+    if (isFlv(s.dataset.url) && !s._flv && window.flvjs && flvjs.isSupported()){ s._flv = flvjs.createPlayer({ type:"flv", url:s.dataset.url }); s._flv.attachMediaElement(vid); s._flv.load(); }
+    vid.muted = feedMuted; vid.playbackRate = s._rate || 1;
+    vid.play().catch(() => { vid.muted = true; vid.play().catch(() => {}); });
+    if (!s._counted){ s._counted = 1; sb.rpc("increment_views", { vid:s.dataset.id }).then(() => {}); }
+  } else {
+    vid.pause();
+    if (s._flv){ try { s._flv.destroy(); } catch (e) {} s._flv = null; } else { try { vid.currentTime = 0; } catch (e) {} }
+  }
+}
+function slide(v, a){
+  const s = document.createElement("section"); s.className = "slide"; s.dataset.url = v.url; s.dataset.id = v.id;
+  const act = (k, label) => '<div><button data-soon="' + label + '" aria-label="' + label + '">' + sv(IC[k]) + '</button>' + label + '</div>';
+  s.innerHTML = '<video playsinline preload="metadata" muted></video>' +
+    '<div class="sinfo"><div class="lrow"><img class="av" alt=""><strong></strong><button class="btn main" data-soon="Seguir">Seguir</button></div><p></p></div>' +
+    '<div class="sact">' + act("heart","Me gusta") + act("chat","Comentarios") + act("save","Guardar") + act("share","Compartir") + '<div class="views"></div></div>' +
+    '<div class="sctl"><button data-a="pp" aria-label="Pausar o reproducir">❚❚</button><button data-a="mute" aria-label="Sonido">🔇</button><button data-a="rate" aria-label="Velocidad">1.0x</button><label><input type="checkbox" checked> Pasar automáticamente</label></div>' +
+    '<div class="sbar"><i></i></div>';
+  const vid = s.querySelector("video"), bar = s.querySelector(".sbar i");
+  if (!isFlv(v.url)) vid.src = v.url;
+  s.querySelector(".av").src = picOf(a);
+  s.querySelector("strong").textContent = nameOf(a);
+  s.querySelector(".sinfo p").textContent = v.caption || "";
+  s.querySelector(".views").textContent = "▷ " + (v.views || 0);
+  vid.onclick = () => vid.paused ? vid.play() : vid.pause();
+  vid.onplay = () => s.querySelector('[data-a="pp"]').textContent = "❚❚";
+  vid.onpause = () => s.querySelector('[data-a="pp"]').textContent = "▶";
+  vid.ontimeupdate = () => bar.style.width = (vid.currentTime / (vid.duration || 1) * 100) + "%";
+  vid.onended = () => { if (autoNext) step(1); else { vid.currentTime = 0; vid.play().catch(() => {}); } };
+  s.querySelector('[data-a="pp"]').onclick = vid.onclick;
+  s.querySelector('[data-a="mute"]').onclick = () => { feedMuted = !feedMuted; syncCtl(); };
+  s.querySelector('[data-a="rate"]').onclick = e => { const r = [1,1.5,2,0.5], n = r[(r.indexOf(s._rate || 1) + 1) % r.length]; s._rate = n; vid.playbackRate = n; e.target.textContent = n.toFixed(1) + "x"; };
+  s.querySelector("input").onchange = e => { autoNext = e.target.checked; syncCtl(); };
+  return s;
+}
+async function loadFeed(){
+  const box = $("feedBox"); killFeed(); box.replaceChildren(); box.className = "reel";
+  const { data, error } = await sb.from("videos").select("*").order("created_at", { ascending:false }).limit(40);
+  if (error) return note(box, "No se pudieron cargar los videos.");
+  if (!data.length) return note(box, "Aún no hay videos. Sube el primero con el botón Subir video.");
+  const au = await withAuthors(data, "user_id");
+  data.forEach(v => box.append(slide(v, au[v.user_id])));
+  feedIO = new IntersectionObserver(es => es.forEach(e => activate(e.target, e.isIntersecting && e.intersectionRatio >= 0.7)), { root:box, threshold:[0, 0.7] });
+  box.querySelectorAll(".slide").forEach(s => feedIO.observe(s));
+}
 const loadMyVideos = () => fillVideos($("myVideos"),
   sb.from("videos").select("*").eq("user_id", me.id).order("created_at", { ascending:false }), false,
   "Todavía no subiste videos.");
 
 function openPlayer(v, a){
-  const vid = $("pVideo"); vid.src = v.url; vid.play().catch(() => {});
+  const vid = $("pVideo"); killFlv();
+  if (isFlv(v.url)){
+    if (window.flvjs && flvjs.isSupported()){
+      flvP = flvjs.createPlayer({ type:"flv", url:v.url }); flvP.attachMediaElement(vid); flvP.load();
+      const pr = flvP.play(); if (pr && pr.catch) pr.catch(() => {});
+    }
+  } else { vid.src = v.url; vid.play().catch(() => {}); }
   $("pAv").src = picOf(a); $("plName").textContent = nameOf(a) + (a && a.username ? "  @" + a.username : "");
   $("pCap").textContent = v.caption || "";
   $("pViews").textContent = ((v.views || 0) + 1) + " reproducciones";
@@ -510,12 +612,13 @@ $("upForm").onsubmit = async e => {
   e.preventDefault();
   const f = $("upFile").files[0];
   if (!f) return say($("upMsg"), "Elige un video.", "err");
-  if (!f.type.startsWith("video/")) return say($("upMsg"), "El archivo debe ser un video.", "err");
-  if (f.size > 50*1024*1024) return say($("upMsg"), "El video pesa más de 50 MB.", "err");
+  const fext = (f.name.split(".").pop() || "").toLowerCase();
+  if (!(f.type.startsWith("video/") || fext === "flv" || fext === "mp4")) return say($("upMsg"), "El archivo debe ser un video MP4 o FLV.", "err");
+  if (f.size > MAX_VIDEO) return say($("upMsg"), "El video pesa más de 50 MB.", "err");
   $("upBtn").disabled = true; say($("upMsg"), "Subiendo… no cierres la página.");
   const ext = (f.name.split(".").pop() || "mp4").toLowerCase().replace(/[^a-z0-9]/g, "");
   const path = me.id + "/" + Date.now() + "." + ext;
-  const up = await sb.storage.from("videos").upload(path, f, { contentType: f.type });
+  const up = await sb.storage.from("videos").upload(path, f, { contentType: f.type || (fext === "flv" ? "video/x-flv" : "video/mp4") });
   if (up.error){ $("upBtn").disabled = false; return say($("upMsg"), "No se pudo subir: " + up.error.message, "err"); }
   const url = sb.storage.from("videos").getPublicUrl(path).data.publicUrl;
   const { error } = await sb.from("videos").insert({ user_id: me.id, url, path, caption: $("upCap").value.trim() });
