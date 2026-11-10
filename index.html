@@ -271,8 +271,8 @@ const GOOGLE_CLIENT_ID = "";
 
 /* ===== NUBE (Supabase) =====
    Pega aquí los dos datos de tu proyecto (Project Settings → API). Si los dejas vacíos, la app funciona en modo local. */
-const SUPA_URL = "";   /* ejemplo: https://abcdefgh.supabase.co */
-const SUPA_KEY = "";   /* la clave "anon public" (es pública por diseño; la protegen las reglas del archivo supabase-setup.sql) */
+const SUPA_URL = "https://cmnnskdmkgtyeuzsvvj.supabase.co";   /* Proyecto Supabase de LiveYou */
+const SUPA_KEY = "PEGA_AQUI_TU_SUPABASE_PUBLISHABLE_OR_ANON_KEY";   /* No uses service_role aquí. */
 const cloud = !!(SUPA_URL && SUPA_KEY);
 let sb;
 const ready = cloud ? import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm").then(m => { sb = m.createClient(SUPA_URL, SUPA_KEY); }) : Promise.resolve();
