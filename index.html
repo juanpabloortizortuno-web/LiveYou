@@ -48,6 +48,20 @@
   .actions .btn{padding:10px 18px}
   .feed{margin-top:24px;padding:36px 20px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:18px}
 
+  .app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+  .side{border-right:1px solid var(--line);padding:20px 14px;display:flex;flex-direction:column;gap:6px;position:sticky;top:0;height:100vh}
+  .side .logo{padding:0 12px 16px}
+  .nav{display:flex;align-items:center;gap:12px;background:none;border:0;color:var(--text);padding:12px;border-radius:12px;cursor:pointer;font-weight:600;width:100%;text-align:left}
+  .nav:hover,.nav.on{background:var(--panel)}.nav.on{color:var(--pink)}
+  .nav:focus-visible{outline:2px solid var(--teal)}
+  .nav svg{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .side .who{margin-top:auto}
+  .mrow{display:flex;gap:12px;padding:14px;border:1px solid var(--line);border-radius:14px;margin-bottom:10px;background:var(--panel)}
+  #onboard{min-height:100vh;display:flex}
+  #onboard .big{margin-top:0}
+  @media(max-width:760px){.app{grid-template-columns:1fr;padding-bottom:70px}
+    .side{position:fixed;bottom:0;left:0;right:0;height:auto;flex-direction:row;justify-content:space-around;z-index:5;background:var(--bg);border-top:1px solid var(--line);border-right:0;padding:6px}
+    .side .logo,.nav span{display:none}.side .who{margin-top:0}.nav{justify-content:center;width:auto}}
   @media(max-width:760px){.login{grid-template-columns:1fr}.hero{padding:8vh 8%}}
   @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -75,13 +89,34 @@
   </div>
 </section>
 
-<!-- ========== APP ========== -->
-<section id="app" class="hidden">
-  <header>
+<!-- ========== CREAR PERFIL ========== -->
+<section id="onboard" class="hidden">
+  <div class="box">
     <div class="logo">LiveYou<i>.</i></div>
-    <button class="who" id="btnWho"><span id="hName"></span><img class="av" id="hAvatar" alt="Tu foto"></button>
-  </header>
+    <h2>Crea tu perfil</h2>
+    <small>Elige cómo quieres que te vean. Podrás cambiarlo cuando quieras.</small>
+    <img class="big" id="oAvatar" alt="Tu foto">
+    <form id="obForm">
+      <label for="oName">Nombre</label><input id="oName" maxlength="50" required>
+      <label for="oUser">Nombre de usuario</label>
+      <input id="oUser" maxlength="30" required pattern="[a-zA-Z0-9_.]{3,30}" title="3 a 30 letras, números, punto o guion bajo">
+      <p class="msg" id="obMsg" role="status"></p>
+      <button class="btn main" type="submit" id="obSave" style="width:100%">Continuar</button>
+    </form>
+  </div>
+</section>
+
+<!-- ========== APP ========== -->
+<section id="app" class="app hidden">
+  <aside class="side">
+    <div class="logo">LiveYou<i>.</i></div>
+    <button class="nav on" id="navProfile"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>Perfil</span></button>
+    <button class="nav" id="navInbox"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span>Bandeja de entrada</span></button>
+    <button class="nav" id="btnLogout2"><svg viewBox="0 0 24 24"><path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/></svg><span>Cerrar sesión</span></button>
+    <button class="nav who" id="btnWho"><img class="av" id="hAvatar" alt="Tu foto"><span id="hName"></span></button>
+  </aside>
   <main>
+    <div id="vProfile">
     <div class="card">
       <div class="cover"></div>
       <div class="info" id="view">
@@ -108,6 +143,17 @@
       </form>
     </div>
     <div class="feed">Aún no hay videos. Aquí aparecerá tu contenido.</div>
+    </div>
+    <div id="vInbox" class="hidden">
+      <h2 style="margin-bottom:14px">Bandeja de entrada</h2>
+      <form class="card" id="msgForm" style="padding:18px;margin-bottom:18px">
+        <label for="mTo" style="margin-top:0">Para (usuario)</label><input id="mTo" placeholder="@usuario">
+        <label for="mBody">Mensaje</label><textarea id="mBody" maxlength="500"></textarea>
+        <p class="msg" id="msgMsg" role="status"></p>
+        <div class="actions"><button class="btn main" type="submit">Enviar mensaje</button></div>
+      </form>
+      <div id="msgList"></div>
+    </div>
   </main>
 </section>
 
@@ -148,7 +194,7 @@ async function loadProfile(user){
   if (!data) { // respaldo si el trigger no creó el perfil
     const base = {
       id: user.id,
-      username: (user.email||"user").split("@")[0].replace(/[^a-zA-Z0-9_.]/g,"") + Math.floor(Math.random()*1000),
+      username: (user.email||"user").split("@")[0].replace(/[^a-zA-Z0-9_.]/g,"").toLowerCase() + Math.floor(Math.random()*1000),
       full_name: m.full_name || m.name || "",
       avatar_url: m.avatar_url || m.picture || ""
     };
@@ -183,7 +229,71 @@ function openEdit(show){
     $("fFile").value = ""; say($("editMsg"), "");
   }
 }
-$("btnEdit").onclick = $("btnWho").onclick = () => openEdit(true);
+$("btnEdit").onclick = () => openEdit(true);
+$("btnWho").onclick = () => show("Profile");
+$("btnLogout2").onclick = () => sb.auth.signOut();
+$("navProfile").onclick = () => show("Profile");
+$("navInbox").onclick = () => { show("Inbox"); loadInbox(); };
+
+function show(v){
+  ["Profile","Inbox"].forEach(n => {
+    $("v"+n).classList.toggle("hidden", n !== v);
+    $("nav"+n).classList.toggle("on", n === v);
+  });
+}
+
+/* ---------- Crear perfil (primera vez) ---------- */
+function startOnboarding(){
+  $("oName").value = profile.full_name || "";
+  $("oUser").value = profile.username || "";
+  $("oAvatar").src = profile.avatar_url || fallbackAvatar(profile.full_name || "U");
+  say($("obMsg"), "");
+}
+$("obForm").onsubmit = async e => {
+  e.preventDefault();
+  $("obSave").disabled = true;
+  const changes = { full_name: $("oName").value.trim(), username: $("oUser").value.trim().toLowerCase(), onboarded: true };
+  const { error } = await sb.from("profiles").update(changes).eq("id", me.id);
+  $("obSave").disabled = false;
+  if (error) return say($("obMsg"), error.code === "23505" ? "Ese usuario ya está en uso. Prueba con otro." : error.message, "err");
+  profile = { ...profile, ...changes };
+  paint(); show("Profile");
+  $("onboard").classList.add("hidden"); $("app").classList.remove("hidden");
+};
+
+/* ---------- Bandeja de entrada ---------- */
+async function loadInbox(){
+  const list = $("msgList"); list.replaceChildren();
+  const { data: msgs, error } = await sb.from("messages").select("*").eq("recipient_id", me.id).order("created_at", { ascending:false }).limit(50);
+  if (error){ list.className = "feed"; list.textContent = "No se pudo cargar la bandeja."; return; }
+  if (!msgs.length){ list.className = "feed"; list.textContent = "Tu bandeja está vacía. Los mensajes que recibas aparecerán aquí."; return; }
+  list.className = "";
+  const ids = [...new Set(msgs.map(m => m.sender_id))];
+  const { data: ps } = await sb.from("profiles").select("id,username,full_name,avatar_url").in("id", ids);
+  const by = Object.fromEntries((ps || []).map(p => [p.id, p]));
+  msgs.forEach(m => {
+    const p = by[m.sender_id] || {};
+    const row = document.createElement("div"); row.className = "mrow";
+    const img = new Image(); img.className = "av"; img.alt = "";
+    img.src = p.avatar_url || fallbackAvatar(p.full_name || p.username);
+    const box = document.createElement("div");
+    const h = document.createElement("strong"); h.textContent = (p.full_name || p.username || "Usuario") + " ";
+    const u = document.createElement("span"); u.className = "user"; u.textContent = "@" + (p.username || "");
+    const t = document.createElement("p"); t.className = "bio"; t.textContent = m.body;
+    box.append(h, u, t); row.append(img, box); list.append(row);
+  });
+}
+$("msgForm").onsubmit = async e => {
+  e.preventDefault();
+  const to = $("mTo").value.trim().replace(/^@/, "").toLowerCase();
+  const body = $("mBody").value.trim();
+  if (!to || !body) return say($("msgMsg"), "Escribe el usuario y el mensaje.", "err");
+  const { data: dest } = await sb.from("profiles").select("id").eq("username", to).maybeSingle();
+  if (!dest) return say($("msgMsg"), "No existe ese usuario.", "err");
+  const { error } = await sb.from("messages").insert({ sender_id: me.id, recipient_id: dest.id, body });
+  if (error) return say($("msgMsg"), "No se pudo enviar: " + error.message, "err");
+  $("mBody").value = ""; say($("msgMsg"), "Mensaje enviado.", "ok");
+};
 $("btnCancel").onclick = () => openEdit(false);
 
 $("editForm").onsubmit = async e => {
@@ -198,7 +308,7 @@ $("editForm").onsubmit = async e => {
     if (up.error){ $("btnSave").disabled=false; return say($("editMsg"), "No se pudo subir la foto: " + up.error.message, "err"); }
     avatar_url = sb.storage.from("avatars").getPublicUrl(path).data.publicUrl;
   }
-  const changes = { full_name: $("fName").value.trim(), username: $("fUser").value.trim(), bio: $("fBio").value.trim(), avatar_url };
+  const changes = { full_name: $("fName").value.trim(), username: $("fUser").value.trim().toLowerCase(), bio: $("fBio").value.trim(), avatar_url };
   const { error } = await sb.from("profiles").update(changes).eq("id", me.id);
   $("btnSave").disabled = false;
   if (error) return say($("editMsg"), error.code === "23505" ? "Ese usuario ya está en uso." : error.message, "err");
@@ -210,13 +320,18 @@ $("editForm").onsubmit = async e => {
 async function route(session){
   if (!session){
     me = profile = null;
-    $("app").classList.add("hidden"); $("login").classList.remove("hidden");
+    $("app").classList.add("hidden"); $("onboard").classList.add("hidden"); $("login").classList.remove("hidden");
     return;
   }
   me = session.user;
   profile = await loadProfile(me);
-  paint(); openEdit(false);
-  $("login").classList.add("hidden"); $("app").classList.remove("hidden");
+  paint(); openEdit(false); show("Profile");
+  $("login").classList.add("hidden");
+  if (profile.onboarded === false){
+    startOnboarding(); $("app").classList.add("hidden"); $("onboard").classList.remove("hidden");
+  } else {
+    $("onboard").classList.add("hidden"); $("app").classList.remove("hidden");
+  }
   if (location.hash.includes("access_token")) history.replaceState(null, "", location.pathname);
 }
 sb.auth.onAuthStateChange((_evt, session) => { setTimeout(() => route(session), 0); });
