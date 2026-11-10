@@ -653,10 +653,15 @@ $("glForm").onsubmit = async e => {
   let stream;
   try { stream = await navigator.mediaDevices.getUserMedia({ video:{ width:{ ideal:1280 }, height:{ ideal:720 }, facingMode:"user" }, audio:{ echoCancellation:true, noiseSuppression:true } }); }
   catch (err) { $("glBtn").disabled = false; return say($("glMsg"), "No se pudo acceder a la cámara o al micrófono. Revisa los permisos del navegador.", "err"); }
+  say($("glMsg"), "Cámara lista. Conectando con el servicio de directos…");
   const title = $("glTitle").value.trim() || ("Directo de " + nameOf(profile));
   const peer = new Peer("liveyou-" + Math.random().toString(36).slice(2, 10), { config: ICE });
   H = { peer, stream, viewers:new Map(), topic:pickedTopic, title, facing:"user", screen:false, row:null, hb:null };
+  const wait = setTimeout(() => {
+    if (H && !H.row){ say($("glMsg"), "No se pudo conectar con el servicio de directos. Desactiva los bloqueadores (Brave Shields o extensiones de anuncios) para esta página y vuelve a intentar.", "err"); cleanupHost(); }
+  }, 12000);
   peer.on("open", async id => {
+    clearTimeout(wait);
     const { data, error } = await sb.from("lives").insert({ host_id:me.id, title, topic:H.topic, peer_id:id, is_live:true }).select().single();
     if (error){ say($("glMsg"), "No se pudo publicar el directo: " + error.message, "err"); cleanupHost(); return; }
     H.row = data; closeM("mGoLive");
