@@ -263,7 +263,7 @@
 <div id="mPlayer" class="modal hidden"><div class="mbox player">
   <video id="pVideo" controls playsinline></video>
   <div style="padding:16px">
-    <div class="lrow"><img class="av" id="pAv" alt=""><strong id="pName"></strong></div>
+    <div class="lrow"><img class="av" id="pAv" alt=""><strong id="plName"></strong></div>
     <p class="bio" id="pCap"></p>
     <div class="user" id="pViews"></div>
     <div class="actions"><button class="btn ghost" data-close="mPlayer">Cerrar</button><button class="btn ghost hidden" id="pDel">Eliminar video</button></div>
@@ -426,7 +426,7 @@ $("editForm").onsubmit = async e => {
   if (file){
     if (file.size > 3*1024*1024){ $("btnSave").disabled=false; return say($("editMsg"), "La foto debe pesar menos de 3 MB.", "err"); }
     const path = me.id + "/avatar-" + Date.now() + "." + file.name.split(".").pop();
-    const up = await sb.storage.from("avatars").upload(path, file, { upsert:true });
+    const up = await sb.storage.from("avatars").upload(path, file);
     if (up.error){ $("btnSave").disabled=false; return say($("editMsg"), "No se pudo subir la foto: " + up.error.message, "err"); }
     avatar_url = sb.storage.from("avatars").getPublicUrl(path).data.publicUrl;
   }
@@ -491,7 +491,7 @@ const loadMyVideos = () => fillVideos($("myVideos"),
 
 function openPlayer(v, a){
   const vid = $("pVideo"); vid.src = v.url; vid.play().catch(() => {});
-  $("pAv").src = picOf(a); $("pName").textContent = nameOf(a) + (a && a.username ? "  @" + a.username : "");
+  $("pAv").src = picOf(a); $("plName").textContent = nameOf(a) + (a && a.username ? "  @" + a.username : "");
   $("pCap").textContent = v.caption || "";
   $("pViews").textContent = ((v.views || 0) + 1) + " reproducciones";
   sb.rpc("increment_views", { vid: v.id }).then(() => {});
