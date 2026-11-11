@@ -99,7 +99,7 @@
     .side .logo,.nav span{display:none}.side .who{margin-top:0}.nav{justify-content:center;width:auto}}
   @media(max-width:760px){.login{grid-template-columns:1fr}.hero{padding:8vh 8%}}
   @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
-  .logo{cursor:pointer}.side{overflow-y:auto}
+  .logo{cursor:pointer}@media(min-width:761px){.side{overflow-y:auto}}
   .reel{height:calc(100vh - 56px);max-width:460px;margin:0 auto;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none;border-radius:16px}
   .reel::-webkit-scrollbar{display:none}
   .slide{position:relative;height:100%;scroll-snap-align:start;scroll-snap-stop:always;background:#000;border-radius:16px;overflow:hidden}
@@ -115,7 +115,7 @@
   .reelnav{position:fixed;right:max(16px,3vw);top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:12px}
   .reelnav .btn{width:46px;height:46px;padding:0;border-radius:50%}
   .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:rgba(0,0,0,.85);padding:8px 16px;border-radius:999px;z-index:30;font-size:.9rem}
-  @media(max-width:760px){.reel{height:calc(100vh - 130px)}.reelnav,.nav.soon{display:none}}
+  @media(max-width:760px){.reel{height:calc(100vh - 130px);height:calc(100dvh - 130px)}.reelnav,.nav.soon{display:none}}
 </style>
 </head>
 <body>
@@ -869,25 +869,35 @@ async function stopAll(){ leaveWatch(); await endLive(); }
 window.addEventListener("beforeunload", () => { try { H && H.peer.destroy(); W && W.peer.destroy(); } catch (e) {} });
 
 /* ---------- Estado de sesión ---------- */
+let routeTok = 0;
 async function route(session){
-  if (!session){
-    me = profile = null; stopAll();
+  const tok = ++routeTok;
+  try {
+    if (!session){
+      me = profile = null; stopAll();
+      $("app").classList.add("hidden"); $("onboard").classList.add("hidden"); $("login").classList.remove("hidden");
+      return;
+    }
+    me = session.user;
+    const pr = await loadProfile(me);
+    if (tok !== routeTok) return;
+    profile = pr;
+    $("login").classList.add("hidden");
+    if (profile.onboarded === false){
+      startOnboarding(); $("app").classList.add("hidden"); $("onboard").classList.remove("hidden");
+    } else {
+      $("onboard").classList.add("hidden"); $("app").classList.remove("hidden");
+    }
+    try { paint(); openEdit(false); show("Feed"); } catch (e) { console.error(e); }
+    if (location.hash.includes("access_token")) history.replaceState(null, "", location.pathname);
+  } catch (err) {
+    console.error(err);
     $("app").classList.add("hidden"); $("onboard").classList.add("hidden"); $("login").classList.remove("hidden");
-    return;
+    say($("loginMsg"), "No se pudo cargar tu cuenta: " + (err && err.message ? err.message : err), "err");
   }
-  me = session.user;
-  profile = await loadProfile(me);
-  paint(); openEdit(false); show("Feed");
-  $("login").classList.add("hidden");
-  if (profile.onboarded === false){
-    startOnboarding(); $("app").classList.add("hidden"); $("onboard").classList.remove("hidden");
-  } else {
-    $("onboard").classList.add("hidden"); $("app").classList.remove("hidden");
-  }
-  if (location.hash.includes("access_token")) history.replaceState(null, "", location.pathname);
 }
 sb.auth.onAuthStateChange((_evt, session) => { setTimeout(() => route(session), 0); });
-sb.auth.getSession().then(({ data }) => route(data.session));
+sb.auth.getSession().then(({ data }) => route(data.session)).catch(err => say($("loginMsg"), "Error de sesión: " + err.message, "err"));
 </script>
 </body>
 </html>
