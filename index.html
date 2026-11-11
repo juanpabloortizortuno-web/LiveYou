@@ -322,6 +322,38 @@
   .sctl label{white-space:nowrap;font-size:.74rem}
   .reelnav .btn{display:grid;place-items:center;flex:none}.reelnav .btn svg{width:22px;height:22px}
   .feedtabs button,.feedtabs .ftlive{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap}
+
+  /* ===== v3: estilo OnlyFans (menú, iconos, perfil) ===== */
+  :root{--of:#00aff0;--ofgray:#8a96a3}
+  .nav svg{stroke-width:1.5}
+  @media(min-width:761px){
+    .side{padding:20px 14px;gap:4px}
+    .nav{gap:20px;padding:12px 16px;border-radius:999px;font-size:1.08rem;font-weight:500;color:var(--ofgray);letter-spacing:.01em}
+    .nav svg{width:30px;height:30px}
+    .nav:hover{background:rgba(255,255,255,.06);color:#fff}
+    .nav.on{background:none;color:#fff;font-weight:700}.nav.on svg{stroke-width:2}
+    #navUpload{justify-content:center;gap:10px;margin-top:18px;background:var(--of);color:#fff;font-weight:700;font-size:.9rem;letter-spacing:.04em;text-transform:uppercase;padding:14px 18px}
+    #navUpload:hover{background:#2bbcf5;color:#fff}#navUpload svg{width:22px;height:22px;stroke-width:2}
+  }
+  #vProfile .card{border-radius:0;background:transparent;border:0;border-left:1px solid var(--line);border-right:1px solid var(--line);max-width:640px;margin:0 auto;overflow:visible}
+  #vProfile .cover{height:210px;border-radius:0}#vProfile .cover::after{display:none}
+  .pinfo{padding:0 20px}
+  .pbig{width:112px;height:112px;margin-top:-56px;border:4px solid #0b0b10;box-shadow:none}
+  .pbtns{gap:10px;padding:12px 0 0}
+  .pbtns .btn{padding:9px 20px;border-radius:999px;background:transparent;border:1px solid var(--of);color:var(--of);font-weight:700;font-size:.8rem;letter-spacing:.05em;text-transform:uppercase}
+  .pbtns .btn.ghost{border-color:rgba(255,255,255,.35);color:#fff}
+  .pbtns .btn:hover{background:rgba(0,175,240,.12)}
+  .pinfo h3{font-size:1.35rem;font-weight:700;display:flex;align-items:center;gap:6px;margin-top:12px}
+  #pName::after{content:"";width:18px;height:18px;flex:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300aff0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9.5'/%3E%3Cpath d='M7.5 12.500l3 3 6-6.500'/%3E%3C/svg%3E") center/contain no-repeat}
+  .pinfo .user{color:var(--ofgray);font-size:.95rem;margin-top:2px}
+  .pinfo .bio{margin-top:12px;line-height:1.45}
+  .pstats{gap:26px;border-top:0;padding:14px 0 12px}
+  .pstats div{flex-direction:row;align-items:baseline;gap:6px}.pstats b{font-size:1rem}.pstats span{font-size:.9rem;color:var(--ofgray)}
+  .ptabs{margin:0 -20px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .ptabs button{color:var(--ofgray);font-weight:600;font-size:.85rem;letter-spacing:.08em;padding:16px 10px}
+  .ptabs button.on{color:#fff;border-bottom:2px solid var(--of)}
+  #myVideos{margin-top:0}
+  @media(max-width:760px){#vProfile .cover{height:140px}.pbig{width:88px;height:88px;margin-top:-44px}.pinfo{padding:0 14px}.ptabs{margin:0 -14px}}
 </style>
 </head>
 <body>
