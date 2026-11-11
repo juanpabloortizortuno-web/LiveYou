@@ -308,7 +308,15 @@ const hadHash = /access_token|refresh_token/.test(location.hash), hadCode = /[?&
 const hashRaw = location.hash;
 let lastEvt = "-", dbgSession = "-", initErr = "", recErr = "";
 let storageOk = true; try { localStorage.setItem("ly_t", "1"); localStorage.removeItem("ly_t"); } catch (e) { storageOk = false; }
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+/* Almacenamiento resistente: Safari a veces lanza "The quota has been exceeded" en localStorage */
+const memStore = {};
+const safeStorage = {
+  getItem(k){ try { const v = localStorage.getItem(k); if (v !== null) return v; } catch (e) {} try { const v = sessionStorage.getItem(k); if (v !== null) return v; } catch (e) {} return k in memStore ? memStore[k] : null; },
+  setItem(k, v){ try { localStorage.setItem(k, v); delete memStore[k]; return; } catch (e) {} try { sessionStorage.setItem(k, v); return; } catch (e) {} memStore[k] = v; },
+  removeItem(k){ try { localStorage.removeItem(k); } catch (e) {} try { sessionStorage.removeItem(k); } catch (e) {} delete memStore[k]; }
+};
+let lsInfo = "?"; try { let n = 0; for (let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); n += k.length + (localStorage.getItem(k) || "").length; } lsInfo = Math.round(n * 2 / 1024) + " KB, " + localStorage.length + " claves"; } catch (e) {}
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { storage: safeStorage } });
 const $ = id => document.getElementById(id);
 let me = null, profile = null;
 
@@ -905,7 +913,7 @@ async function route(session){
     say($("loginMsg"), "No se pudo cargar tu cuenta: " + (err && err.message ? err.message : err), "err");
   }
 }
-function dbg(){ const d = $("dbg"); if (d) d.textContent = "Diagnóstico (temporal): evento=" + lastEvt + " · sesión=" + dbgSession + " · tokens en la dirección=" + (hadHash ? "sí" : "no") + " · código=" + (hadCode ? "sí" : "no") + " · error=" + (urlErr ? urlErr.slice(0, 120) : "no") + " · almacenamiento=" + (storageOk ? "ok" : "bloqueado") + (initErr ? " · init=" + initErr.slice(0, 120) : "") + (recErr ? " · rec=" + recErr.slice(0, 120) : "") + " · " + location.host + location.pathname; }
+function dbg(){ const d = $("dbg"); if (d) d.textContent = "Diagnóstico (temporal): evento=" + lastEvt + " · sesión=" + dbgSession + " · tokens en la dirección=" + (hadHash ? "sí" : "no") + " · código=" + (hadCode ? "sí" : "no") + " · error=" + (urlErr ? urlErr.slice(0, 120) : "no") + " · almacenamiento=" + (storageOk ? "ok" : "bloqueado") + " (" + lsInfo + ")" + (initErr ? " · init=" + initErr.slice(0, 120) : "") + (recErr ? " · rec=" + recErr.slice(0, 120) : "") + " · " + location.host + location.pathname; }
 sb.auth.onAuthStateChange((_evt, session) => { lastEvt = _evt; dbgSession = session ? "sí" : "no"; dbg(); setTimeout(() => route(session), 0); });
 async function recoverFromHash(){
   const h = new URLSearchParams(hashRaw.replace(/^#/, "")), at = h.get("access_token"), rt = h.get("refresh_token");
