@@ -229,6 +229,22 @@
     #lvHostTools{padding:16px 5% 24px;margin-top:0}
     .grid.wide{grid-template-columns:1fr}
   }
+.gprev{position:relative;border-radius:12px;overflow:hidden;background:#000;aspect-ratio:16/9;margin-bottom:12px}
+.gprev video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+.gcount{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:6rem;font-weight:800;background:rgba(0,0,0,.55);color:#fff}
+.gcount.hidden,.vstat.hidden{display:none}
+.vstat{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;background:rgba(10,8,20,.85);font-weight:700;z-index:3}
+.tbtn.off{border-color:var(--pink);color:var(--pink);background:rgba(255,61,110,.12)}
+.cmsg:not(.sys){display:flex;gap:8px;align-items:flex-start}
+.cmsg .cav{width:26px;height:26px;border-radius:50%;object-fit:cover;flex:none}
+.cmsg.host{background:rgba(255,61,110,.16);border-radius:10px;padding:6px 8px}
+.lthumb{position:relative;flex:none;width:168px;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#1c1830;display:block}
+.lthumb img{width:100%;height:100%;object-fit:cover;display:block}
+.lthumb .badge{position:absolute;left:8px;top:8px}
+@media(max-width:700px){.lthumb{width:120px}}
+.sumgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+.sumgrid div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+.sumgrid b{display:block;font-size:1.4rem}.sumgrid span{font-size:.8rem;opacity:.7}
 </style>
 </head>
 <body>
@@ -316,10 +332,13 @@
               </div>
               <div class="vtools">
                 <span class="cnt" id="lvCount">0 viendo</span>
+                <button class="btn main hidden" id="lvFollow" type="button" style="padding:6px 12px">Seguir</button>
+                <button class="ibtn" id="lvLink" type="button" aria-label="Copiar enlace del directo"><svg viewBox="0 0 24 24"><path d="M10 14a5 5 0 007 0l3-3a5 5 0 00-7-7l-1 1M14 10a5 5 0 00-7 0l-3 3a5 5 0 007 7l1-1"/></svg></button>
                 <button class="ibtn" id="lvFull" type="button" aria-label="Pantalla completa"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
                 <button class="ibtn hidden" id="lvLeave" type="button" aria-label="Salir del directo"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
               </div>
             </div>
+            <div id="lvStatus" class="vstat hidden"></div>
             <button class="btn main hidden" id="lvUnmute">Activar sonido</button>
             <div id="reactLayer"></div>
             <div class="vbot"><h2 id="lvTitle"></h2><span class="chip on" id="lvTopic"></span></div>
@@ -402,11 +421,14 @@
 
 <div id="mGoLive" class="modal hidden"><form class="mbox" id="glForm">
   <h2>Transmitir en vivo</h2>
+  <div class="gprev"><video id="glPrev" autoplay muted playsinline></video><div id="glCount" class="gcount hidden"></div></div>
   <label>Elige un tema</label><div class="chips" id="glTopics"></div>
   <label for="glTitle">Título (opcional)</label><input id="glTitle" maxlength="60" placeholder="Ej. Hablemos de cripto">
   <p class="msg" id="glMsg" role="status"></p>
   <div class="actions"><button class="btn main" type="submit" id="glBtn" disabled>Empezar ahora</button><button class="btn ghost" type="button" data-close="mGoLive">Cancelar</button></div>
 </form></div>
+
+<div id="mSum" class="modal hidden"><div class="mbox"><h2>Directo terminado 🎉</h2><div class="sumgrid"><div><b id="sumDur">0</b><span>Duración</span></div><div><b id="sumPeak">0</b><span>Máx. espectadores</span></div><div><b id="sumReacts">0</b><span>Reacciones</span></div></div><div class="actions"><button class="btn main" type="button" data-close="mSum">Cerrar</button></div></div></div>
 
 <div id="mPlayer" class="modal hidden"><div class="mbox player">
   <video id="pVideo" controls playsinline></video>
@@ -770,16 +792,52 @@ $("upForm").onsubmit = async e => {
 const TOPICS = ["Charla","Música","Cripto","Educación","Gaming","Cocina","Deportes","Humor","Otro"];
 const REACTS = ["❤️","🔥","👏","😂"];
 const MAX_VIEWERS = 15;
-const ICE = { iceServers: [{ urls:"stun:stun.l.google.com:19302" }, { urls:"stun:global.stun.twilio.com:3478" }] };
+const ICE = { iceServers: [{ urls:"stun:stun.l.google.com:19302" }, { urls:"stun:global.stun.twilio.com:3478" },
+  { urls:["turn:openrelay.metered.ca:80","turn:openrelay.metered.ca:443","turn:openrelay.metered.ca:443?transport=tcp"], username:"openrelayproject", credential:"openrelayproject" }] };
+let camOff = false, statTxt = "";
+function paintStat(){ const t = statTxt || (camOff ? "📷 Cámara apagada" : ""); $("lvStatus").textContent = t; $("lvStatus").classList.toggle("hidden", !t); }
+const setStat = t => { statTxt = t; paintStat(); };
+function toastMsg(t, ms){ const d = $("toast"); d.textContent = t; d.classList.remove("hidden"); clearTimeout(d._t); d._t = setTimeout(() => d.classList.add("hidden"), ms || 2500); }
+let actx;
+function ping(){ try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime;
+  o.type = "sine"; o.frequency.value = 880; g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.12, t + .02); g.gain.exponentialRampToValueAtTime(.0001, t + .35);
+  o.connect(g); g.connect(actx.destination); o.start(); o.stop(t + .4); } catch (e) {} }
+const getFollows = () => { try { return JSON.parse(localStorage.getItem("ly_follow") || "[]"); } catch (e) { return []; } };
+const setFollows = a => { try { localStorage.setItem("ly_follow", JSON.stringify(a)); } catch (e) {} };
+const thumbUrl = id => sb.storage.from("avatars").getPublicUrl(id + "/live-thumb.jpg").data.publicUrl + "?t=" + Math.floor(Date.now() / 30000);
+const liveLink = id => location.origin + location.pathname + "?live=" + id;
+async function copyLink(id){ const u = liveLink(id); try { await navigator.clipboard.writeText(u); toastMsg("Enlace del directo copiado ✓"); } catch (e) { prompt("Copia el enlace:", u); } }
+function tuneCall(call){ setTimeout(() => { try { const pc = call.peerConnection; pc.getSenders().forEach(x => { if (x.track && x.track.kind === "video"){
+  const p = x.getParameters(); if (!p.encodings || !p.encodings.length) p.encodings = [{}]; p.encodings[0].maxBitrate = 1200000; p.degradationPreference = "maintain-framerate"; x.setParameters(p).catch(() => {}); } }); } catch (e) {} }, 1500); }
+function snap(){ if (!H) return; const v = $("lvVideo"); if (!v.videoWidth) return; const c = document.createElement("canvas"); c.width = 320; c.height = Math.round(320 * v.videoHeight / v.videoWidth);
+  c.getContext("2d").drawImage(v, 0, 0, c.width, c.height);
+  c.toBlob(b => { if (b) sb.storage.from("avatars").upload(me.id + "/live-thumb.jpg", b, { upsert:true, contentType:"image/jpeg" }).then(() => {}, () => {}); }, "image/jpeg", .7); }
+const seenAlert = new Set();
+async function followAlerts(){
+  if (!me) return; const f = getFollows(); if (!f.length) return;
+  const { data } = await sb.from("lives").select("*").eq("is_live", true).in("host_id", f).gte("last_seen", new Date(Date.now() - 45000).toISOString());
+  if (!data || !data.length) return; const au = await withAuthors(data, "host_id");
+  data.forEach(l => { if (seenAlert.has(l.id) || l.host_id === me.id) return; seenAlert.add(l.id); ping(); toastMsg("🔴 " + nameOf(au[l.host_id]) + " está en vivo", 6000); });
+}
+setInterval(followAlerts, 30000);
+let linkDone = false;
+async function openFromLink(){
+  const id = new URLSearchParams(location.search).get("live"); if (!id) return;
+  history.replaceState(null, "", location.pathname);
+  const { data } = await sb.from("lives").select("*").eq("id", id).eq("is_live", true).maybeSingle();
+  if (!data){ show("Live"); return toastMsg("Ese directo ya terminó."); }
+  const au = await withAuthors([data], "host_id"); data._a = au[data.host_id]; watchLive(data);
+}
 let topicFilter = "Todos", pickedTopic = null, H = null, W = null;
 
 async function loadLives(){
   if (!$("lvFilter").children.length)
-    chips($("lvFilter"), ["Todos", ...TOPICS], topicFilter, t => { topicFilter = t; loadLives(); });
+    chips($("lvFilter"), ["Todos", "Siguiendo", ...TOPICS], topicFilter, t => { topicFilter = t; loadLives(); });
   const box = $("liveGrid");
   let q = sb.from("lives").select("*").eq("is_live", true)
     .gte("last_seen", new Date(Date.now() - 45000).toISOString()).order("started_at", { ascending:false });
-  if (topicFilter !== "Todos") q = q.eq("topic", topicFilter);
+  if (topicFilter === "Siguiendo"){ const f = getFollows(); if (!f.length){ box.replaceChildren(); return note(box, "Aún no sigues a nadie. Entra a un directo y toca Seguir."); } q = q.in("host_id", f); }
+  else if (topicFilter !== "Todos") q = q.eq("topic", topicFilter);
   const { data, error } = await q;
   box.replaceChildren();
   if (error) return note(box, "No se pudieron cargar los directos.");
@@ -789,8 +847,8 @@ async function loadLives(){
   data.forEach(l => {
     const a = au[l.host_id];
     const b = document.createElement("button"); b.className = "lcard"; b.type = "button";
-    const av = document.createElement("span"); av.className = "lav";
-    const img = new Image(); img.alt = ""; img.src = picOf(a);
+    const av = document.createElement("span"); av.className = "lthumb";
+    const img = new Image(); img.alt = ""; img.src = thumbUrl(l.host_id); img.onerror = () => { img.onerror = null; img.src = picOf(a); };
     const bd = document.createElement("span"); bd.className = "badge"; bd.textContent = "EN VIVO";
     av.append(img, bd);
     const info = document.createElement("div"); info.className = "linfo";
@@ -805,10 +863,14 @@ async function loadLives(){
 }
 
 /* chat y reacciones */
-function addLv(name, text, cls){
+function addLv(name, text, cls, pic){
   const d = document.createElement("div"); d.className = "cmsg" + (cls ? " " + cls : "");
   if (cls === "sys") d.textContent = text;
-  else { const b = document.createElement("b"); b.textContent = name; d.append(b, document.createTextNode(text)); }
+  else {
+    const im = new Image(); im.className = "cav"; im.alt = ""; im.src = pic || fallbackAvatar(name);
+    const w = document.createElement("div"), b = document.createElement("b"); b.textContent = name + (cls === "host" ? " 👑 " : " ");
+    w.append(b, document.createTextNode(text)); d.append(im, w);
+  }
   $("lvMsgs").append(d); $("lvMsgs").scrollTop = $("lvMsgs").scrollHeight;
 }
 const lvSys = t => addLv("", t, "sys");
@@ -834,20 +896,20 @@ $("lvFull").onclick = () => {
 };
 document.querySelectorAll("[data-react]").forEach(b => b.onclick = () => {
   const e = b.dataset.react;
-  if (H){ floatEmoji(e); bcast({ t:"react", e }); }
+  if (H){ H.reacts = (H.reacts || 0) + 1; floatEmoji(e); bcast({ t:"react", e }); }
   else if (W && W.conn && W.conn.open) W.conn.send({ t:"react", e });
 });
 $("lvForm").onsubmit = e => {
   e.preventDefault();
   const t = $("lvInput").value.trim().slice(0, 300); if (!t) return;
   $("lvInput").value = "";
-  if (H){ addLv(nameOf(profile), t, "host"); bcast({ t:"chat", name:nameOf(profile), text:t, host:true }); }
+  if (H){ addLv(nameOf(profile), t, "host", picOf(profile)); bcast({ t:"chat", name:nameOf(profile), text:t, host:true, pic:picOf(profile) }); }
   else if (W && W.conn && W.conn.open) W.conn.send({ t:"chat", text:t });
 };
 function enterStage(host){
   $("lvMsgs").replaceChildren(); $("lvUnmute").classList.add("hidden");
   $("lvHostTools").classList.toggle("hidden", !host);
-  $("lvLeave").classList.toggle("hidden", host);
+  $("lvLeave").classList.toggle("hidden", host); $("lvFollow").classList.toggle("hidden", host); camOff = false; statTxt = ""; paintStat();
   setCount(0); show("Stage");
 }
 
@@ -856,13 +918,22 @@ $("btnGoLive").onclick = () => {
   if (H) return show("Stage");
   pickedTopic = null; $("glTitle").value = ""; $("glBtn").disabled = true; say($("glMsg"), "");
   chips($("glTopics"), TOPICS, null, t => { pickedTopic = t; $("glBtn").disabled = false; });
-  openM("mGoLive");
+  glCancelled = false; openM("mGoLive"); startPrev();
 };
+let prevStream = null, glCancelled = false;
+const MEDIA = () => ({ video:{ width:{ ideal:1280 }, height:{ ideal:720 }, facingMode:"user" }, audio:{ echoCancellation:true, noiseSuppression:true } });
+async function startPrev(){
+  stopPrev();
+  try { prevStream = await navigator.mediaDevices.getUserMedia(MEDIA()); $("glPrev").srcObject = prevStream; }
+  catch (e) { say($("glMsg"), "Permite la cámara y el micrófono para verte antes de salir al aire.", "err"); }
+}
+function stopPrev(){ if (prevStream){ prevStream.getTracks().forEach(t => t.stop()); prevStream = null; } $("glPrev").srcObject = null; }
+document.querySelectorAll('[data-close="mGoLive"]').forEach(b => b.addEventListener("click", () => { glCancelled = true; stopPrev(); $("glCount").classList.add("hidden"); }));
 function bcast(m){ if (H) H.viewers.forEach(v => { try { v.conn.send(m); } catch (e) {} }); }
 function refreshViewers(){
-  const n = H.viewers.size; setCount(n); bcast({ t:"count", n });
+  const n = H.viewers.size; H.peak = Math.max(H.peak || 0, n); setCount(n); bcast({ t:"count", n });
   const box = $("lvViewers"); box.replaceChildren();
-  if (!n){ box.textContent = "Todavía no hay nadie."; return; }
+  if (!n){ box.textContent = "Todavía no hay nadie. Toca 🔗 arriba para copiar el enlace y compartirlo."; return; }
   H.viewers.forEach((v, id) => {
     const r = document.createElement("div"); r.className = "vrow";
     const s = document.createElement("span"); s.textContent = v.name;
@@ -879,23 +950,24 @@ function hostConn(conn){
   conn.on("open", () => {
     if (!H) return;
     const name = String((conn.metadata || {}).name || "Invitado").slice(0, 30);
+    const pic0 = String((conn.metadata || {}).pic || "").slice(0, 400), pic = /^https:\/\//.test(pic0) ? pic0 : "";
     if (H.viewers.size >= MAX_VIEWERS){ try { conn.send({ t:"deny", why:"La sala está llena." }); } catch (e) {} setTimeout(() => conn.close(), 500); return; }
-    const call = H.peer.call(conn.peer, H.stream);
-    H.viewers.set(conn.peer, { conn, call, name });
-    conn.send({ t:"ok", title:H.title, topic:H.topic });
-    lvSys(name + " entró"); bcast({ t:"chat", sys:true, text:name + " entró" }); refreshViewers();
+    const call = H.peer.call(conn.peer, H.stream); tuneCall(call);
+    H.viewers.set(conn.peer, { conn, call, name, pic });
+    conn.send({ t:"ok", title:H.title, topic:H.topic }); conn.send(mediaState());
+    ping(); lvSys(name + " entró"); bcast({ t:"chat", sys:true, text:name + " entró" }); refreshViewers();
   });
   conn.on("data", d => {
     const v = H && H.viewers.get(conn.peer); if (!v || !d) return;
-    if (d.t === "chat"){ const text = String(d.text || "").trim().slice(0, 300); if (!text) return; addLv(v.name, text); bcast({ t:"chat", name:v.name, text }); }
-    else if (d.t === "react" && REACTS.includes(d.e)){ floatEmoji(d.e); bcast({ t:"react", e:d.e }); }
+    if (d.t === "chat"){ const text = String(d.text || "").trim().slice(0, 300); if (!text) return; addLv(v.name, text, "", v.pic); bcast({ t:"chat", name:v.name, text, pic:v.pic }); }
+    else if (d.t === "react" && REACTS.includes(d.e)){ H.reacts = (H.reacts || 0) + 1; floatEmoji(d.e); bcast({ t:"react", e:d.e }); }
   });
   conn.on("close", () => dropViewer(conn.peer));
   conn.on("error", () => dropViewer(conn.peer));
 }
 function cleanupHost(){
   if (!H) return;
-  clearInterval(H.hb); H.stream.getTracks().forEach(t => t.stop()); try { H.peer.destroy(); } catch (e) {}
+  clearInterval(H.hb); clearInterval(H.th); H.stream.getTracks().forEach(t => t.stop()); try { H.peer.destroy(); } catch (e) {}
   H = null; $("glBtn").disabled = !pickedTopic;
 }
 $("glForm").onsubmit = async e => {
@@ -903,14 +975,22 @@ $("glForm").onsubmit = async e => {
   if (!pickedTopic || H) return;
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
     return say($("glMsg"), "Tu navegador no permite usar la cámara. Abre la página con https en Chrome, Edge o Firefox.", "err");
-  $("glBtn").disabled = true; say($("glMsg"), "Activando cámara…");
-  let stream;
-  try { stream = await navigator.mediaDevices.getUserMedia({ video:{ width:{ ideal:1280 }, height:{ ideal:720 }, facingMode:"user" }, audio:{ echoCancellation:true, noiseSuppression:true } }); }
-  catch (err) { $("glBtn").disabled = false; return say($("glMsg"), "No se pudo acceder a la cámara o al micrófono. Revisa los permisos del navegador.", "err"); }
-  say($("glMsg"), "Cámara lista. Conectando con el servicio de directos…");
+  $("glBtn").disabled = true; glCancelled = false;
+  let stream = prevStream;
+  if (!stream){
+    say($("glMsg"), "Activando cámara…");
+    try { stream = await navigator.mediaDevices.getUserMedia(MEDIA()); prevStream = stream; $("glPrev").srcObject = stream; }
+    catch (err) { $("glBtn").disabled = false; return say($("glMsg"), "No se pudo acceder a la cámara o al micrófono. Revisa los permisos del navegador.", "err"); }
+  }
+  say($("glMsg"), "");
+  for (const n of [3, 2, 1]){ if (glCancelled) break; $("glCount").textContent = n; $("glCount").classList.remove("hidden"); await new Promise(r => setTimeout(r, 900)); }
+  $("glCount").classList.add("hidden");
+  if (glCancelled || !stream.active){ stream.getTracks().forEach(t => t.stop()); prevStream = null; $("glBtn").disabled = !pickedTopic; return; }
+  prevStream = null; $("glPrev").srcObject = null;
+  say($("glMsg"), "Conectando con el servicio de directos…");
   const title = $("glTitle").value.trim() || ("Directo de " + nameOf(profile));
   const peer = new Peer("liveyou-" + Math.random().toString(36).slice(2, 10), { config: ICE });
-  H = { peer, stream, viewers:new Map(), topic:pickedTopic, title, facing:"user", screen:false, row:null, hb:null };
+  H = { peer, stream, viewers:new Map(), topic:pickedTopic, title, facing:"user", screen:false, row:null, hb:null, t0:Date.now(), peak:0, reacts:0 };
   const wait = setTimeout(() => {
     if (H && !H.row){ say($("glMsg"), "No se pudo conectar con el servicio de directos. Desactiva los bloqueadores (Brave Shields o extensiones de anuncios) para esta página y vuelve a intentar.", "err"); cleanupHost(); }
   }, 12000);
@@ -922,22 +1002,32 @@ $("glForm").onsubmit = async e => {
     $("lvTitle").textContent = title; $("lvTopic").textContent = H.topic; setHost(profile);
     $("lvVideo").srcObject = stream; $("lvVideo").muted = true; playLv();
     enterStage(true); lvSys("Estás en vivo. Los espectadores aparecerán aquí.");
+    snap(); setTimeout(snap, 4000); H.th = setInterval(snap, 30000);
     H.hb = setInterval(() => sb.from("lives").update({ last_seen:new Date().toISOString(), viewers:H.viewers.size }).eq("id", H.row.id).then(() => {}), 15000);
   });
   peer.on("connection", hostConn);
+  peer.on("disconnected", () => { try { peer.reconnect(); } catch (e) {} });
   peer.on("error", err => {
     if (!H) return;
     if (!H.row){ say($("glMsg"), "No se pudo conectar con el servicio de directos (" + err.type + ").", "err"); cleanupHost(); }
     else lvSys("Error de conexión: " + err.type);
   });
 };
+function setTb(btn, off, onTxt, offTxt){
+  btn.classList.toggle("off", off); btn.lastElementChild.textContent = off ? offTxt : onTxt;
+  const sv2 = btn.querySelector("svg"), x = sv2.querySelector(".x");
+  if (off && !x) sv2.insertAdjacentHTML("beforeend", '<path class="x" d="M3 3l18 18"/>'); if (!off && x) x.remove();
+}
+function mediaState(){ const v = H.stream.getVideoTracks()[0], a = H.stream.getAudioTracks()[0]; return { t:"media", cam:!v || v.enabled, mic:!a || a.enabled }; }
 $("lvMic").onclick = () => {
   const t = H.stream.getAudioTracks(); if (!t.length) return;
-  const on = !t[0].enabled; t.forEach(x => x.enabled = on); $("lvMic").lastElementChild.textContent = on ? "Silenciar micrófono" : "Activar micrófono";
+  const on = !t[0].enabled; t.forEach(x => x.enabled = on); setTb($("lvMic"), !on, "Silenciar micrófono", "Activar micrófono");
+  bcast(mediaState()); bcast({ t:"chat", sys:true, text:on ? "Micrófono activado" : "El anfitrión silenció el micrófono" });
 };
 $("lvCam").onclick = () => {
   const t = H.stream.getVideoTracks(); if (!t.length) return;
-  const on = !t[0].enabled; t.forEach(x => x.enabled = on); $("lvCam").lastElementChild.textContent = on ? "Apagar cámara" : "Encender cámara";
+  const on = !t[0].enabled; t.forEach(x => x.enabled = on); setTb($("lvCam"), !on, "Apagar cámara", "Encender cámara");
+  camOff = !on; paintStat(); bcast(mediaState());
 };
 async function swapVideo(track){
   const old = H.stream.getVideoTracks()[0];
@@ -970,14 +1060,18 @@ $("lvShare").onclick = async () => {
   } catch (err) {}
 };
 async function endLive(){
-  if (!H) return; const row = H.row; bcast({ t:"end" });
+  if (!H) return null; const row = H.row, st = { ms:Date.now() - H.t0, peak:H.peak || 0, reacts:H.reacts || 0 }; bcast({ t:"end" });
   await new Promise(r => setTimeout(r, 300));
   if (row) await sb.from("lives").update({ is_live:false }).eq("id", row.id);
-  cleanupHost();
+  cleanupHost(); return row ? st : null;
+}
+function showSummary(st){
+  const s = Math.round(st.ms / 1000), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60);
+  $("sumDur").textContent = (h ? h + " h " : "") + m + " min " + (s % 60) + " s"; $("sumPeak").textContent = st.peak; $("sumReacts").textContent = st.reacts; openM("mSum");
 }
 $("lvEnd").onclick = async () => {
   if (!confirm("¿Terminar el directo para todos?")) return;
-  await endLive(); show("Live"); say($("liveMsg"), "Tu directo terminó. ¡Gracias por transmitir!", "ok");
+  const st = await endLive(); show("Live"); if (st) showSummary(st);
 };
 
 /* --- espectador --- */
@@ -985,28 +1079,47 @@ function watchLive(l){
   if (H) return show("Stage");
   leaveWatch(); say($("liveMsg"), "");
   $("lvTitle").textContent = l.title; $("lvTopic").textContent = l.topic; setHost(l._a);
-  $("lvVideo").muted = false; enterStage(false);
-  const peer = new Peer({ config: ICE });
-  W = { peer, conn:null, timer:null };
-  peer.on("open", () => {
-    W.conn = peer.connect(l.peer_id, { metadata:{ name:nameOf(profile) }, reliable:true });
-    W.timer = setTimeout(() => watchEnd("No se pudo conectar. Puede que el directo ya terminó o que tu red lo bloquee.", "err"), 15000);
-    W.conn.on("data", onWatchData);
-    W.conn.on("close", () => { if (W) watchEnd("Se perdió la conexión con el directo.", "err"); });
-  });
-  peer.on("call", call => { call.answer(); call.on("stream", s => { $("lvVideo").srcObject = s; playLv(); }); });
-  peer.on("error", err => { if (W) watchEnd(err.type === "peer-unavailable" ? "Este directo ya terminó." : "Error de conexión (" + err.type + ").", "err"); });
+  $("lvVideo").muted = false; enterStage(false); setStat("Conectando…");
+  const w = W = { peer:null, conn:null, timer:null, l, tries:0, pending:false };
+  const retry = msg => {
+    if (W !== w || w.pending) return; w.pending = true; clearTimeout(w.timer);
+    if (++w.tries > 5){ w.pending = false; return watchEnd(msg + " Intenta entrar de nuevo.", "err"); }
+    setStat("Reconectando… (" + w.tries + "/5)"); setTimeout(start, 1500 * w.tries);
+  };
+  const start = () => {
+    if (W !== w) return; w.pending = false;
+    try { w.peer && w.peer.destroy(); } catch (e) {}
+    const peer = new Peer({ config: ICE }); w.peer = peer;
+    peer.on("open", () => {
+      const conn = peer.connect(l.peer_id, { metadata:{ name:nameOf(profile), pic:profile.avatar_url || "" }, reliable:true }); w.conn = conn;
+      w.timer = setTimeout(() => retry("No se pudo conectar."), 15000);
+      conn.on("data", onWatchData); conn.on("close", () => retry("Se perdió la conexión."));
+    });
+    peer.on("call", call => { call.answer(); call.on("stream", s => { setStat(""); $("lvVideo").srcObject = s; playLv(); }); });
+    peer.on("error", err => { if (W !== w) return; if (err.type === "peer-unavailable") watchEnd("Este directo ya terminó.", "err"); else retry("Error de conexión."); });
+  };
+  start(); paintFollow();
 }
+function paintFollow(){
+  const id = W && W.l.host_id, f = !!id && getFollows().includes(id);
+  $("lvFollow").textContent = f ? "Siguiendo ✓" : "Seguir"; $("lvFollow").classList.toggle("main", !f); $("lvFollow").classList.toggle("ghost", f);
+}
+$("lvFollow").onclick = () => {
+  if (!W) return; const id = W.l.host_id; let f = getFollows(); const had = f.includes(id);
+  f = had ? f.filter(x => x !== id) : [...f, id]; setFollows(f); paintFollow(); toastMsg(had ? "Dejaste de seguir" : "Ahora sigues a este anfitrión ✓");
+};
+$("lvLink").onclick = () => { if (W) copyLink(W.l.id); else if (H && H.row) copyLink(H.row.id); };
 function onWatchData(d){
   if (!d || !W) return;
-  if (d.t === "ok"){ clearTimeout(W.timer); lvSys("Estás dentro. Escribe para saludar."); }
+  if (d.t === "ok"){ clearTimeout(W.timer); W.tries = 0; lvSys("Estás dentro. Escribe para saludar."); }
   else if (d.t === "deny") watchEnd(d.why || "No se pudo entrar.", "err");
   else if (d.t === "kick") watchEnd("El anfitrión te sacó del directo.", "err");
   else if (d.t === "end") watchEnd("El directo terminó. ¡Gracias por acompañar!", "ok");
+  else if (d.t === "media"){ camOff = !d.cam; paintStat(); }
   else if (d.t === "count") setCount(d.n);
   else if (d.t === "react") floatEmoji(d.e);
   else if (d.t === "chat"){
-    if (d.sys) lvSys(d.text); else addLv(d.name, d.text, d.host ? "host" : (d.name === nameOf(profile) ? "me" : ""));
+    if (d.sys) lvSys(d.text); else addLv(d.name, d.text, d.host ? "host" : (d.name === nameOf(profile) ? "me" : ""), d.pic);
   }
 }
 function leaveWatch(){
@@ -1041,7 +1154,7 @@ async function route(session){
     } else {
       $("onboard").classList.add("hidden"); $("app").classList.remove("hidden");
     }
-    try { paint(); openEdit(false); show("Feed"); } catch (e) { console.error(e); }
+    try { paint(); openEdit(false); show("Feed"); if (!linkDone){ linkDone = true; openFromLink(); } } catch (e) { console.error(e); }
     if (location.hash.includes("access_token")) history.replaceState(null, "", location.pathname);
   } catch (err) {
     console.error(err);
