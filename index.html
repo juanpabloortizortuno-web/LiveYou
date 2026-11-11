@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>LiveYou · videos cortos</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
@@ -116,6 +116,30 @@
   .reelnav .btn{width:46px;height:46px;padding:0;border-radius:50%}
   .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:rgba(0,0,0,.85);padding:8px 16px;border-radius:999px;z-index:30;font-size:.9rem}
   @media(max-width:760px){.reel{height:calc(100vh - 130px);height:calc(100dvh - 130px)}.reelnav,.nav.soon{display:none}}
+  .slide::after{content:"";position:absolute;left:0;right:0;bottom:0;height:40%;background:linear-gradient(transparent,rgba(0,0,0,.7));pointer-events:none;z-index:0}
+  .sinfo,.sact,.sctl,.sbar{z-index:1}
+  .feedtabs{display:none}
+  @media(max-width:760px){
+    :root{--bar:calc(58px + env(safe-area-inset-bottom))}
+    .app{padding-bottom:var(--bar)}
+    main{padding:0}
+    #vLive,#vStage,#vProfile,#vInbox{padding:16px 5% 24px}
+    .side{height:var(--bar);padding:4px 6px env(safe-area-inset-bottom);align-items:center;background:#000;border-top:1px solid rgba(255,255,255,.12)}
+    .nav{flex-direction:column;gap:2px;padding:4px 6px;font-size:.62rem;font-weight:600;min-width:56px;border-radius:8px}
+    .nav span{display:block}.nav svg{width:24px;height:24px}
+    .nav.who,#btnLogout2,.nav.soon{display:none}
+    #navFeed{order:1}#navLive{order:2}#navUpload{order:3}#navInbox{order:4}#navProfile{order:5}
+    #navUpload span{display:none}
+    #navUpload svg{width:48px;height:32px;fill:var(--pink);stroke:#fff}
+    .reel{height:calc(100vh - 58px);height:calc(100dvh - var(--bar));max-width:none;border-radius:0}
+    .slide{border-radius:0}
+    .sinfo{bottom:34px;left:12px}.sact{bottom:40px;right:8px;gap:14px}
+    .sctl{bottom:8px}.sctl [data-a="pp"],.sctl [data-a="rate"]{display:none}
+    .feedtabs{display:flex;position:absolute;top:calc(10px + env(safe-area-inset-top));left:0;right:0;justify-content:center;gap:22px;z-index:3;pointer-events:none}
+    .feedtabs button{pointer-events:auto;background:none;border:0;color:rgba(255,255,255,.65);font-size:1.05rem;font-weight:700;cursor:pointer;text-shadow:0 1px 3px #000;padding:4px 2px}
+    .feedtabs button.on{color:#fff;border-bottom:2px solid #fff}
+    .toast{bottom:calc(var(--bar) + 16px)}
+  }
 </style>
 </head>
 <body>
@@ -138,7 +162,6 @@
     <input id="email" type="email" placeholder="Correo electrónico" autocomplete="email">
     <button class="btn main" id="btnEmail">Enviarme un enlace de acceso</button>
     <p class="msg" id="loginMsg" role="status"></p>
-      <p id="dbg" style="margin-top:14px;font-size:.72rem;color:#8a8aa3;word-break:break-word"></p>
   </div>
 </section>
 
@@ -170,13 +193,14 @@
     <button class="nav" id="navLive"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M6 6a8 8 0 000 12M18 6a8 8 0 010 12"/></svg><span>En vivo</span></button>
     <button class="nav" id="navUpload"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg><span>Subir video</span></button>
     <button class="nav" id="navProfile"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>Perfil</span></button>
-    <button class="nav" id="navInbox"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span>Bandeja de entrada</span></button>
+    <button class="nav" id="navInbox"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span>Bandeja</span></button>
     <button class="nav soon" data-soon="Actividad"><svg viewBox="0 0 24 24"><path d="M12 3l2.5 6 6.500.5-5 4.500 1.500 6.500L12 17l-5.500 3.500L8 14 3 9.500 9.500 9z"/></svg><span>Actividad</span></button>
     <button class="nav" id="btnLogout2"><svg viewBox="0 0 24 24"><path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/></svg><span>Cerrar sesión</span></button>
     <button class="nav who" id="btnWho"><img class="av" id="hAvatar" alt="Tu foto"><span id="hName"></span></button>
   </aside>
   <main>
-    <div id="vFeed">
+    <div id="vFeed" style="position:relative">
+      <div class="feedtabs"><button data-soon="Siguiendo">Siguiendo</button><button class="on">Para ti</button></div>
       <div id="feedBox" class="reel"></div>
       <div class="reelnav"><button class="btn ghost" id="rUp" aria-label="Video anterior">▲</button><button class="btn ghost" id="rDown" aria-label="Video siguiente">▼</button></div>
     </div>
