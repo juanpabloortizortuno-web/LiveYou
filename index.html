@@ -305,7 +305,8 @@ const SITE_URL     = "https://juanpabloortizortuno-web.github.io/LiveYou/";
 /* Diagnóstico: errores que Google/Supabase devuelven en la dirección y si el navegador guarda sesión */
 const urlErr = (() => { try { const q = new URLSearchParams(location.search), h = new URLSearchParams(location.hash.replace(/^#/, "")); return h.get("error_description") || q.get("error_description") || h.get("error") || q.get("error") || ""; } catch (e) { return ""; } })();
 const hadHash = /access_token|refresh_token/.test(location.hash), hadCode = /[?&]code=/.test(location.search);
-let lastEvt = "-", dbgSession = "-";
+const hashRaw = location.hash;
+let lastEvt = "-", dbgSession = "-", initErr = "", recErr = "";
 let storageOk = true; try { localStorage.setItem("ly_t", "1"); localStorage.removeItem("ly_t"); } catch (e) { storageOk = false; }
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const $ = id => document.getElementById(id);
@@ -904,9 +905,25 @@ async function route(session){
     say($("loginMsg"), "No se pudo cargar tu cuenta: " + (err && err.message ? err.message : err), "err");
   }
 }
-function dbg(){ const d = $("dbg"); if (d) d.textContent = "Diagnóstico (temporal): evento=" + lastEvt + " · sesión=" + dbgSession + " · tokens en la dirección=" + (hadHash ? "sí" : "no") + " · código=" + (hadCode ? "sí" : "no") + " · error=" + (urlErr ? urlErr.slice(0, 120) : "no") + " · almacenamiento=" + (storageOk ? "ok" : "bloqueado") + " · " + location.host + location.pathname; }
+function dbg(){ const d = $("dbg"); if (d) d.textContent = "Diagnóstico (temporal): evento=" + lastEvt + " · sesión=" + dbgSession + " · tokens en la dirección=" + (hadHash ? "sí" : "no") + " · código=" + (hadCode ? "sí" : "no") + " · error=" + (urlErr ? urlErr.slice(0, 120) : "no") + " · almacenamiento=" + (storageOk ? "ok" : "bloqueado") + (initErr ? " · init=" + initErr.slice(0, 120) : "") + (recErr ? " · rec=" + recErr.slice(0, 120) : "") + " · " + location.host + location.pathname; }
 sb.auth.onAuthStateChange((_evt, session) => { lastEvt = _evt; dbgSession = session ? "sí" : "no"; dbg(); setTimeout(() => route(session), 0); });
-sb.auth.getSession().then(({ data }) => { dbgSession = data.session ? "sí" : "no"; dbg(); route(data.session); }).catch(err => say($("loginMsg"), "Error de sesión: " + err.message, "err"));
+async function recoverFromHash(){
+  const h = new URLSearchParams(hashRaw.replace(/^#/, "")), at = h.get("access_token"), rt = h.get("refresh_token");
+  if (!at || !rt) return "faltan tokens en la dirección";
+  const { data, error } = await sb.auth.setSession({ access_token:at, refresh_token:rt });
+  if (error) return error.message;
+  return data && data.session ? "" : "setSession no devolvió sesión";
+}
+sb.auth.getSession().then(async ({ data }) => {
+  let sess = data.session;
+  if (!sess && hadHash){
+    try { const ini = await sb.auth.initialize(); if (ini && ini.error) initErr = ini.error.message; } catch (e) { initErr = e.message; }
+    try { recErr = await recoverFromHash(); } catch (e) { recErr = e.message; }
+    if (!recErr){ const r = await sb.auth.getSession(); sess = r.data.session; }
+  }
+  dbgSession = sess ? "sí" : "no"; dbg(); route(sess);
+  if (!sess && hadHash) say($("loginMsg"), "No se pudo completar el acceso: " + (recErr || initErr || "sin detalle"), "err");
+}).catch(err => say($("loginMsg"), "Error de sesión: " + err.message, "err"));
 </script>
 </body>
 </html>
