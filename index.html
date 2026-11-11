@@ -301,6 +301,9 @@ const SUPABASE_KEY = "sb_publishable_7_bduqeBHGz-rTGVAOMmlA_Af7Qtom4";
 const SITE_URL     = "https://juanpabloortizortuno-web.github.io/LiveYou/";
 /* ===================================================== */
 
+/* Diagnóstico: errores que Google/Supabase devuelven en la dirección y si el navegador guarda sesión */
+const urlErr = (() => { try { const q = new URLSearchParams(location.search), h = new URLSearchParams(location.hash.replace(/^#/, "")); return h.get("error_description") || q.get("error_description") || h.get("error") || q.get("error") || ""; } catch (e) { return ""; } })();
+let storageOk = true; try { localStorage.setItem("ly_t", "1"); localStorage.removeItem("ly_t"); } catch (e) { storageOk = false; }
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const $ = id => document.getElementById(id);
 let me = null, profile = null;
@@ -876,6 +879,8 @@ async function route(session){
     if (!session){
       me = profile = null; stopAll();
       $("app").classList.add("hidden"); $("onboard").classList.add("hidden"); $("login").classList.remove("hidden");
+      if (urlErr) { say($("loginMsg"), "No se pudo iniciar sesión: " + urlErr.replace(/\+/g, " "), "err"); history.replaceState(null, "", location.pathname); }
+      else if (!storageOk) say($("loginMsg"), "Tu navegador bloquea el almacenamiento (modo privado o bloqueo de rastreo), por eso no se guarda la sesión. Prueba en otra pestaña normal o en otro navegador.", "err");
       return;
     }
     me = session.user;
