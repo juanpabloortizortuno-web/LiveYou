@@ -245,6 +245,63 @@
 .sumgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
 .sumgrid div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
 .sumgrid b{display:block;font-size:1.4rem}.sumgrid span{font-size:.8rem;opacity:.7}
+
+/* ===== PERFIL (estilo red de creadores) ===== */
+#vProfile{max-width:680px}
+#vProfile .card{border-radius:16px;position:relative}
+#vProfile .cover{height:200px;background-size:cover;background-position:center;background-color:#1a1033;
+  background-image:radial-gradient(circle at 20% 20%,rgba(255,255,255,.2),transparent 45%),linear-gradient(135deg,var(--pink),var(--violet) 70%,#1a1033)}
+#vProfile .cover::after{content:"";position:absolute;left:0;right:0;top:0;height:200px;background:linear-gradient(transparent 55%,rgba(20,18,31,.55));pointer-events:none}
+.pinfo{padding-bottom:0}
+.prow{display:flex;justify-content:space-between;align-items:flex-end}
+.pbig{width:120px;height:120px;margin-top:-62px;border:4px solid var(--panel);box-shadow:0 0 0 3px var(--pink);position:relative;z-index:1}
+.pbtns{display:flex;gap:8px;padding-bottom:4px}.pbtns .btn{padding:9px 18px}
+.pinfo h3{font-size:1.5rem;margin-top:14px}
+.pstats{display:flex;gap:30px;margin:16px 0 0;padding:14px 0;border-top:1px solid var(--line)}
+.pstats div{display:flex;flex-direction:column}.pstats b{font-size:1.15rem}.pstats span{font-size:.8rem;color:var(--muted)}
+.ptabs{display:flex;border-top:1px solid var(--line);margin:0 -24px}
+.ptabs button{flex:1;padding:14px;background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);font-weight:700;letter-spacing:.05em;font-size:.82rem;cursor:pointer}
+.ptabs button.on{color:var(--text);border-bottom-color:var(--pink)}.ptabs i{font-style:normal;opacity:.7;margin-left:4px}
+#myVideos{grid-template-columns:repeat(3,1fr);gap:3px;margin-top:3px}
+#myVideos.feed{display:block}
+#myVideos .vcard{border-radius:0;aspect-ratio:3/4;transition:filter .15s}
+#myVideos .vcard:hover{filter:brightness(1.18)}
+@media(max-width:760px){#vProfile .cover{height:150px}#vProfile .cover::after{height:150px}.pbig{width:96px;height:96px;margin-top:-50px}.pstats{gap:22px}}
+
+/* ===== SUBIR VIDEO ===== */
+.upbox{max-width:500px}
+.drop{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:36px 16px;border:2px dashed var(--line);border-radius:16px;cursor:pointer;color:var(--muted);transition:border-color .15s,background .15s;margin:12px 0 0}
+.drop:hover,.drop.over{border-color:var(--pink);background:rgba(255,61,110,.07)}
+.drop strong{color:var(--text)}.drop span{font-size:.85rem}
+.drop svg{width:46px;height:46px;fill:none;stroke:var(--pink);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.upprev{margin-top:12px}
+.upprev video{width:100%;max-height:300px;border-radius:14px;background:#000;display:block}
+.upinfo{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px;font-size:.85rem;color:var(--muted)}
+.upinfo span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.upinfo .btn{padding:5px 12px;flex:none}
+.upflv{padding:26px;text-align:center;border-radius:14px;background:linear-gradient(135deg,var(--pink),var(--violet));font-weight:700}
+.upcnt{text-align:right;font-size:.75rem;color:var(--muted);margin-top:4px}
+.upbar{height:6px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:12px}
+.upbar i{display:block;height:100%;width:40%;background:linear-gradient(90deg,var(--pink),var(--violet));border-radius:99px;animation:upslide 1.1s ease-in-out infinite}
+@keyframes upslide{0%{margin-left:-40%}100%{margin-left:100%}}
+
+/* ===== REPRODUCTOR ===== */
+.mbox.player{max-width:440px;overflow:hidden;border-radius:20px;padding:0}
+.pwrap{position:relative;background:#000}
+.mbox.player .pwrap video{width:100%;max-height:72vh;display:block;border-radius:0;cursor:pointer}
+.pclose{position:absolute;top:10px;right:10px;z-index:4}
+.pbig2{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:74px;height:74px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;display:none;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px);z-index:2}
+.pbig2 svg{width:34px;height:34px;fill:#fff}
+.pwrap.paused .pbig2{display:flex}
+.pctl{position:absolute;left:0;right:0;bottom:0;z-index:3;display:flex;align-items:center;gap:8px;padding:28px 12px 10px;background:linear-gradient(transparent,rgba(0,0,0,.85));color:#fff;font-size:.78rem}
+.pctl .cb{width:32px;height:32px;background:none;border:0;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;border-radius:8px;font-weight:700;font-size:.78rem}
+.pctl .cb:hover{background:rgba(255,255,255,.15)}
+.pctl .cb svg{width:20px;height:20px}
+#pSeek{flex:1;height:4px;accent-color:var(--pink);padding:0;background:none;border:0;min-width:0;cursor:pointer}
+#pTime{white-space:nowrap;font-variant-numeric:tabular-nums}
+.pwrap:fullscreen{display:flex;align-items:center;justify-content:center}
+.pwrap:fullscreen video{max-height:100vh;height:100%;object-fit:contain}
+.pinfo2{padding:16px}
 </style>
 </head>
 <body>
@@ -369,16 +426,17 @@
 
     <div id="vProfile" class="hidden">
     <div class="card">
-      <div class="cover"></div>
-      <div class="info" id="view">
-        <img class="big" id="pAvatar" alt="Foto de perfil">
+      <div class="cover" id="pCover"></div>
+      <div class="info pinfo" id="view">
+        <div class="prow">
+          <img class="big pbig" id="pAvatar" alt="Foto de perfil">
+          <div class="pbtns"><button class="btn main" id="btnEdit">Editar perfil</button><button class="btn ghost" id="btnLogout">Salir</button></div>
+        </div>
         <h3 id="pName"></h3>
         <div class="user" id="pUser"></div>
         <p class="bio" id="pBio"></p>
-        <div class="actions">
-          <button class="btn main" id="btnEdit">Editar perfil</button>
-          <button class="btn ghost" id="btnLogout">Cerrar sesión</button>
-        </div>
+        <div class="pstats"><div><b id="stVid">0</b><span>Videos</span></div><div><b id="stViews">0</b><span>Reproducciones</span></div><div><b id="stFol">0</b><span>Siguiendo</span></div></div>
+        <div class="ptabs"><button class="on" type="button">▦ VIDEOS <i id="tabCnt">0</i></button></div>
       </div>
       <form class="info hidden" id="editForm">
         <img class="big" id="eAvatar" alt="Foto de perfil">
@@ -386,6 +444,7 @@
         <label for="fUser">Usuario</label><input id="fUser" maxlength="30" pattern="[a-zA-Z0-9_.]{3,30}" title="3 a 30 letras, números, punto o guion bajo">
         <label for="fBio">Biografía</label><textarea id="fBio" maxlength="200"></textarea>
         <label for="fFile">Cambiar foto (opcional)</label><input id="fFile" type="file" accept="image/*">
+        <label for="fBanner">Cambiar portada / banner (opcional)</label><input id="fBanner" type="file" accept="image/*">
         <p class="msg" id="editMsg" role="status"></p>
         <div class="actions">
           <button class="btn main" type="submit" id="btnSave">Guardar cambios</button>
@@ -393,7 +452,6 @@
         </div>
       </form>
     </div>
-    <h3 style="margin:24px 0 12px">Mis videos</h3>
     <div id="myVideos" class="grid"></div>
     </div>
     <div id="vInbox" class="hidden">
@@ -411,10 +469,14 @@
 
 <div id="toast" class="toast hidden" role="status"></div>
 
-<div id="mUpload" class="modal hidden"><form class="mbox" id="upForm">
+<div id="mUpload" class="modal hidden"><form class="mbox upbox" id="upForm">
   <h2>Subir video</h2>
-  <label for="upFile">Video MP4 o FLV (máximo 50 MB)</label><input id="upFile" type="file" accept="video/*,.flv,.mp4">
-  <label for="upCap">Descripción</label><textarea id="upCap" maxlength="200"></textarea>
+  <label class="drop" id="upDrop" for="upFile"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></svg><strong>Toca para elegir un video</strong><span>o arrástralo aquí · MP4 o FLV · máx. 50 MB</span></label>
+  <input id="upFile" type="file" accept="video/*,.flv,.mp4" class="hidden">
+  <div id="upPrevBox" class="upprev hidden"><video id="upPrev" muted playsinline controls></video><div id="upFlv" class="upflv hidden">Video FLV listo para subir</div><div class="upinfo"><span id="upName"></span><button class="btn ghost" type="button" id="upClear">Quitar</button></div></div>
+  <label for="upCap">Descripción</label><textarea id="upCap" maxlength="200" placeholder="Cuéntales de qué trata tu video…"></textarea>
+  <div class="upcnt"><span id="upCnt">0</span>/200</div>
+  <div class="upbar hidden" id="upBar"><i></i></div>
   <p class="msg" id="upMsg" role="status"></p>
   <div class="actions"><button class="btn main" type="submit" id="upBtn">Publicar</button><button class="btn ghost" type="button" data-close="mUpload">Cancelar</button></div>
 </form></div>
@@ -431,12 +493,24 @@
 <div id="mSum" class="modal hidden"><div class="mbox"><h2>Directo terminado 🎉</h2><div class="sumgrid"><div><b id="sumDur">0</b><span>Duración</span></div><div><b id="sumPeak">0</b><span>Máx. espectadores</span></div><div><b id="sumReacts">0</b><span>Reacciones</span></div></div><div class="actions"><button class="btn main" type="button" data-close="mSum">Cerrar</button></div></div></div>
 
 <div id="mPlayer" class="modal hidden"><div class="mbox player">
-  <video id="pVideo" controls playsinline></video>
-  <div style="padding:16px">
+  <div class="pwrap paused" id="pWrap">
+    <video id="pVideo" playsinline></video>
+    <button class="ibtn pclose" type="button" data-close="mPlayer" aria-label="Cerrar"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <button class="pbig2" id="pPlayBig" type="button" aria-label="Reproducir"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+    <div class="pctl">
+      <button class="cb" id="pPlay" type="button" aria-label="Reproducir o pausar"><svg viewBox="0 0 24 24"></svg></button>
+      <input type="range" id="pSeek" min="0" max="1000" value="0" aria-label="Avanzar">
+      <span id="pTime">0:00 / 0:00</span>
+      <button class="cb" id="pRate" type="button" aria-label="Velocidad">1x</button>
+      <button class="cb" id="pMute" type="button" aria-label="Silenciar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9zM16 9a4 4 0 010 6"/></svg></button>
+      <button class="cb" id="pFs" type="button" aria-label="Pantalla completa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+    </div>
+  </div>
+  <div class="pinfo2">
     <div class="lrow"><img class="av" id="pAv" alt=""><strong id="plName"></strong></div>
     <p class="bio" id="pCap"></p>
     <div class="user" id="pViews"></div>
-    <div class="actions"><button class="btn ghost" data-close="mPlayer">Cerrar</button><button class="btn ghost hidden" id="pDel">Eliminar video</button></div>
+    <div class="actions"><button class="btn ghost hidden" id="pDel">Eliminar video</button></div>
   </div>
 </div></div>
 
@@ -514,6 +588,16 @@ function paint(){
   $("pName").textContent = name;
   $("pUser").textContent = "@" + (profile.username || "");
   $("pBio").textContent = profile.bio || "Añade una biografía para que te conozcan.";
+  loadBanner();
+}
+let bannerV = Date.now();
+function loadBanner(){
+  if (!me) return;
+  const u = sb.storage.from("avatars").getPublicUrl(me.id + "/banner.jpg").data.publicUrl + "?t=" + bannerV;
+  const im = new Image();
+  im.onload = () => { $("pCover").style.backgroundImage = "url(" + u + ")"; };
+  im.onerror = () => { $("pCover").style.backgroundImage = ""; };
+  im.src = u;
 }
 
 function openEdit(show){
@@ -523,7 +607,7 @@ function openEdit(show){
     $("fName").value = profile.full_name || "";
     $("fUser").value = profile.username || "";
     $("fBio").value = profile.bio || "";
-    $("fFile").value = ""; say($("editMsg"), "");
+    $("fFile").value = ""; $("fBanner").value = ""; say($("editMsg"), "");
   }
 }
 $("btnEdit").onclick = () => openEdit(true);
@@ -616,6 +700,13 @@ $("editForm").onsubmit = async e => {
     const up = await sb.storage.from("avatars").upload(path, file);
     if (up.error){ $("btnSave").disabled=false; return say($("editMsg"), "No se pudo subir la foto: " + up.error.message, "err"); }
     avatar_url = sb.storage.from("avatars").getPublicUrl(path).data.publicUrl;
+  }
+  const ban = $("fBanner").files[0];
+  if (ban){
+    if (ban.size > 4*1024*1024){ $("btnSave").disabled=false; return say($("editMsg"), "La portada debe pesar menos de 4 MB.", "err"); }
+    const ub = await sb.storage.from("avatars").upload(me.id + "/banner.jpg", ban, { upsert:true, contentType: ban.type || "image/jpeg" });
+    if (ub.error){ $("btnSave").disabled=false; return say($("editMsg"), "No se pudo subir la portada: " + ub.error.message, "err"); }
+    bannerV = Date.now();
   }
   const changes = { full_name: $("fName").value.trim(), username: $("fUser").value.trim().toLowerCase(), bio: $("fBio").value.trim(), avatar_url };
   const { error } = await sb.from("profiles").update(changes).eq("id", me.id);
@@ -742,12 +833,18 @@ async function loadFeed(){
   feedIO = new IntersectionObserver(es => es.forEach(e => activate(e.target, e.isIntersecting && e.intersectionRatio >= 0.7)), { root:box, threshold:[0, 0.7] });
   box.querySelectorAll(".slide").forEach(s => feedIO.observe(s));
 }
-const loadMyVideos = () => fillVideos($("myVideos"),
+async function loadStats(){
+  const { data } = await sb.from("videos").select("views").eq("user_id", me.id); const a = data || [];
+  $("stVid").textContent = a.length; $("tabCnt").textContent = a.length;
+  $("stViews").textContent = a.reduce((t, v) => t + (v.views || 0), 0); $("stFol").textContent = getFollows().length;
+}
+const loadMyVideos = () => { loadStats(); return fillVideos($("myVideos"),
   sb.from("videos").select("*").eq("user_id", me.id).order("created_at", { ascending:false }), false,
-  "Todavía no subiste videos.");
+  "Todavía no subiste videos. Toca el botón + para publicar el primero."); };
 
 function openPlayer(v, a){
   const vid = $("pVideo"); killFlv();
+  $("pSeek").value = 0; $("pTime").textContent = "0:00 / 0:00"; vid.muted = false; vid.playbackRate = 1; $("pRate").textContent = "1x"; $("pMute").style.opacity = 1;
   if (isFlv(v.url)){
     if (window.flvjs && flvjs.isSupported()){
       flvP = flvjs.createPlayer({ type:"flv", url:v.url }); flvP.attachMediaElement(vid); flvP.load();
@@ -768,7 +865,45 @@ function openPlayer(v, a){
   openM("mPlayer");
 }
 
-$("navUpload").onclick = () => { $("upForm").reset(); say($("upMsg"), ""); openM("mUpload"); };
+let upURL = null;
+function upSet(f){
+  if (upURL){ URL.revokeObjectURL(upURL); upURL = null; }
+  $("upDrop").classList.toggle("hidden", !!f); $("upPrevBox").classList.toggle("hidden", !f);
+  if (!f) return;
+  $("upName").textContent = f.name + " · " + (f.size / 1048576).toFixed(1) + " MB";
+  const v = $("upPrev"), flv = /\.flv$/i.test(f.name);
+  $("upFlv").classList.toggle("hidden", !flv); v.classList.toggle("hidden", flv);
+  if (flv) v.removeAttribute("src"); else { upURL = URL.createObjectURL(f); v.src = upURL; }
+}
+$("upFile").onchange = () => upSet($("upFile").files[0]);
+$("upClear").onclick = () => { $("upFile").value = ""; upSet(null); };
+$("upCap").oninput = () => { $("upCnt").textContent = $("upCap").value.length; };
+["dragenter","dragover"].forEach(ev => $("upDrop").addEventListener(ev, e => { e.preventDefault(); $("upDrop").classList.add("over"); }));
+["dragleave","drop"].forEach(ev => $("upDrop").addEventListener(ev, e => { e.preventDefault(); $("upDrop").classList.remove("over"); }));
+$("upDrop").addEventListener("drop", e => { const f = e.dataTransfer.files[0]; if (!f) return; try { $("upFile").files = e.dataTransfer.files; } catch (x) {} upSet(f); });
+$("navUpload").onclick = () => { $("upForm").reset(); upSet(null); $("upCnt").textContent = "0"; $("upBar").classList.add("hidden"); $("upBtn").disabled = false; say($("upMsg"), ""); openM("mUpload"); };
+(function(){
+  const v = $("pVideo"), W = $("pWrap");
+  const fmt = t => { t = Math.floor(t || 0); return Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0"); };
+  const P = '<path d="M8 5v14l11-7z" fill="currentColor"/>', Pa = '<path d="M7 5h4v14H7zM13 5h4v14h-4z" fill="currentColor"/>';
+  const sync = () => { $("pPlay").firstElementChild.innerHTML = v.paused ? P : Pa; W.classList.toggle("paused", v.paused); };
+  const tog = () => { if (v.paused) v.play().catch(() => {}); else v.pause(); };
+  $("pPlayBig").onclick = tog; $("pPlay").onclick = tog; v.onclick = tog;
+  ["play","pause","ended","loadedmetadata","emptied"].forEach(ev => v.addEventListener(ev, sync));
+  v.addEventListener("timeupdate", () => { if (v.duration) $("pSeek").value = v.currentTime / v.duration * 1000; $("pTime").textContent = fmt(v.currentTime) + " / " + fmt(v.duration); });
+  $("pSeek").oninput = () => { if (v.duration) v.currentTime = $("pSeek").value / 1000 * v.duration; };
+  $("pMute").onclick = () => { v.muted = !v.muted; $("pMute").style.opacity = v.muted ? .45 : 1; };
+  $("pRate").onclick = () => { const r = [1, 1.5, 2, 0.5], n = r[(r.indexOf(v.playbackRate) + 1) % r.length]; v.playbackRate = n; $("pRate").textContent = n + "x"; };
+  $("pFs").onclick = () => { if (document.fullscreenElement) document.exitFullscreen(); else if (W.requestFullscreen) W.requestFullscreen().catch(() => {}); else if (v.webkitEnterFullscreen) v.webkitEnterFullscreen(); };
+  document.addEventListener("keydown", e => {
+    if ($("mPlayer").classList.contains("hidden")) return;
+    if (e.key === " "){ e.preventDefault(); tog(); }
+    else if (e.key === "ArrowRight") v.currentTime = Math.min(v.duration || 0, v.currentTime + 5);
+    else if (e.key === "ArrowLeft") v.currentTime = Math.max(0, v.currentTime - 5);
+    else if (e.key === "Escape" && !document.fullscreenElement) $("mPlayer").querySelector("[data-close]").click();
+  });
+  sync();
+})();
 $("upForm").onsubmit = async e => {
   e.preventDefault();
   const f = $("upFile").files[0];
@@ -776,14 +911,14 @@ $("upForm").onsubmit = async e => {
   const fext = (f.name.split(".").pop() || "").toLowerCase();
   if (!(f.type.startsWith("video/") || fext === "flv" || fext === "mp4")) return say($("upMsg"), "El archivo debe ser un video MP4 o FLV.", "err");
   if (f.size > MAX_VIDEO) return say($("upMsg"), "El video pesa más de 50 MB.", "err");
-  $("upBtn").disabled = true; say($("upMsg"), "Subiendo… no cierres la página.");
+  $("upBtn").disabled = true; $("upBar").classList.remove("hidden"); say($("upMsg"), "Subiendo… no cierres la página.");
   const ext = (f.name.split(".").pop() || "mp4").toLowerCase().replace(/[^a-z0-9]/g, "");
   const path = me.id + "/" + Date.now() + "." + ext;
   const up = await sb.storage.from("videos").upload(path, f, { contentType: f.type || (fext === "flv" ? "video/x-flv" : "video/mp4") });
-  if (up.error){ $("upBtn").disabled = false; return say($("upMsg"), "No se pudo subir: " + up.error.message, "err"); }
+  if (up.error){ $("upBtn").disabled = false; $("upBar").classList.add("hidden"); return say($("upMsg"), "No se pudo subir: " + up.error.message, "err"); }
   const url = sb.storage.from("videos").getPublicUrl(path).data.publicUrl;
   const { error } = await sb.from("videos").insert({ user_id: me.id, url, path, caption: $("upCap").value.trim() });
-  $("upBtn").disabled = false;
+  $("upBtn").disabled = false; $("upBar").classList.add("hidden");
   if (error) return say($("upMsg"), "No se pudo publicar: " + error.message, "err");
   closeM("mUpload"); show("Profile");
 };
