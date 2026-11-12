@@ -930,6 +930,15 @@
     .stage{grid-template-columns:minmax(0,1fr) 360px;gap:24px;max-width:1600px;margin:0 auto;padding:0 20px}
     .stage .chat{height:calc(100vh - 100px);max-height:800px}
   }
+
+  /* ── Logo animado (SVG propio, sin imagen externa) ── */
+  .logo .lg{display:inline-block;width:38px;height:38px;border-radius:0;box-shadow:none;background:none;vertical-align:-12px;filter:drop-shadow(0 0 8px rgba(var(--pink-rgb),.45))}
+  .side .logo .lg{box-shadow:none;border-radius:0;flex:none;margin-right:9px}
+  .logo .lg svg{display:block;width:100%;height:100%;overflow:visible}
+  .lg-ring{transform-origin:20px 20px;animation:lgspin 2.6s linear infinite}
+  .logo:hover .lg-ring{animation-duration:.9s}
+  @keyframes lgspin{to{transform:rotate(360deg)}}
+  body.sbmin .side .logo .lg{margin-right:0}
   /* ═════════ FIN · CSS-15 ═════════ */
 </style>
 </head>
@@ -988,7 +997,7 @@
 <!-- ═════════ INICIO · HTML-03 · BARRA LATERAL (menú) ═════════ -->
   <aside class="side">
     <button class="sbtog" id="sbTog" type="button" aria-label="Reducir barra lateral" title="Reducir barra lateral"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></svg></button>
-    <div class="logo" id="sideLogo" role="button" tabindex="0" title="Ir a Para ti"><img class="lg" src="icons/logo-mark.png" alt="" width="40" height="40">Live<b>You</b><i>.</i></div>
+    <div class="logo" id="sideLogo" role="button" tabindex="0" title="Ir a Para ti"><span class="lg" aria-hidden="true"><svg viewBox="0 0 40 40" width="38" height="38"><defs><linearGradient id="lgG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fe2c55"/><stop offset="1" stop-color="#ff9a3d"/></linearGradient></defs><g class="lg-ring"><circle cx="20" cy="20" r="17" fill="none" stroke="url(#lgG)" stroke-width="3" stroke-linecap="round" stroke-dasharray="72 35"/></g><circle cx="20" cy="20" r="12.5" fill="#161a21"/><path d="M17.2 14.6v10.8l8.6-5.4z" fill="#fff"/></svg></span>Live<b>You</b><i>.</i></div>
     <button class="nav on" id="navFeed"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10H3z"/></svg><span class="dk">Para ti</span><span class="mb">Inicio</span></button>
     <button class="nav soon" data-soon="Explorar"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 100 18 9 9 0 000-18zM15 9l-2 6-4 0 2-6z"/></svg><span>Explorar</span></button>
     <button class="nav soon" id="navFol"><svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 100-8 4 4 0 000 8zM3 21c0-4 3-6 7-6s7 2 7 6"/></svg><span>Siguiendo</span></button>
