@@ -1060,6 +1060,18 @@
 
   /* monetización */
   .wnote{font-size:.85rem;color:var(--muted);margin:-8px 0 14px}
+  #mWallet h3{margin:18px 0 8px;font-size:1rem}
+  #mWallet .wnote.in{margin:4px 0 8px}
+  .wpacks{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px}
+  .wpack{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 6px}
+  .wpack small{opacity:.7}
+  .wbox{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+  .wref{font-size:1.5rem;font-weight:800;letter-spacing:.08em;margin:6px 0}
+  .wrow{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:.88rem}
+  .wrow:last-child{border-bottom:0}
+  .wrow .wbtns{display:flex;gap:6px}
+  .wform{display:grid;gap:8px}
+  .wform input,.wform select{width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:inherit;font:inherit}
   .gifttray{position:absolute;left:12px;right:72px;bottom:12px;z-index:6;background:var(--panel-glass);backdrop-filter:var(--glass);border:1px solid var(--line);border-radius:16px;padding:10px 12px;color:var(--text)}
   .gthead{display:flex;justify-content:space-between;align-items:center;font-size:.85rem;margin-bottom:8px}
   .gthead button{background:none;border:0;color:var(--muted);font-size:1rem;cursor:pointer}
@@ -1366,12 +1378,35 @@
 
 <!-- ═════════ FIN · HTML-15 ═════════ -->
 <!-- ═════════ INICIO · HTML-17 · VENTANA · MONETIZACIÓN ═════════ -->
-<div id="mWallet" class="modal hidden"><div class="mbox">
+<div id="mWallet" class="modal hidden"><div class="mbox" style="max-height:90vh;overflow:auto">
   <h2>💰 Monetización</h2>
-  <p class="wnote">MODO PRUEBA: los puntos no tienen valor en dinero.</p>
+  <p class="wnote">Los puntos gratis sirven para regalar, pero solo los puntos comprados generan ganancias para los creadores.</p>
   <div class="sumgrid" style="grid-template-columns:1fr 1fr"><div><b id="wBal">0</b><span>Puntos para regalar</span></div><div><b id="wEarn">0</b><span>Puntos ganados</span></div></div>
+  <p class="wnote" id="wEarnBs"></p>
   <p class="msg" id="wMsg" role="status"></p>
-  <div class="actions"><button class="btn main" id="wClaim" type="button">Reclamar 50 puntos de hoy</button><button class="btn ghost" type="button" data-close="mWallet">Cerrar</button></div>
+  <div class="actions"><button class="btn main" id="wClaim" type="button">Reclamar 50 puntos gratis de hoy</button></div>
+
+  <h3>🛒 Comprar puntos</h3>
+  <div class="wpacks" id="wPacks"></div>
+  <div class="wbox hidden" id="wOrderBox"></div>
+  <div id="wOrders"></div>
+
+  <h3>💵 Cobrar mis ganancias</h3>
+  <div class="wform">
+    <input id="wPayPts" type="number" inputmode="numeric" min="1" placeholder="Puntos a retirar">
+    <select id="wPayMethod"><option>QR Simple</option><option>Transferencia bancaria</option><option>Tigo Money</option></select>
+    <input id="wPayAcc" type="text" maxlength="120" placeholder="Tu número de cuenta / celular / nombre del titular">
+    <button class="btn main" id="wPay" type="button">Pedir retiro</button>
+  </div>
+  <div id="wPayouts"></div>
+
+  <div id="wAdmin" class="hidden">
+    <h3>🛠️ Panel admin</h3>
+    <div id="wAdminOrders"></div>
+    <div id="wAdminPayouts"></div>
+  </div>
+
+  <div class="actions"><button class="btn ghost" type="button" data-close="mWallet">Cerrar</button></div>
 </div></div>
 <!-- ═════════ FIN · HTML-17 ═════════ -->
 <!-- ═════════ INICIO · HTML-16 · VENTANA · REPRODUCTOR DE VIDEO ═════════ -->
@@ -2929,22 +2964,22 @@ async function loadGifts(){
 loadGifts();
 function paintWallet(){
   const b = myBal == null ? "…" : myBal;
-  $("wBal").textContent = b; $("wEarn").textContent = myEarn; $("gtBal").textContent = b;
+  $("wBal").textContent = b; $("wEarn").textContent = myEarn; $("gtBal").textContent = b; paintEarnBs();
 }
 async function refreshWallet(){
   if (!me) return;
-  const { data, error } = await sb.from("wallets").select("balance,earned").eq("user_id", me.id).maybeSingle();
+  const { data, error } = await sb.from("wallets").select("balance,free,earned").eq("user_id", me.id).maybeSingle();
   if (error){ say($("wMsg"), needSql(error.message) ? "Falta ejecutar supabase_monetizacion.sql en Supabase." : error.message, "err"); return; }
-  myBal = data ? data.balance : 0; myEarn = data ? data.earned : 0; paintWallet();
+  myBal = data ? data.balance + data.free : 0; myEarn = data ? data.earned : 0; paintWallet();
 }
-$("btnWallet").onclick = () => { say($("wMsg"), ""); openM("mWallet"); refreshWallet(); };
+$("btnWallet").onclick = () => { say($("wMsg"), ""); openM("mWallet"); refreshWallet(); loadShop(); };
 $("wClaim").onclick = async () => {
   $("wClaim").disabled = true;
   const { data, error } = await sb.rpc("claim_daily");
   $("wClaim").disabled = false;
   if (error) return say($("wMsg"), needSql(error.message) ? "Falta ejecutar supabase_monetizacion.sql en Supabase." : "No se pudo reclamar: " + error.message, "err");
   myBal = data.balance; myEarn = data.earned; paintWallet();
-  data.claimed ? say($("wMsg"), "+50 puntos ✓", "ok") : say($("wMsg"), "Ya reclamaste hoy. Vuelve mañana.", "");
+  data.claimed ? say($("wMsg"), "+50 puntos gratis ✓ (se pueden regalar, no se cobran)", "ok") : say($("wMsg"), "Ya reclamaste hoy. Vuelve mañana.", "");
 };
 function drawTray(){
   const box = $("gtList"); box.replaceChildren();
@@ -2993,6 +3028,125 @@ function showGift(name, g, pic){
   for (let i = 0; i < n; i++) setTimeout(() => floatEmoji(g.emoji), i * 140);
 }
 /* ═════════ FIN · JS-21 ═════════ */
+
+/* ═════════ INICIO · JS-21b · COMPRAR PUNTOS · RETIRAR · PANEL ADMIN ═════════ */
+let SET = { creator_pct:0.6, payout_bs_per_point:0.08, min_payout_points:500, pay_instructions:"" };
+const mk = (tag, text, cls) => { const e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls; return e; };
+const fmtDate = d => new Date(d).toLocaleString("es-BO", { dateStyle:"short", timeStyle:"short" });
+const ST = { pendiente:"⏳ Pendiente", pagado:"✅ Pagado", rechazado:"❌ Rechazado" };
+const bsOf = n => (Number(n) || 0).toFixed(2);
+function paintEarnBs(){
+  const el = $("wEarnBs"); if (!el) return;
+  el.textContent = "≈ Bs " + bsOf(myEarn * SET.payout_bs_per_point) + " · mínimo para retirar: " + SET.min_payout_points + " pts (Bs " + bsOf(SET.min_payout_points * SET.payout_bs_per_point) + ")";
+}
+async function loadSettings(){
+  try {
+    const { data } = await sb.from("app_settings").select("key,value");
+    (data || []).forEach(r => { SET[r.key] = r.key === "pay_instructions" ? r.value : Number(r.value); });
+  } catch (e) {}
+  paintEarnBs();
+}
+async function loadShop(){
+  if (!me) return;
+  await loadSettings();
+  const box = $("wPacks"); box.replaceChildren();
+  const { data, error } = await sb.from("point_packs").select("id,bs,points").order("bs");
+  if (error){ box.append(mk("p", needSql(error.message) ? "Falta ejecutar supabase_pagos.sql en Supabase." : error.message, "wnote in")); return; }
+  (data || []).forEach(k => {
+    const b = mk("button", null, "btn wpack"); b.type = "button";
+    b.append(mk("b", k.points + " pts"), mk("small", "Bs " + bsOf(k.bs)));
+    b.onclick = () => buyPack(k, b); box.append(b);
+  });
+  loadOrders(); loadPayouts(); checkAdmin();
+}
+async function buyPack(k, btn){
+  btn.disabled = true;
+  const { data, error } = await sb.rpc("create_order", { p_pack:k.id });
+  btn.disabled = false;
+  if (error) return say($("wMsg"), /demasiadas_pendientes/.test(error.message) ? "Ya tienes 3 compras pendientes. Espera a que se confirmen." : error.message, "err");
+  say($("wMsg"), "");
+  showOrder(data); loadOrders();
+}
+function showOrder(o){
+  const bx = $("wOrderBox");
+  const cp = mk("button", "Copiar código", "btn"); cp.type = "button";
+  cp.onclick = () => { try { navigator.clipboard.writeText(o.ref); } catch (e) {} toastMsg("Código copiado"); };
+  bx.replaceChildren(mk("b", "Paga Bs " + bsOf(o.bs) + " y escribe este código en la glosa:"), mk("div", o.ref, "wref"), mk("p", SET.pay_instructions, "wnote in"), cp);
+  bx.classList.remove("hidden");
+}
+async function loadOrders(){
+  const box = $("wOrders"); box.replaceChildren();
+  const { data } = await sb.from("orders").select("id,ref,bs,points,status,created_at").eq("user_id", me.id).order("created_at", { ascending:false }).limit(5);
+  (data || []).forEach(o => {
+    const r = mk("div", null, "wrow");
+    r.append(mk("span", o.ref + " · " + o.points + " pts · Bs " + bsOf(o.bs)), mk("span", ST[o.status] || o.status));
+    if (o.status === "pendiente"){ r.style.cursor = "pointer"; r.title = "Ver cómo pagar"; r.onclick = () => showOrder(o); }
+    box.append(r);
+  });
+}
+async function loadPayouts(){
+  const box = $("wPayouts"); box.replaceChildren();
+  const { data } = await sb.from("payout_requests").select("id,points,bs,status,created_at").eq("user_id", me.id).order("created_at", { ascending:false }).limit(5);
+  (data || []).forEach(p => {
+    const r = mk("div", null, "wrow");
+    r.append(mk("span", fmtDate(p.created_at) + " · " + p.points + " pts · Bs " + bsOf(p.bs)), mk("span", ST[p.status] || p.status));
+    box.append(r);
+  });
+}
+function payErr(m){
+  return /minimo_/.test(m) ? "El mínimo para retirar es " + SET.min_payout_points + " puntos."
+    : /puntos_insuficientes/.test(m) ? "No tienes tantos puntos ganados."
+    : /ya_tienes_un_retiro_pendiente/.test(m) ? "Ya tienes un retiro pendiente. Espera a que se pague."
+    : /datos_de_pago_invalidos/.test(m) ? "Escribe el método y los datos de tu cuenta."
+    : needSql(m) ? "Falta ejecutar supabase_ganancias_v2.sql en Supabase." : m;
+}
+$("wPay").onclick = async () => {
+  const pts = parseInt($("wPayPts").value, 10);
+  if (!pts || pts < 1) return say($("wMsg"), "Escribe cuántos puntos quieres retirar.", "err");
+  $("wPay").disabled = true;
+  const { data, error } = await sb.rpc("request_payout", { p_points:pts, p_method:$("wPayMethod").value, p_account:$("wPayAcc").value });
+  $("wPay").disabled = false;
+  if (error) return say($("wMsg"), payErr(error.message), "err");
+  myEarn = data.earned; paintWallet(); $("wPayPts").value = "";
+  say($("wMsg"), "Solicitud enviada ✓ Recibirás Bs " + bsOf(data.bs) + " cuando se confirme el pago.", "ok");
+  loadPayouts();
+};
+
+/* ── Panel admin (solo aparece si tu usuario está en la tabla admins; el servidor vuelve a comprobarlo en cada acción) ── */
+async function checkAdmin(){
+  const { data, error } = await sb.rpc("is_admin");
+  const on = !error && data === true;
+  $("wAdmin").classList.toggle("hidden", !on);
+  if (on) loadAdmin();
+}
+async function adminAct(fn, args, okTxt){
+  const { error } = await sb.rpc(fn, args);
+  if (error) return say($("wMsg"), error.message, "err");
+  say($("wMsg"), okTxt, "ok"); loadAdmin();
+}
+async function loadAdmin(){
+  const { data, error } = await sb.rpc("admin_queue");
+  const bo = $("wAdminOrders"), bp = $("wAdminPayouts"); bo.replaceChildren(); bp.replaceChildren();
+  if (error){ bo.append(mk("p", needSql(error.message) ? "Falta ejecutar supabase_ganancias_v2.sql" : error.message, "wnote in")); return; }
+  bo.append(mk("b", "Compras por confirmar (" + data.orders.length + ")"));
+  data.orders.forEach(o => {
+    const r = mk("div", null, "wrow"), bt = mk("div", null, "wbtns");
+    const ok = mk("button", "Confirmar", "btn main"), no = mk("button", "Rechazar", "btn ghost");
+    ok.onclick = () => { if (confirm("¿Ya recibiste Bs " + bsOf(o.bs) + " de " + o.who + " con la glosa " + o.ref + "?")) adminAct("confirm_order", { p_order:o.id }, "Compra confirmada: +" + o.points + " pts a " + o.who); };
+    no.onclick = () => { if (confirm("¿Rechazar esta compra?")) adminAct("reject_order", { p_order:o.id }, "Compra rechazada"); };
+    bt.append(ok, no); r.append(mk("span", o.who + " · " + o.ref + " · Bs " + bsOf(o.bs) + " → " + o.points + " pts"), bt); bo.append(r);
+  });
+  bp.append(mk("b", "Retiros por pagar (" + data.payouts.length + ")"));
+  data.payouts.forEach(p => {
+    const r = mk("div", null, "wrow"), bt = mk("div", null, "wbtns");
+    const ok = mk("button", "Ya pagué", "btn main"), no = mk("button", "Rechazar", "btn ghost");
+    ok.onclick = () => { if (confirm("Marca como pagado SOLO después de transferir Bs " + bsOf(p.bs) + " a " + p.who + ". ¿Continuar?")) adminAct("mark_payout_paid", { p_id:p.id }, "Retiro marcado como pagado"); };
+    no.onclick = () => { const n = prompt("Motivo del rechazo (opcional). Los puntos vuelven al creador:"); if (n !== null) adminAct("reject_payout", { p_id:p.id, p_note:n }, "Retiro rechazado, puntos devueltos"); };
+    bt.append(ok, no); r.append(mk("span", p.who + " · Bs " + bsOf(p.bs) + " (" + p.points + " pts) · " + p.method + ": " + p.account), bt); bp.append(r);
+  });
+}
+/* ═════════ FIN · JS-21b ═════════ */
+
 
 /* ═════════ INICIO · JS-22 · MINIDRAMAS (divide videos grandes en partes de menos de 25 MB) ═════════ */
 const MAX_BIG = 400 * 1048576, PART_TARGET = 20 * 1048576;
