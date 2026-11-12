@@ -459,6 +459,32 @@
     #myVideos{grid-template-columns:repeat(3,1fr);gap:2px}#myVideos .vcard{border-radius:0}
     .ptabs button{flex:1;padding:12px 6px}.tkbtns .btn{padding:9px 16px;font-size:.88rem}
   }
+
+  /* ===== v8: acciones, barra lateral plegable, columnas ===== */
+  .sact button.on{background:rgba(255,255,255,.22)}
+  .sact button.on svg{fill:var(--pink);stroke:var(--pink)}
+  .sact button[data-act="save"].on svg{fill:#ffc83d;stroke:#ffc83d}
+  .sact button[data-act="share"].on svg{fill:none;stroke:var(--of)}
+  .sharedby{position:absolute;top:14px;left:14px;z-index:3;background:rgba(0,0,0,.6);padding:5px 12px;border-radius:999px;font-size:.82rem;font-weight:600}
+  .sbtog{display:none}
+  .app{--sbw:260px}
+  @media(min-width:761px){
+    .app{grid-template-columns:var(--sbw) 1fr}
+    .sbtog{display:grid;place-items:center;background:none;border:0;color:var(--ofgray);width:40px;height:40px;border-radius:10px;cursor:pointer;margin:0 0 6px 8px}
+    .sbtog:hover{background:rgba(255,255,255,.07);color:#fff}.sbtog svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.6}
+    body.sbmin .app{--sbw:76px}
+    body.sbmin .side{padding:20px 8px;align-items:center}
+    body.sbmin .side .logo,body.sbmin .nav span{display:none}
+    body.sbmin .nav{justify-content:center;padding:12px 0;gap:0;width:52px}
+    body.sbmin #navUpload{width:48px;height:48px;padding:0;margin:14px 0 0}
+    body.sbmin .nav.who{padding:6px 0}
+  }
+  @media(min-width:1100px){
+    .app.onfeed{grid-template-columns:var(--sbw) minmax(0,1fr) 250px;justify-content:stretch;max-width:1600px;margin:0 auto}
+    .app.onfeed .rail{padding:22px 14px}
+    .rcard{height:112px}.rcard .av2{width:50px;height:50px;left:10px;bottom:10px}.rcard .rin{left:70px;bottom:10px}.rcard .rin b{font-size:.92rem}
+    .rail h4{font-size:.78rem}.railbtn{padding:11px;font-size:.78rem}
+  }
 </style>
 </head>
 <body>
@@ -509,11 +535,12 @@
 <!-- ========== APP ========== -->
 <section id="app" class="app hidden">
   <aside class="side">
+    <button class="sbtog" id="sbTog" type="button" aria-label="Reducir barra lateral" title="Reducir barra lateral"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></svg></button>
     <div class="logo" id="sideLogo" role="button" tabindex="0" title="Ir a Para ti">LiveYou<i>.</i></div>
     <button class="nav on" id="navFeed"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10H3z"/></svg><span class="dk">Para ti</span><span class="mb">Inicio</span></button>
     <button class="nav soon" data-soon="Explorar"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 100 18 9 9 0 000-18zM15 9l-2 6-4 0 2-6z"/></svg><span>Explorar</span></button>
     <button class="nav soon" id="navFol"><svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 100-8 4 4 0 000 8zM3 21c0-4 3-6 7-6s7 2 7 6"/></svg><span>Siguiendo</span></button>
-    <button class="nav soon keep" data-soon="Amigos"><svg viewBox="0 0 24 24"><path d="M9 11a3 3 0 100-6 3 3 0 000 6zM2 20c0-3 3-5 7-5s7 2 7 5M17 11a3 3 0 100-6M22 20c0-3-2-4-4-5"/></svg><span>Amigos</span></button>
+    <button class="nav soon keep" id="navFri"><svg viewBox="0 0 24 24"><path d="M9 11a3 3 0 100-6 3 3 0 000 6zM2 20c0-3 3-5 7-5s7 2 7 5M17 11a3 3 0 100-6M22 20c0-3-2-4-4-5"/></svg><span>Amigos</span></button>
     <button class="nav" id="navLive"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M6 6a8 8 0 000 12M18 6a8 8 0 010 12"/></svg><span>En vivo</span></button>
     <button class="nav" id="navUpload"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg><span>Subir video</span></button>
     <button class="nav" id="navProfile"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>Perfil</span></button>
@@ -524,7 +551,7 @@
   </aside>
   <main>
     <div id="vFeed" style="position:relative">
-      <div class="feedtabs"><button class="ftlive" id="ftLive" aria-label="En vivo">LIVE</button><button id="ftFol">Siguiendo</button><button class="on" id="ftAll">Para ti</button><button class="ftsearch" data-soon="Buscar" aria-label="Buscar"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button></div>
+      <div class="feedtabs"><button class="ftlive" id="ftLive" aria-label="En vivo">LIVE</button><button id="ftFol">Siguiendo</button><button id="ftFri">Amigos</button><button class="on" id="ftAll">Para ti</button><button class="ftsearch" data-soon="Buscar" aria-label="Buscar"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button></div>
       <div id="feedBox" class="reel"></div>
       <div class="reelnav"><button class="btn ghost" id="rUp" aria-label="Video anterior">▲</button><button class="btn ghost" id="rDown" aria-label="Video siguiente">▼</button></div>
     </div>
@@ -594,13 +621,13 @@
           <img class="tkav" id="pAvatar" alt="Foto de perfil">
           <div class="tkmain">
             <div class="tkname"><h3 id="pName"></h3><span class="tkuser" id="pUser"></span></div>
-            <div class="tkstats"><span><b id="stFol">0</b> Siguiendo</span><span><b id="stFers">0</b> Seguidores</span><span><b id="stVid">0</b> Videos</span><span><b id="stViews">0</b> Reproducciones</span></div>
+            <div class="tkstats"><span><b id="stFol">0</b> Siguiendo</span><span><b id="stFers">0</b> Seguidores</span><span><b id="stLikes">0</b> Me gusta</span><span><b id="stVid">0</b> Videos</span><span><b id="stViews">0</b> Reproducciones</span></div>
             <div class="tkbtns" id="pBtnsMe"><button class="btn" id="btnEdit">Editar perfil</button><button class="btn" id="btnLogout">Salir</button></div>
             <div class="tkbtns hidden" id="pBtnsOther"><button class="btn main" id="pFollow" type="button" data-follow="">Seguir</button><button class="btn" id="pMsg" type="button">Mensaje</button></div>
             <p class="bio" id="pBio"></p>
           </div>
         </div>
-        <div class="ptabs"><button class="on" type="button" id="tabVid">▦ Videos <i id="tabCnt">0</i></button><button type="button" id="tabPost">▤ Publicaciones</button></div>
+        <div class="ptabs"><button class="on" type="button" id="tabVid">▦ Videos <i id="tabCnt">0</i></button><button type="button" id="tabPost">▤ Publicaciones</button><button type="button" id="tabFav">☆ Favoritos</button></div>
       </div>
       <form class="info hidden" id="editForm">
         <img class="big" id="eAvatar" alt="Foto de perfil">
@@ -617,6 +644,7 @@
       </form>
     </div>
     <div id="myVideos" class="grid"></div>
+    <div id="favVideos" class="grid hidden"></div>
     <div id="profPosts" class="hidden">
       <form class="pcomp" id="poForm">
         <textarea id="poBody" maxlength="1500" placeholder="Escribir nueva publicación…" aria-label="Nueva publicación"></textarea>
@@ -1006,10 +1034,10 @@ function activate(s, on){
 }
 function slide(v, a){
   const s = document.createElement("section"); s.className = "slide"; s.dataset.url = v.url; s.dataset.id = v.id;
-  const act = (k, label) => '<div><button data-soon="' + label + '" aria-label="' + label + '">' + sv(IC[k]) + '</button>' + label + '</div>';
+  const act = (k, label, key) => '<div><button ' + (key ? 'data-act="' + key + '"' : 'data-soon="' + label + '"') + ' aria-label="' + label + '">' + sv(IC[k]) + '</button><span class="lab">' + label + '</span></div>';
   s.innerHTML = '<video playsinline preload="metadata" muted></video>' +
     '<div class="sinfo"><div class="lrow"><img class="av" alt=""><strong></strong><button class="btn main" type="button" data-follow="">Seguir</button></div><p></p></div>' +
-    '<div class="sact">' + act("heart","Me gusta") + act("chat","Comentarios") + act("save","Guardar") + act("share","Compartir") + '<div class="views"></div></div>' +
+    '<div class="sact">' + act("heart","Me gusta","like") + act("chat","Comentarios") + act("save","Favoritos","save") + act("share","Compartir","share") + '<div class="views"></div></div>' +
     '<div class="sctl"><button data-a="pp" aria-label="Pausar o reproducir">❚❚</button><button data-a="mute" aria-label="Sonido">🔇</button><button data-a="rate" aria-label="Velocidad">1.0x</button><label><input type="checkbox" checked> Pasar automáticamente</label></div>' +
     '<div class="sbar"><i></i></div>';
   const vid = s.querySelector("video"), bar = s.querySelector(".sbar i");
@@ -1032,7 +1060,8 @@ function slide(v, a){
   return s;
 }
 let feedMode = "all";
-function setMode(m){ feedMode = m; $("ftAll").classList.toggle("on", m === "all"); $("ftFol").classList.toggle("on", m === "following"); $("navFol").classList.toggle("on", m === "following"); $("navFeed").classList.toggle("on", m === "all"); }
+function setMode(m){ feedMode = m; $("ftFri").classList.toggle("on", m === "friends"); $("navFri").classList.toggle("on", m === "friends"); $("ftAll").classList.toggle("on", m === "all"); $("ftFol").classList.toggle("on", m === "following"); $("navFol").classList.toggle("on", m === "following"); $("navFeed").classList.toggle("on", m === "all"); }
+let shareBy = null;
 async function loadFeed(){
   await loadFollows();
   const box = $("feedBox"); killFeed(); box.replaceChildren(); box.className = "reel";
@@ -1042,6 +1071,16 @@ async function loadFeed(){
     if (!f.length) return note(box, "Aún no sigues a nadie. Toca Seguir en un video o en Sugerencias.");
     q = q.in("user_id", f);
   }
+  shareBy = null;
+  if (feedMode === "friends"){
+    const f = getFollows();
+    if (!f.length) return note(box, "Sigue a otros usuarios: aquí verás los videos que ellos compartan.");
+    const sh = await sb.from("video_shares").select("video_id,user_id,created_at").in("user_id", f).order("created_at", { ascending:false }).limit(40);
+    if (sh.error) return note(box, "Falta ejecutar interactions.sql en Supabase.");
+    shareBy = {}; sh.data.forEach(r => { if (!shareBy[r.video_id]) shareBy[r.video_id] = r.user_id; });
+    const ids = Object.keys(shareBy); if (!ids.length) return note(box, "Tus amigos aún no han compartido videos.");
+    q = sb.from("videos").select("*").in("id", ids);
+  }
   const { data, error } = await q;
   if (error) return note(box, "No se pudieron cargar los videos.");
   if (!data.length) return note(box, feedMode === "following" ? "Las personas que sigues aún no han subido videos." : "Aún no hay videos. Sube el primero con el botón Subir video.");
@@ -1049,20 +1088,35 @@ async function loadFeed(){
   data.forEach(v => box.append(slide(v, au[v.user_id])));
   feedIO = new IntersectionObserver(es => es.forEach(e => activate(e.target, e.isIntersecting && e.intersectionRatio >= 0.7)), { root:box, threshold:[0, 0.7] });
   box.querySelectorAll(".slide").forEach(s => feedIO.observe(s));
+  await loadRx(data.map(v => v.id)); box.querySelectorAll(".slide").forEach(paintSlide);
+  if (shareBy){ const sa = await withAuthors(Object.values(shareBy).map(u => ({ user_id:u })), "user_id");
+    box.querySelectorAll(".slide").forEach(sl => { const u = shareBy[sl.dataset.id]; if (!u) return; const d = document.createElement("div"); d.className = "sharedby";
+      d.textContent = "↗ " + (u === me.id ? "Tú" : nameOf(sa[u])) + " compartió este video"; sl.append(d); }); }
 }
 let pv = null, keepPv = false;
 function openUser(id){ if (!id) return; pv = (me && id === me.id) ? null : id; keepPv = true; show("Profile"); }
-function profTab(t){ const v = t === "vid"; $("myVideos").classList.toggle("hidden", !v); $("profPosts").classList.toggle("hidden", v);
-  $("tabVid").classList.toggle("on", v); $("tabPost").classList.toggle("on", !v);
-  if (!v){ $("poForm").classList.toggle("hidden", !!pv); loadPosts(pv || me.id); } }
+function profTab(t){ const v = t === "vid", f = t === "fav"; $("myVideos").classList.toggle("hidden", !v); $("favVideos").classList.toggle("hidden", !f); $("profPosts").classList.toggle("hidden", t !== "post");
+  $("tabVid").classList.toggle("on", v); $("tabPost").classList.toggle("on", t === "post"); $("tabFav").classList.toggle("on", f); $("tabFav").classList.toggle("hidden", !!pv);
+  if (f) loadFavs();
+  if (t === "post"){ $("poForm").classList.toggle("hidden", !!pv); loadPosts(pv || me.id); } }
+async function loadFavs(){
+  const box = $("favVideos"); const r = await sb.from("video_saves").select("video_id").eq("user_id", me.id).order("created_at", { ascending:false });
+  if (r.error) return note(box, "Falta ejecutar interactions.sql en Supabase.");
+  const ids = (r.data || []).map(x => x.video_id); if (!ids.length) return note(box, "Aún no tienes favoritos. Toca la estrella de un video para guardarlo aquí.");
+  fillVideos(box, sb.from("videos").select("*").in("id", ids), true, "Los videos que guardaste ya no están disponibles.");
+}
+$("tabFav").onclick = () => profTab("fav");
 $("tabVid").onclick = () => profTab("vid"); $("tabPost").onclick = () => profTab("post");
 async function loadStats(uid){
   uid = uid || me.id; await loadFollows();
-  const { data } = await sb.from("videos").select("views").eq("user_id", uid); const a = data || [];
+  const { data } = await sb.from("videos").select("id,views").eq("user_id", uid); const a = data || [];
   $("stVid").textContent = a.length; $("tabCnt").textContent = a.length;
   $("stViews").textContent = a.reduce((t, v) => t + (v.views || 0), 0);
   const c1 = await sb.from("follows").select("*", { count:"exact", head:true }).eq("following_id", uid);
   const c2 = await sb.from("follows").select("*", { count:"exact", head:true }).eq("follower_id", uid);
+  const vids = a.map(x => String(x.id)); let lk = 0;
+  if (vids.length){ const c3 = await sb.from("video_likes").select("*", { count:"exact", head:true }).in("video_id", vids); lk = c3.error ? 0 : (c3.count || 0); }
+  $("stLikes").textContent = lk;
   $("stFers").textContent = c1.error ? 0 : (c1.count || 0);
   $("stFol").textContent = c2.error ? (uid === me.id ? getFollows().length : 0) : (c2.count || 0);
 }
@@ -1241,9 +1295,48 @@ async function loadPosts(uid){
 }
 
 { const nf = $("navFeed").onclick; $("navFeed").onclick = e => { setMode("all"); nf && nf.call($("navFeed"), e); };
-  $("ftAll").onclick = () => { setMode("all"); loadFeed(); }; $("ftFol").onclick = () => { setMode("following"); loadFeed(); };
+  $("ftAll").onclick = () => { setMode("all"); loadFeed(); }; $("ftFri").onclick = () => { setMode("friends"); loadFeed(); };
+  $("navFri").onclick = () => { setMode("friends"); show("Feed"); $("navFri").classList.add("on"); $("navFeed").classList.remove("on"); }; $("ftFol").onclick = () => { setMode("following"); loadFeed(); };
   $("navFol").onclick = () => { setMode("following"); show("Feed"); $("navFol").classList.add("on"); $("navFeed").classList.remove("on"); };
 }
+
+/* ---------- Me gusta / Favoritos / Compartir ---------- */
+const RX = { likes:{}, shares:{}, mine:new Set(), saves:new Set(), myShares:new Set() };
+const RXK = { like:{ t:"video_likes", set:RX.mine, cnt:RX.likes, def:"Me gusta" }, save:{ t:"video_saves", set:RX.saves, cnt:null, def:"Favoritos" }, share:{ t:"video_shares", set:RX.myShares, cnt:RX.shares, def:"Compartir" } };
+async function loadRx(ids){
+  if (!me || !ids.length) return; ids = ids.map(String);
+  ids.forEach(i => { RX.likes[i] = 0; RX.shares[i] = 0; RX.mine.delete(i); RX.saves.delete(i); RX.myShares.delete(i); });
+  const [l, sv2, sh] = await Promise.all([
+    sb.from("video_likes").select("video_id,user_id").in("video_id", ids),
+    sb.from("video_saves").select("video_id").eq("user_id", me.id).in("video_id", ids),
+    sb.from("video_shares").select("video_id,user_id").in("video_id", ids)]);
+  (l.data || []).forEach(r => { RX.likes[r.video_id] = (RX.likes[r.video_id] || 0) + 1; if (r.user_id === me.id) RX.mine.add(r.video_id); });
+  (sv2.data || []).forEach(r => RX.saves.add(r.video_id));
+  (sh.data || []).forEach(r => { RX.shares[r.video_id] = (RX.shares[r.video_id] || 0) + 1; if (r.user_id === me.id) RX.myShares.add(r.video_id); });
+}
+function paintSlide(s){
+  const id = String(s.dataset.id);
+  Object.entries(RXK).forEach(([k, o]) => { const b = s.querySelector('[data-act="' + k + '"]'); if (!b) return;
+    b.classList.toggle("on", o.set.has(id)); const n = o.cnt ? (o.cnt[id] || 0) : 0; b.parentElement.querySelector(".lab").textContent = n > 0 ? String(n) : o.def; });
+}
+async function toggleRx(kind, s){
+  if (!me) return; const o = RXK[kind], id = String(s.dataset.id), had = o.set.has(id);
+  had ? o.set.delete(id) : o.set.add(id); if (o.cnt) o.cnt[id] = Math.max(0, (o.cnt[id] || 0) + (had ? -1 : 1)); paintSlide(s);
+  const r = had ? await sb.from(o.t).delete().eq("user_id", me.id).eq("video_id", id) : await sb.from(o.t).insert({ user_id: me.id, video_id: id });
+  if (r.error && r.error.code !== "23505"){
+    had ? o.set.add(id) : o.set.delete(id); if (o.cnt) o.cnt[id] = Math.max(0, (o.cnt[id] || 0) + (had ? 1 : -1)); paintSlide(s);
+    return toastMsg(/does not exist|schema cache|42P01/.test((r.error.code || "") + r.error.message) ? "Falta ejecutar interactions.sql en Supabase" : "No se pudo guardar: " + r.error.message, 3500);
+  }
+  toastMsg(kind === "like" ? (had ? "Quitaste tu me gusta" : "Te gusta este video ♥") : kind === "save" ? (had ? "Quitado de Favoritos" : "Guardado en Favoritos ★") : (had ? "Dejaste de compartir" : "Compartido: tus amigos lo verán en Amigos ↗"));
+}
+$("feedBox").addEventListener("click", e => { const b = e.target.closest("[data-act]"); if (b) toggleRx(b.dataset.act, b.closest(".slide")); });
+
+/* ---------- barra lateral plegable ---------- */
+function applySb(min){ document.body.classList.toggle("sbmin", min); const t = min ? "Ampliar barra lateral" : "Reducir barra lateral";
+  $("sbTog").title = t; $("sbTog").setAttribute("aria-label", t); try { localStorage.setItem("ly_sbmin", min ? "1" : "0"); } catch (e) {} }
+$("sbTog").onclick = () => applySb(!document.body.classList.contains("sbmin"));
+try { if (localStorage.getItem("ly_sbmin") === "1") applySb(true); } catch (e) {}
+
 /* ---------- Sugerencias (columna derecha) ---------- */
 let _railPool = [];
 async function loadRail(){
