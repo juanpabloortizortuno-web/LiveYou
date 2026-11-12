@@ -485,6 +485,37 @@
     .rcard{height:112px}.rcard .av2{width:50px;height:50px;left:10px;bottom:10px}.rcard .rin{left:70px;bottom:10px}.rcard .rin b{font-size:.92rem}
     .rail h4{font-size:.78rem}.railbtn{padding:11px;font-size:.78rem}
   }
+
+  /* ===== v9: columna de acciones y barra de control como TikTok ===== */
+  .sact{right:14px;bottom:76px;gap:16px;width:56px}
+  .sact button[data-act]{background:none;width:46px;height:46px;filter:drop-shadow(0 1px 3px rgba(0,0,0,.7))}
+  .sact button[data-act] svg{width:32px;height:32px}
+  .sact button[data-act].on{background:none}
+  .sact button[data-act="like"].on svg{fill:#fe2c55;stroke:#fe2c55}
+  .sact .lab{font-weight:700;font-size:.8rem;text-shadow:0 1px 3px #000}
+  .sact .arr{display:flex!important;flex-direction:column;gap:10px;margin-bottom:8px;width:auto}
+  .sact .arr button{width:44px;height:44px;background:rgba(84,84,84,.7);filter:none}.sact .arr svg{width:22px;height:22px;fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+  .sctl{left:0;right:0;bottom:0;padding:0 16px 10px;gap:12px;height:48px;background:linear-gradient(transparent,rgba(0,0,0,.65));color:#fff;font-size:.82rem;align-items:flex-end}
+  .sctl>*{align-self:center}
+  .sctl .tm{font-variant-numeric:tabular-nums;color:#e8e8e8;white-space:nowrap}.sctl .sp{flex:1}
+  .sctl button svg{width:22px;height:22px;display:block}
+  .sctl label.auto{margin:0;display:flex;align-items:center;gap:10px;white-space:nowrap;font-weight:600}
+  .sctl input.sw{appearance:none;-webkit-appearance:none;width:44px;height:24px;border-radius:999px;background:#5a5d63;position:relative;cursor:pointer;flex:none;margin:0;transition:background .15s}
+  .sctl input.sw::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s}
+  .sctl input.sw:checked{background:var(--pink)}.sctl input.sw:checked::after{left:23px}
+  @media(min-width:761px){.sbar{bottom:48px;height:4px;cursor:pointer;background:rgba(255,255,255,.3)}.sbar:hover{height:7px}}
+  @media(max-width:760px){.sact .arr,.sctl .tm{display:none!important}.sact{bottom:48px}.sctl{height:auto;padding:0 12px 6px}}
+  .cmp{position:fixed;right:0;top:0;bottom:0;width:380px;max-width:100vw;background:#121317;border-left:1px solid var(--line);z-index:30;display:flex;flex-direction:column}
+  .cmp header{display:flex;justify-content:space-between;align-items:center;padding:16px;border-bottom:1px solid var(--line);font-weight:700}
+  .cmp header button{background:none;border:0;color:#fff;font-size:1.2rem;cursor:pointer}
+  #cmList{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:16px}
+  .cmrow{display:flex;gap:10px}.cmrow img{width:36px;height:36px;border-radius:50%;object-fit:cover;flex:none}
+  .cmrow div{min-width:0;flex:1}.cmrow b{font-size:.88rem}.cmrow small{color:var(--ofgray);margin-left:6px}
+  .cmrow p{margin:2px 0 0;word-break:break-word;line-height:1.4}.cmrow .x{background:none;border:0;color:var(--ofgray);cursor:pointer;align-self:flex-start}
+  .cmnote{color:var(--ofgray);text-align:center;padding:30px 10px}
+  #cmForm{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}#cmForm input{flex:1;border-radius:999px}
+  #cmForm .btn{border-radius:999px;padding:9px 18px}
+  @media(max-width:760px){.cmp{top:auto;height:70vh;width:100%;border-left:0;border-top:1px solid var(--line);border-radius:16px 16px 0 0}}
 </style>
 </head>
 <body>
@@ -682,6 +713,7 @@
 <div id="toast" class="toast hidden" role="status"></div>
 
 <div id="upChip" class="upchip hidden" role="status"><b id="upChipTxt">Subiendo 0%</b><div class="upbar"><i id="upChipBar"></i></div></div>
+<aside id="cmPanel" class="cmp hidden" aria-label="Comentarios"><header><span id="cmTitle">Comentarios</span><button type="button" id="cmClose" aria-label="Cerrar">✕</button></header><div id="cmList"></div><form id="cmForm"><input id="cmInput" maxlength="500" placeholder="Añade un comentario…" autocomplete="off" aria-label="Comentario"><button class="btn main" type="submit">Publicar</button></form></aside>
 <div id="mUpload" class="modal hidden"><form class="mbox upbox" id="upForm">
   <h2>Subir video</h2>
   <label class="drop" id="upDrop" for="upFile"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></svg><strong>Toca para elegir un video</strong><span>o arrástralo aquí · MP4 o FLV · máx. 50 MB</span></label>
@@ -850,6 +882,7 @@ $("navInbox").onclick = () => { show("Inbox"); loadInbox(); };
 
 let livePoll = null;
 function show(v){
+  $("cmPanel").classList.add("hidden");
   if (v === "Live" && H) v = "Stage";
   if (v !== "Stage") leaveWatch();
   ["Feed","Live","Stage","Profile","Inbox"].forEach(n => {
@@ -1002,6 +1035,8 @@ async function fillVideos(box, query, withAuthor, emptyText){
 /* --- Feed estilo TikTok --- */
 let feedMuted = true, autoNext = true, feedIO = null, curSlide = null;
 const sv = d => '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="' + d + '"/></svg>';
+const ICO = { pause:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>', play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"/></svg>',
+  volOn:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9v6h4l5 4V5L7 9z" fill="currentColor"/><path d="M16 8.500a5 5 0 010 7M19 5.500a9 9 0 010 13"/></svg>', volOff:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9v6h4l5 4V5L7 9z" fill="currentColor"/><path d="M16 9l5 6M21 9l-5 6"/></svg>' };
 const IC = { heart:"M12 21l-1.5-1.3C5.4 15.100 2 12.100 2 8.500 2 5.500 4.300 3.500 7 3.500c1.700 0 3.400.8 5 2.500 1.600-1.700 3.300-2.500 5-2.500 2.700 0 5 2 5 5 0 3.600-3.400 6.600-8.500 11.200z",
   chat:"M4 4h16a2 2 0 012 2v10a2 2 0 01-2 2H9l-5 4v-4a2 2 0 01-2-2V6a2 2 0 012-2z", save:"M6 3h12a1 1 0 011 1v17l-7-4-7 4V4a1 1 0 011-1z", share:"M14 3l8 8-8 8v-5c-6 0-10 2-12 6 1-7 5-12 12-13z" };
 function soon(t){ const d = $("toast"); d.textContent = "Pronto: " + t; d.classList.remove("hidden"); clearTimeout(d._t); d._t = setTimeout(() => d.classList.add("hidden"), 1800); }
@@ -1015,7 +1050,7 @@ function step(dir){ if (!curSlide) return; const t = dir > 0 ? curSlide.nextElem
 $("rUp").onclick = () => step(-1); $("rDown").onclick = () => step(1);
 function syncCtl(){
   document.querySelectorAll("#feedBox .slide").forEach(s => {
-    s.querySelector("video").muted = feedMuted; s.querySelector('[data-a="mute"]').textContent = feedMuted ? "🔇" : "🔊";
+    s.querySelector("video").muted = feedMuted; s.querySelector('[data-a="mute"]').innerHTML = feedMuted ? ICO.volOff : ICO.volOn;
     s.querySelector("input").checked = autoNext;
   });
 }
@@ -1037,8 +1072,8 @@ function slide(v, a){
   const act = (k, label, key) => '<div><button ' + (key ? 'data-act="' + key + '"' : 'data-soon="' + label + '"') + ' aria-label="' + label + '">' + sv(IC[k]) + '</button><span class="lab">' + label + '</span></div>';
   s.innerHTML = '<video playsinline preload="metadata" muted></video>' +
     '<div class="sinfo"><div class="lrow"><img class="av" alt=""><strong></strong><button class="btn main" type="button" data-follow="">Seguir</button></div><p></p></div>' +
-    '<div class="sact">' + act("heart","Me gusta","like") + act("chat","Comentarios") + act("save","Favoritos","save") + act("share","Compartir","share") + '<div class="views"></div></div>' +
-    '<div class="sctl"><button data-a="pp" aria-label="Pausar o reproducir">❚❚</button><button data-a="mute" aria-label="Sonido">🔇</button><button data-a="rate" aria-label="Velocidad">1.0x</button><label><input type="checkbox" checked> Pasar automáticamente</label></div>' +
+    '<div class="sact"><div class="arr"><button type="button" data-a="up" aria-label="Video anterior"><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg></button><button type="button" data-a="down" aria-label="Video siguiente"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button></div>' + act("heart","Me gusta","like") + act("chat","Comentarios","comment") + act("save","Favoritos","save") + act("share","Compartir","share") + '<div class="views"></div></div>' +
+    '<div class="sctl"><button data-a="pp" aria-label="Pausar o reproducir"></button><span class="tm">0:00 / 0:00</span><span class="sp"></span><label class="auto"><span>Pasar automáticamente</span><input type="checkbox" class="sw" checked></label><button data-a="rate" aria-label="Velocidad">1.0x</button><button data-a="mute" aria-label="Sonido"></button></div>' +
     '<div class="sbar"><i></i></div>';
   const vid = s.querySelector("video"), bar = s.querySelector(".sbar i");
   if (!isFlv(v.url)) vid.src = v.url;
@@ -1049,9 +1084,14 @@ function slide(v, a){
   s.querySelector(".sinfo p").textContent = v.caption || "";
   s.querySelector(".views").textContent = "▷ " + (v.views || 0);
   vid.onclick = () => vid.paused ? vid.play() : vid.pause();
-  vid.onplay = () => s.querySelector('[data-a="pp"]').textContent = "❚❚";
-  vid.onpause = () => s.querySelector('[data-a="pp"]').textContent = "▶";
-  vid.ontimeupdate = () => bar.style.width = (vid.currentTime / (vid.duration || 1) * 100) + "%";
+  const pp = s.querySelector('[data-a="pp"]'), tm = s.querySelector(".tm"); pp.innerHTML = ICO.play; s.querySelector('[data-a="mute"]').innerHTML = feedMuted ? ICO.volOff : ICO.volOn;
+  const fmt = t => { t = Math.floor(t || 0); return Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0"); };
+  vid.onplay = () => pp.innerHTML = ICO.pause;
+  vid.onpause = () => pp.innerHTML = ICO.play;
+  vid.ontimeupdate = () => { bar.style.width = (vid.currentTime / (vid.duration || 1) * 100) + "%"; tm.textContent = fmt(vid.currentTime) + " / " + fmt(vid.duration); };
+  vid.onloadedmetadata = () => tm.textContent = "0:00 / " + fmt(vid.duration);
+  s.querySelector(".sbar").onclick = e => { const r = e.currentTarget.getBoundingClientRect(); if (vid.duration) vid.currentTime = (e.clientX - r.left) / r.width * vid.duration; };
+  s.querySelector('[data-a="up"]').onclick = () => step(-1); s.querySelector('[data-a="down"]').onclick = () => step(1);
   vid.onended = () => { if (autoNext) step(1); else { vid.currentTime = 0; vid.play().catch(() => {}); } };
   s.querySelector('[data-a="pp"]').onclick = vid.onclick;
   s.querySelector('[data-a="mute"]').onclick = () => { feedMuted = !feedMuted; syncCtl(); };
@@ -1301,15 +1341,17 @@ async function loadPosts(uid){
 }
 
 /* ---------- Me gusta / Favoritos / Compartir ---------- */
-const RX = { likes:{}, shares:{}, mine:new Set(), saves:new Set(), myShares:new Set() };
+const RX = { comments:{}, likes:{}, shares:{}, mine:new Set(), saves:new Set(), myShares:new Set() };
 const RXK = { like:{ t:"video_likes", set:RX.mine, cnt:RX.likes, def:"Me gusta" }, save:{ t:"video_saves", set:RX.saves, cnt:null, def:"Favoritos" }, share:{ t:"video_shares", set:RX.myShares, cnt:RX.shares, def:"Compartir" } };
 async function loadRx(ids){
   if (!me || !ids.length) return; ids = ids.map(String);
-  ids.forEach(i => { RX.likes[i] = 0; RX.shares[i] = 0; RX.mine.delete(i); RX.saves.delete(i); RX.myShares.delete(i); });
-  const [l, sv2, sh] = await Promise.all([
+  ids.forEach(i => { RX.comments[i] = 0; RX.likes[i] = 0; RX.shares[i] = 0; RX.mine.delete(i); RX.saves.delete(i); RX.myShares.delete(i); });
+  const [l, sv2, sh, cm] = await Promise.all([
     sb.from("video_likes").select("video_id,user_id").in("video_id", ids),
     sb.from("video_saves").select("video_id").eq("user_id", me.id).in("video_id", ids),
-    sb.from("video_shares").select("video_id,user_id").in("video_id", ids)]);
+    sb.from("video_shares").select("video_id,user_id").in("video_id", ids),
+    sb.from("video_comments").select("video_id").in("video_id", ids)]);
+  (cm.data || []).forEach(r => { RX.comments[r.video_id] = (RX.comments[r.video_id] || 0) + 1; });
   (l.data || []).forEach(r => { RX.likes[r.video_id] = (RX.likes[r.video_id] || 0) + 1; if (r.user_id === me.id) RX.mine.add(r.video_id); });
   (sv2.data || []).forEach(r => RX.saves.add(r.video_id));
   (sh.data || []).forEach(r => { RX.shares[r.video_id] = (RX.shares[r.video_id] || 0) + 1; if (r.user_id === me.id) RX.myShares.add(r.video_id); });
@@ -1317,7 +1359,8 @@ async function loadRx(ids){
 function paintSlide(s){
   const id = String(s.dataset.id);
   Object.entries(RXK).forEach(([k, o]) => { const b = s.querySelector('[data-act="' + k + '"]'); if (!b) return;
-    b.classList.toggle("on", o.set.has(id)); const n = o.cnt ? (o.cnt[id] || 0) : 0; b.parentElement.querySelector(".lab").textContent = n > 0 ? String(n) : o.def; });
+    b.classList.toggle("on", o.set.has(id)); const n = o.cnt ? (o.cnt[id] || 0) : 0; b.parentElement.querySelector(".lab").textContent = o.cnt ? String(n) : o.def; });
+  const cb = s.querySelector('[data-act="comment"]'); if (cb) cb.parentElement.querySelector(".lab").textContent = String(RX.comments[id] || 0);
 }
 async function toggleRx(kind, s){
   if (!me) return; const o = RXK[kind], id = String(s.dataset.id), had = o.set.has(id);
@@ -1329,7 +1372,31 @@ async function toggleRx(kind, s){
   }
   toastMsg(kind === "like" ? (had ? "Quitaste tu me gusta" : "Te gusta este video ♥") : kind === "save" ? (had ? "Quitado de Favoritos" : "Guardado en Favoritos ★") : (had ? "Dejaste de compartir" : "Compartido: tus amigos lo verán en Amigos ↗"));
 }
-$("feedBox").addEventListener("click", e => { const b = e.target.closest("[data-act]"); if (b) toggleRx(b.dataset.act, b.closest(".slide")); });
+$("feedBox").addEventListener("click", e => { const b = e.target.closest("[data-act]"); if (!b) return;
+  b.dataset.act === "comment" ? openComments(b.closest(".slide")) : toggleRx(b.dataset.act, b.closest(".slide")); });
+let cmSlide = null;
+async function openComments(s){ cmSlide = s; $("cmPanel").classList.remove("hidden"); await drawComments(); $("cmInput").focus(); }
+async function drawComments(){
+  const id = String(cmSlide.dataset.id), box = $("cmList"), nt = t => { const d = document.createElement("div"); d.className = "cmnote"; d.textContent = t; box.replaceChildren(d); };
+  const { data, error } = await sb.from("video_comments").select("*").eq("video_id", id).order("created_at", { ascending:true }).limit(200);
+  if (error) return nt("Falta ejecutar interactions.sql en Supabase.");
+  $("cmTitle").textContent = data.length + (data.length === 1 ? " comentario" : " comentarios");
+  RX.comments[id] = data.length; paintSlide(cmSlide);
+  if (!data.length) return nt("Sé el primero en comentar.");
+  const au = await withAuthors(data, "user_id"); box.replaceChildren();
+  data.forEach(c => { const a = au[c.user_id], r = document.createElement("div"); r.className = "cmrow";
+    const im = new Image(); im.alt = ""; im.src = picOf(a); im.style.cursor = "pointer"; im.onclick = () => { $("cmPanel").classList.add("hidden"); openUser(c.user_id); };
+    const d = document.createElement("div"), b = document.createElement("b"), sm = document.createElement("small"), p = document.createElement("p");
+    b.textContent = nameOf(a); sm.textContent = ago(c.created_at); p.textContent = c.body; d.append(b, sm, p); r.append(im, d);
+    if (me && c.user_id === me.id){ const x = document.createElement("button"); x.className = "x"; x.type = "button"; x.textContent = "✕"; x.setAttribute("aria-label", "Borrar comentario");
+      x.onclick = async () => { await sb.from("video_comments").delete().eq("id", c.id); drawComments(); }; r.append(x); }
+    box.append(r); });
+  box.scrollTop = box.scrollHeight;
+}
+$("cmForm").onsubmit = async e => { e.preventDefault(); const body = $("cmInput").value.trim(); if (!body || !cmSlide || !me) return;
+  $("cmInput").value = ""; const r = await sb.from("video_comments").insert({ video_id: String(cmSlide.dataset.id), user_id: me.id, body });
+  if (r.error) toastMsg("No se pudo comentar: " + r.error.message, 3500); drawComments(); };
+$("cmClose").onclick = () => $("cmPanel").classList.add("hidden");
 
 /* ---------- barra lateral plegable ---------- */
 function applySb(min){ document.body.classList.toggle("sbmin", min); const t = min ? "Ampliar barra lateral" : "Reducir barra lateral";
