@@ -1048,6 +1048,28 @@
   #liveGrid .linfo strong{font-size:.9rem;line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
   @media(max-width:760px){.lvnav{display:none!important}}
   /* ═════════ FIN · CSS-16 ═════════ */
+  /* ═════════ INICIO · CSS-17 · LOGO LOGIN, AUTOCOMPLETADO Y REGALOS ═════════ */
+  .hero-mark .hero-logo{width:100%;height:100%;display:block;border-radius:28px;box-shadow:0 14px 50px var(--brand-glow)}
+  .lgl-ring{transform-origin:60px 60px;animation:lgspin 2.6s linear infinite}
+  @media(max-width:760px){.hero-mark .hero-logo{border-radius:22px}}
+
+  /* el navegador pintaba los campos de amarillo al autocompletar */
+  input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus{
+    -webkit-text-fill-color:var(--text);caret-color:var(--text);
+    box-shadow:0 0 0 1000px var(--panel) inset!important;transition:background-color 9999s}
+
+  /* monetización */
+  .wnote{font-size:.85rem;color:var(--muted);margin:-8px 0 14px}
+  .gifttray{position:absolute;left:12px;right:72px;bottom:12px;z-index:6;background:var(--panel-glass);backdrop-filter:var(--glass);border:1px solid var(--line);border-radius:16px;padding:10px 12px;color:var(--text)}
+  .gthead{display:flex;justify-content:space-between;align-items:center;font-size:.85rem;margin-bottom:8px}
+  .gthead button{background:none;border:0;color:var(--muted);font-size:1rem;cursor:pointer}
+  .gtlist{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
+  .gbtn{flex:none;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:64px;padding:8px 6px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--text);cursor:pointer}
+  .gbtn:hover{border-color:var(--pink)}.gbtn:disabled{opacity:.5;cursor:wait}
+  .gbtn .ge{font-size:1.6rem;line-height:1}.gbtn small{font-size:.7rem;color:var(--muted)}.gbtn .gn{font-size:.72rem;font-weight:700}
+  .cmsg.gift div{background:linear-gradient(90deg,rgba(255,154,61,.18),rgba(254,44,85,.18));padding:8px 12px;border-radius:12px;border:1px solid rgba(255,154,61,.4)}
+  .cmsg.gift b{color:#ff9a3d}
+  /* ═════════ FIN · CSS-17 ═════════ */
 </style>
 </head>
 <body>
@@ -1056,7 +1078,7 @@
 <section id="login" class="login hidden">
   <button class="ibtn themefab" type="button" data-theme-toggle aria-label="Cambiar entre modo oscuro y claro"><svg class="ti ti-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="ti ti-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 13.5A9 9 0 1110.5 3a7 7 0 0010.5 10.5z"/></svg></button>
   <div class="hero">
-    <div class="hero-mark"><span class="ring" aria-hidden="true"></span><img src="img/login-icon.jpg" width="132" height="132" alt="Logo de LiveYou"></div>
+    <div class="hero-mark"><span class="ring" aria-hidden="true"></span><svg class="hero-logo" viewBox="0 0 120 120" role="img" aria-label="Logo de LiveYou"><defs><linearGradient id="lgL" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fe2c55"/><stop offset="1" stop-color="#ff9a3d"/></linearGradient></defs><rect width="120" height="120" fill="#161a21"/><g class="lgl-ring"><circle cx="60" cy="60" r="50" fill="none" stroke="url(#lgL)" stroke-width="9" stroke-linecap="round" stroke-dasharray="215 100"/></g><circle cx="60" cy="60" r="37" fill="#0d0a16"/><path d="M52 42v36l29-18z" fill="#fff"/></svg></div>
     <div class="logo">Live<b>You</b><i>.</i></div>
     <h1>Crea, mira y transmite videos cortos en vivo</h1>
     <p>Tu comunidad, tu cámara, tu momento.</p>
@@ -1170,6 +1192,11 @@
               <button type="button" data-react="🔥" aria-label="Fuego">🔥</button>
               <button type="button" data-react="👏" aria-label="Aplauso">👏</button>
               <button type="button" data-react="😂" aria-label="Risa">😂</button>
+              <button type="button" id="lvGiftBtn" class="hidden" aria-label="Enviar regalo">🎁</button>
+            </div>
+            <div id="giftTray" class="gifttray hidden">
+              <div class="gthead"><span>Tu saldo: <b id="gtBal">…</b> pts</span><button type="button" id="gtClose" aria-label="Cerrar">✕</button></div>
+              <div id="gtList" class="gtlist"></div>
             </div>
           </div>
           <div id="lvHostTools" class="hidden">
@@ -1201,7 +1228,7 @@
           <div class="tkmain">
             <div class="tkname"><h3 id="pName"></h3><span class="tkuser" id="pUser"></span></div>
             <div class="tkstats"><span><b id="stFol">0</b> Siguiendo</span><span><b id="stFers">0</b> Seguidores</span><span><b id="stLikes">0</b> Me gusta</span><span><b id="stVid">0</b> Videos</span><span><b id="stViews">0</b> Reproducciones</span></div>
-            <div class="tkbtns" id="pBtnsMe"><button class="btn main" id="btnUpProfile" type="button">Subir video</button><button class="btn" id="btnEdit">Editar perfil</button><button class="btn" id="btnLogout">Salir</button><button class="btn" type="button" data-theme-toggle aria-label="Cambiar entre modo oscuro y claro"><svg class="ti ti-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="ti ti-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 13.5A9 9 0 1110.5 3a7 7 0 0010.5 10.5z"/></svg><span data-theme-label>Modo claro</span></button><button class="btn" type="button" id="btnResetFeed" title="Borra lo que Para ti aprendió de ti en este dispositivo">Reiniciar mi feed</button></div>
+            <div class="tkbtns" id="pBtnsMe"><button class="btn main" id="btnUpProfile" type="button">Subir video</button><button class="btn" id="btnEdit">Editar perfil</button><button class="btn" id="btnLogout">Salir</button><button class="btn" type="button" id="btnWallet">💰 Monetización</button><button class="btn" type="button" data-theme-toggle aria-label="Cambiar entre modo oscuro y claro"><svg class="ti ti-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="ti ti-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 13.5A9 9 0 1110.5 3a7 7 0 0010.5 10.5z"/></svg><span data-theme-label>Modo claro</span></button><button class="btn" type="button" id="btnResetFeed" title="Borra lo que Para ti aprendió de ti en este dispositivo">Reiniciar mi feed</button></div>
             <div class="tkbtns hidden" id="pBtnsOther"><button class="btn main" id="pFollow" type="button" data-follow="">Seguir</button><button class="btn" id="pMsg" type="button">Mensaje</button></div>
             <p class="bio" id="pBio"></p>
           </div>
@@ -1316,6 +1343,15 @@
 <div id="mSum" class="modal hidden"><div class="mbox"><h2>Directo terminado 🎉</h2><div class="sumgrid"><div><b id="sumDur">0</b><span>Duración</span></div><div><b id="sumPeak">0</b><span>Máx. espectadores</span></div><div><b id="sumReacts">0</b><span>Reacciones</span></div></div><div class="actions"><button class="btn main" type="button" data-close="mSum">Cerrar</button></div></div></div>
 
 <!-- ═════════ FIN · HTML-15 ═════════ -->
+<!-- ═════════ INICIO · HTML-17 · VENTANA · MONETIZACIÓN ═════════ -->
+<div id="mWallet" class="modal hidden"><div class="mbox">
+  <h2>💰 Monetización</h2>
+  <p class="wnote">MODO PRUEBA: los puntos no tienen valor en dinero.</p>
+  <div class="sumgrid" style="grid-template-columns:1fr 1fr"><div><b id="wBal">0</b><span>Puntos para regalar</span></div><div><b id="wEarn">0</b><span>Puntos ganados</span></div></div>
+  <p class="msg" id="wMsg" role="status"></p>
+  <div class="actions"><button class="btn main" id="wClaim" type="button">Reclamar 50 puntos de hoy</button><button class="btn ghost" type="button" data-close="mWallet">Cerrar</button></div>
+</div></div>
+<!-- ═════════ FIN · HTML-17 ═════════ -->
 <!-- ═════════ INICIO · HTML-16 · VENTANA · REPRODUCTOR DE VIDEO ═════════ -->
 <div id="mPlayer" class="modal hidden" role="dialog" aria-modal="true" aria-label="Reproductor de video"><div class="vp">
   <section class="vp-main">
@@ -2557,6 +2593,7 @@ function enterStage(host){
   $("lvMsgs").replaceChildren(); $("lvUnmute").classList.add("hidden");
   $("lvHostTools").classList.toggle("hidden", !host);
   $("lvLeave").classList.toggle("hidden", host); ["lvPrev","lvNext"].forEach(i => $(i).classList.toggle("hidden", host)); $("lvFollow").classList.toggle("hidden", host); camOff = false; statTxt = ""; paintStat();
+  $("lvGiftBtn").classList.toggle("hidden", host); $("giftTray").classList.add("hidden");
   setCount(0); show("Stage");
 }
 
@@ -2611,6 +2648,7 @@ function hostConn(conn){
     const v = H && H.viewers.get(conn.peer); if (!v || !d) return;
     if (d.t === "chat"){ const text = String(d.text || "").trim().slice(0, 300); if (!text) return; addLv(v.name, text, "", v.pic); bcast({ t:"chat", name:v.name, text, pic:v.pic }); }
     else if (d.t === "react" && REACTS.includes(d.e)){ H.reacts = (H.reacts || 0) + 1; floatEmoji(d.e); bcast({ t:"react", e:d.e }); }
+    else if (d.t === "gift" && typeof d.id === "string") hostGift(v, d.id);
   });
   conn.on("close", () => dropViewer(conn.peer));
   conn.on("error", () => dropViewer(conn.peer));
@@ -2768,6 +2806,7 @@ function onWatchData(d){
   else if (d.t === "media"){ camOff = !d.cam; paintStat(); }
   else if (d.t === "count") setCount(d.n);
   else if (d.t === "react") floatEmoji(d.e);
+  else if (d.t === "gift") showGift(String(d.name || "Alguien").slice(0, 30), { emoji:String(d.e || "🎁").slice(0, 4), name:String(d.g || "regalo").slice(0, 20), price:+d.p || 0 }, d.pic);
   else if (d.t === "chat"){
     if (d.sys) lvSys(d.text); else addLv(d.name, d.text, d.host ? "host" : (d.name === nameOf(profile) ? "me" : ""), d.pic);
   }
@@ -2839,6 +2878,86 @@ async function stopAll(){ leaveWatch(); await endLive(); }
 window.addEventListener("beforeunload", () => { try { H && H.peer.destroy(); W && W.peer.destroy(); } catch (e) {} });
 
 /* ═════════ FIN · JS-19 ═════════ */
+
+/* ═════════ INICIO · JS-21 · MONETIZACIÓN (puntos y regalos · MODO PRUEBA) ═════════ */
+let GIFTS = [
+  { id:"rosa", emoji:"🌹", name:"Rosa", price:5 }, { id:"corazon", emoji:"💖", name:"Corazón", price:10 },
+  { id:"fuego", emoji:"🔥", name:"Fuego", price:20 }, { id:"corona", emoji:"👑", name:"Corona", price:50 },
+  { id:"cohete", emoji:"🚀", name:"Cohete", price:100 }
+];
+let myBal = null, myEarn = 0, giftBusy = false;
+const giftSeen = new Set();
+const needSql = m => /does not exist|schema cache|Could not find|42883|42P01/.test(m || "");
+async function loadGifts(){
+  try { const { data } = await sb.from("gift_catalog").select("id,emoji,name,price").order("price"); if (data && data.length) GIFTS = data; } catch (e) {}
+}
+loadGifts();
+function paintWallet(){
+  const b = myBal == null ? "…" : myBal;
+  $("wBal").textContent = b; $("wEarn").textContent = myEarn; $("gtBal").textContent = b;
+}
+async function refreshWallet(){
+  if (!me) return;
+  const { data, error } = await sb.from("wallets").select("balance,earned").eq("user_id", me.id).maybeSingle();
+  if (error){ say($("wMsg"), needSql(error.message) ? "Falta ejecutar supabase_monetizacion.sql en Supabase." : error.message, "err"); return; }
+  myBal = data ? data.balance : 0; myEarn = data ? data.earned : 0; paintWallet();
+}
+$("btnWallet").onclick = () => { say($("wMsg"), ""); openM("mWallet"); refreshWallet(); };
+$("wClaim").onclick = async () => {
+  $("wClaim").disabled = true;
+  const { data, error } = await sb.rpc("claim_daily");
+  $("wClaim").disabled = false;
+  if (error) return say($("wMsg"), needSql(error.message) ? "Falta ejecutar supabase_monetizacion.sql en Supabase." : "No se pudo reclamar: " + error.message, "err");
+  myBal = data.balance; myEarn = data.earned; paintWallet();
+  data.claimed ? say($("wMsg"), "+50 puntos ✓", "ok") : say($("wMsg"), "Ya reclamaste hoy. Vuelve mañana.", "");
+};
+function drawTray(){
+  const box = $("gtList"); box.replaceChildren();
+  GIFTS.forEach(g => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "gbtn";
+    const e = document.createElement("span"); e.className = "ge"; e.textContent = g.emoji;
+    const n = document.createElement("span"); n.className = "gn"; n.textContent = g.name;
+    const p = document.createElement("small"); p.textContent = g.price + " pts";
+    b.append(e, n, p); b.onclick = () => sendGift(g); box.append(b);
+  });
+  paintWallet();
+}
+$("lvGiftBtn").onclick = () => {
+  const t = $("giftTray"); t.classList.toggle("hidden");
+  if (!t.classList.contains("hidden")){ drawTray(); refreshWallet(); }
+};
+$("gtClose").onclick = () => $("giftTray").classList.add("hidden");
+function giftErr(m){
+  return /saldo_insuficiente/.test(m) ? "No te alcanzan los puntos. Reclama los gratis en Perfil → Monetización"
+    : needSql(m) ? "Falta ejecutar supabase_monetizacion.sql en Supabase" : "No se pudo enviar el regalo: " + m;
+}
+async function sendGift(g){
+  const w = W; if (giftBusy) return;
+  if (!w || !w.conn || !w.conn.open) return toastMsg("Aún no estás conectado al directo");
+  if (myBal != null && myBal < g.price) return toastMsg("Te faltan puntos. Reclama 50 gratis en Perfil → Monetización", 4000);
+  giftBusy = true; document.querySelectorAll(".gbtn").forEach(b => b.disabled = true);
+  const { data, error } = await sb.rpc("send_gift", { p_to:w.l.host_id, p_live:String(w.l.id), p_gift:g.id });
+  giftBusy = false; document.querySelectorAll(".gbtn").forEach(b => b.disabled = false);
+  if (error) return toastMsg(giftErr(error.message), 4000);
+  myBal = data.balance; paintWallet();
+  try { if (W === w && w.conn.open) w.conn.send({ t:"gift", id:data.id }); } catch (e) {}
+  toastMsg("Regalo enviado " + g.emoji + "  −" + g.price + " pts", 2500);
+}
+/* el anfitrión NO se cree lo que dice el espectador: comprueba en la base que el regalo existe y es para él */
+async function hostGift(v, id){
+  if (!H || !H.row || giftSeen.has(id)) return; giftSeen.add(id);
+  const { data, error } = await sb.from("gifts").select("gift_id,live_id").eq("id", id).eq("to_user", me.id).maybeSingle();
+  if (error || !data || String(data.live_id) !== String(H.row.id)) return;
+  const g = GIFTS.find(x => x.id === data.gift_id); if (!g) return;
+  showGift(v.name, g, v.pic);
+  bcast({ t:"gift", name:v.name, pic:v.pic, e:g.emoji, g:g.name, p:g.price });
+}
+function showGift(name, g, pic){
+  addLv(name, "envió " + g.emoji + " " + g.name + " (" + g.price + " pts)", "gift", pic);
+  const n = Math.min(10, Math.max(3, Math.round(g.price / 10)));
+  for (let i = 0; i < n; i++) setTimeout(() => floatEmoji(g.emoji), i * 140);
+}
+/* ═════════ FIN · JS-21 ═════════ */
 
 /* ═════════ INICIO · JS-20 · ESTADO DE SESIÓN (arranque de la app) ═════════ */
 /* ---------- Estado de sesión ---------- */
