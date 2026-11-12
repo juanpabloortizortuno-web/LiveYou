@@ -1070,6 +1070,21 @@
   .cmsg.gift div{background:linear-gradient(90deg,rgba(255,154,61,.18),rgba(254,44,85,.18));padding:8px 12px;border-radius:12px;border:1px solid rgba(255,154,61,.4)}
   .cmsg.gift b{color:#ff9a3d}
   /* ═════════ FIN · CSS-17 ═════════ */
+
+  /* ═════════ INICIO · CSS-18 · MINIDRAMAS ═════════ */
+  #serVideos,#dramaGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;margin-top:18px}
+  #serVideos.feed,#dramaGrid.feed{display:block}
+  #vDramas{padding:4px 0 40px}
+  .sercard{aspect-ratio:3/4;border-radius:12px;box-shadow:var(--shadow-out);border:1px solid var(--line);transition:transform .15s,border-color .15s}
+  .sercard:hover{transform:translateY(-2px);border-color:var(--pink)}
+  .sertag{position:absolute;top:8px;left:8px;z-index:2;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);color:#fff;font-size:.72rem;font-weight:800;padding:3px 8px;border-radius:6px}
+  .sercard .vmeta{padding:30px 10px 10px}
+  .sercard .vmeta b{font-size:.92rem;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .sercard .vmeta small{display:block;opacity:.8;margin-top:2px}
+  .serchip{display:inline-flex;align-items:center;gap:6px;max-width:100%;margin-top:8px;background:rgba(255,255,255,.18);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.28);color:#fff;border-radius:8px;padding:6px 10px;font-size:.82rem;font-weight:700;text-align:left;cursor:pointer}
+  .serchip:hover{background:rgba(255,255,255,.28)}
+  @media(max-width:760px){#vDramas{padding:16px 5% 24px}#serVideos,#dramaGrid{grid-template-columns:repeat(2,1fr);gap:10px}#navDramas{order:2}}
+  /* ═════════ FIN · CSS-18 ═════════ */
 </style>
 </head>
 <body>
@@ -1130,7 +1145,7 @@
     <button class="sbtog" id="sbTog" type="button" aria-label="Reducir barra lateral" title="Reducir barra lateral"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></svg></button>
     <div class="logo" id="sideLogo" role="button" tabindex="0" title="Ir a Para ti"><span class="lg" aria-hidden="true"><svg viewBox="0 0 40 40" width="38" height="38"><defs><linearGradient id="lgG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fe2c55"/><stop offset="1" stop-color="#ff9a3d"/></linearGradient></defs><g class="lg-ring"><circle cx="20" cy="20" r="17" fill="none" stroke="url(#lgG)" stroke-width="3" stroke-linecap="round" stroke-dasharray="72 35"/></g><circle cx="20" cy="20" r="12.5" fill="#161a21"/><path d="M17.2 14.6v10.8l8.6-5.4z" fill="#fff"/></svg></span>Live<b>You</b><i>.</i></div>
     <button class="nav on" id="navFeed"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10H3z"/></svg><span class="dk">Para ti</span><span class="mb">Inicio</span></button>
-    <button class="nav soon" data-soon="Explorar"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 100 18 9 9 0 000-18zM15 9l-2 6-4 0 2-6z"/></svg><span>Explorar</span></button>
+    <button class="nav" id="navDramas"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5M16 4v5M10.500 13l4 2.500-4 2.500z"/></svg><span>Minidramas</span></button>
     <button class="nav soon" id="navFol"><svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 100-8 4 4 0 000 8zM3 21c0-4 3-6 7-6s7 2 7 6"/></svg><span>Siguiendo</span></button>
     <button class="nav soon keep" id="navFri"><svg viewBox="0 0 24 24"><path d="M9 11a3 3 0 100-6 3 3 0 000 6zM2 20c0-3 3-5 7-5s7 2 7 5M17 11a3 3 0 100-6M22 20c0-3-2-4-4-5"/></svg><span>Amigos</span></button>
     <button class="nav" id="navLive"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M6 6a8 8 0 000 12M18 6a8 8 0 010 12"/></svg><span>En vivo</span></button>
@@ -1164,6 +1179,12 @@
     </div>
 
 <!-- ═════════ FIN · HTML-05 ═════════ -->
+<!-- ═════════ INICIO · HTML-05B · VISTA · MINIDRAMAS (catálogo) ═════════ -->
+    <div id="vDramas" class="hidden">
+      <div class="head"><h2>🎬 Minidramas</h2></div>
+      <div id="dramaGrid" class="grid"></div>
+    </div>
+<!-- ═════════ FIN · HTML-05B ═════════ -->
 <!-- ═════════ INICIO · HTML-06 · VISTA · ESCENARIO DEL DIRECTO ═════════ -->
     <div id="vStage" class="hidden">
       <div class="stage" id="stageBox">
@@ -1233,7 +1254,7 @@
             <p class="bio" id="pBio"></p>
           </div>
         </div>
-        <div class="ptabs"><button class="on" type="button" id="tabVid">▦ Videos <i id="tabCnt">0</i></button><button type="button" id="tabPost">▤ Publicaciones</button><button type="button" id="tabFav">☆ Favoritos</button></div>
+        <div class="ptabs"><button class="on" type="button" id="tabVid">▦ Videos <i id="tabCnt">0</i></button><button type="button" id="tabSer">🎬 Minidramas</button><button type="button" id="tabPost">▤ Publicaciones</button><button type="button" id="tabFav">☆ Favoritos</button></div>
       </div>
       <form class="info hidden" id="editForm">
         <img class="big" id="eAvatar" alt="Foto de perfil">
@@ -1251,6 +1272,7 @@
     </div>
     <div id="myVideos" class="grid"></div>
     <div id="favVideos" class="grid hidden"></div>
+    <div id="serVideos" class="grid hidden"></div>
     <div id="profPosts" class="hidden">
       <form class="pcomp" id="poForm">
         <textarea id="poBody" maxlength="1500" placeholder="Escribir nueva publicación…" aria-label="Nueva publicación"></textarea>
@@ -1317,7 +1339,7 @@
 <!-- ═════════ INICIO · HTML-13 · VENTANA · SUBIR VIDEO ═════════ -->
 <div id="mUpload" class="modal hidden"><form class="mbox upbox" id="upForm">
   <h2>Subir video</h2>
-  <label class="drop" id="upDrop" for="upFile"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></svg><strong>Toca para elegir un video</strong><span>o arrástralo aquí · MP4 o FLV · máx. 25 MB</span></label>
+  <label class="drop" id="upDrop" for="upFile"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></svg><strong>Toca para elegir un video</strong><span>o arrástralo aquí · MP4 o FLV · si pesa más de 25 MB se divide solo en partes (hasta 400 MB)</span></label>
   <input id="upFile" type="file" accept="video/*,.flv,.mp4" class="hidden">
   <div id="upPrevBox" class="upprev hidden"><video id="upPrev" muted playsinline controls></video><div id="upFlv" class="upflv hidden">Video FLV listo para subir</div><div class="upinfo"><span id="upName"></span><button class="btn ghost" type="button" id="upClear">Quitar</button></div></div>
   <label for="upCap">Descripción</label><textarea id="upCap" maxlength="200" placeholder="Cuéntales de qué trata tu video…"></textarea>
@@ -1538,7 +1560,7 @@ function show(v){
   $("cmPanel").classList.add("hidden");
   if (v === "Live" && H) v = "Stage";
   if (v !== "Stage") leaveWatch();
-  ["Feed","Live","Stage","Profile","Inbox"].forEach(n => {
+  ["Feed","Live","Stage","Profile","Inbox","Dramas"].forEach(n => {
     $("v"+n).classList.toggle("hidden", n !== v);
     const nv = $("nav"+n); if (nv) nv.classList.toggle("on", n === v);
   });
@@ -1548,6 +1570,7 @@ function show(v){
   if (v === "Feed"){ loadRail(); liveDot(); }
   if (v === "Profile"){ if (!keepPv) pv = null; keepPv = false; loadMyVideos(); }
   if (v === "Live"){ loadLives(); livePoll = setInterval(loadLives, 15000); }
+  if (v === "Dramas") loadDramas();
 }
 $("navFeed").onclick = () => show("Feed");
 $("ftLive").onclick = () => quickLive();
@@ -1892,6 +1915,9 @@ function slide(v, a){
   s.querySelector("strong").textContent = nameOf(a);
   [s.querySelector(".av"), s.querySelector("strong")].forEach(el => { el.style.cursor = "pointer"; el.onclick = () => openUser(v.user_id); });
   s.querySelector(".sinfo p").textContent = v.caption || "";
+  if (v.series_id){ const c = document.createElement("button"); c.type = "button"; c.className = "serchip";
+    c.textContent = "🎬 Minidrama · " + (v.series_title || "") + " · " + (v.part_total || "") + " partes ▸ Ver serie";
+    c.onclick = e => { e.stopPropagation(); openSeries(v.series_id); }; s.querySelector(".sinfo").insertBefore(c, s.querySelector(".sinfo p")); }
   s.querySelector(".views").textContent = "▷ " + (v.views || 0);
   vid.onclick = () => vid.paused ? vid.play() : vid.pause();
   const pp = s.querySelector('[data-a="pp"]'), tm = s.querySelector(".tm"); pp.innerHTML = ICO.play; s.querySelector('[data-a="mute"]').innerHTML = feedMuted ? ICO.volOff : ICO.volOn;
@@ -1934,6 +1960,8 @@ async function loadFeed(){
   let { data, error } = await q;
   if (error) return note(box, "No se pudieron cargar los videos.");
   if (!data.length) return note(box, feedMode === "following" ? "Las personas que sigues aún no han subido videos." : "Aún no hay videos. Sube el primero con el botón Subir video.");
+  data = data.filter(v => !v.series_id || v.part_no === 1);
+  if (!data.length) return note(box, "Aún no hay videos.");
   if (feedMode === "all") data = rankFeed(data);
   const au = await withAuthors(data, "user_id");
   data.forEach(v => box.append(slide(v, au[v.user_id])));
@@ -1946,9 +1974,10 @@ async function loadFeed(){
 }
 let pv = null, keepPv = false;
 function openUser(id){ if (!id) return; pv = (me && id === me.id) ? null : id; keepPv = true; show("Profile"); }
-function profTab(t){ const v = t === "vid", f = t === "fav"; $("myVideos").classList.toggle("hidden", !v); $("favVideos").classList.toggle("hidden", !f); $("profPosts").classList.toggle("hidden", t !== "post");
-  $("tabVid").classList.toggle("on", v); $("tabPost").classList.toggle("on", t === "post"); $("tabFav").classList.toggle("on", f); $("tabFav").classList.toggle("hidden", !!pv);
+function profTab(t){ const v = t === "vid", f = t === "fav"; $("myVideos").classList.toggle("hidden", !v); $("favVideos").classList.toggle("hidden", !f); $("profPosts").classList.toggle("hidden", t !== "post"); $("serVideos").classList.toggle("hidden", t !== "ser");
+  $("tabSer").classList.toggle("on", t === "ser"); $("tabVid").classList.toggle("on", v); $("tabPost").classList.toggle("on", t === "post"); $("tabFav").classList.toggle("on", f); $("tabFav").classList.toggle("hidden", !!pv);
   if (f) loadFavs();
+  if (t === "ser") loadSeries();
   if (t === "post"){ $("poForm").classList.toggle("hidden", !!pv); loadPosts(pv || me.id); } }
 async function loadFavs(){
   const box = $("favVideos"); const r = await sb.from("video_saves").select("video_id").eq("user_id", me.id).order("created_at", { ascending:false });
@@ -1981,7 +2010,7 @@ async function loadMyVideos(){
   if (!isMe){ $("pFollow").dataset.follow = uid; paintFollowBtn($("pFollow")); $("pMsg").onclick = () => { show("Inbox"); loadInbox(); $("mTo").value = "@" + (p.username || ""); $("mBody").focus(); }; }
   if (isMe) openEdit(false);
   profTab("vid"); loadStats(uid);
-  return fillVideos($("myVideos"), sb.from("videos").select("*").eq("user_id", uid).order("created_at", { ascending:false }), false,
+  return fillVideos($("myVideos"), sb.from("videos").select("*").eq("user_id", uid).order("created_at", { ascending:false }).then(r => ({ data:r.data && r.data.filter(v => !v.series_id), error:r.error })), false,
     isMe ? "Todavía no subiste videos. Toca el botón + para publicar el primero." : "Este usuario aún no ha subido videos.");
 }
 
@@ -2046,8 +2075,9 @@ function playAt(i, dir){
   sb.rpc("increment_views", { vid:v.id }).then(() => {});
   $("pDel").classList.toggle("hidden", v.user_id !== me.id);
   const one = new Set(PQ.map(x => x.v.user_id)).size === 1;
-  $("pQTitle").textContent = one ? "Videos de " + nameOf(a) : "Lista de reproducción";
-  $("pQCount").textContent = "Video " + (i + 1) + " de " + PQ.length;
+  const isSer = PQ.every(x => x.v.series_id && x.v.series_id === v.series_id);
+  $("pQTitle").textContent = isSer ? "🎬 " + (v.series_title || "Minidrama") : (one ? "Videos de " + nameOf(a) : "Lista de reproducción");
+  $("pQCount").textContent = (isSer ? "Parte " : "Video ") + (i + 1) + " de " + PQ.length;
   $("pPrev").disabled = i === 0; $("pNext").disabled = i === PQ.length - 1;
   markQueue();
   /* el video siguiente ya quedó pidiéndose en el fondo: se suelta ahora y se prepara el que sigue después de éste */
@@ -2085,10 +2115,13 @@ function openPlayer(v, a, list){
   const fs = () => { if (document.fullscreenElement) document.exitFullscreen(); else if (ST.requestFullscreen) ST.requestFullscreen().catch(() => {}); else if (v.webkitEnterFullscreen) v.webkitEnterFullscreen(); };
   $("pFs").onclick = () => { fs(); $("pFs").blur(); };
   $("pDel").onclick = async () => {
-    const it = PQ[PI]; if (!it || !confirm("¿Eliminar este video?")) return;
-    await sb.storage.from("videos").remove([it.v.path, it.v.path.replace(/\.[a-z0-9]+$/i, "_t.jpg")]);
-    await sb.from("videos").delete().eq("id", it.v.id);
-    PDirty = true; PQ.splice(PI, 1);
+    const it = PQ[PI]; if (!it) return;
+    const ser = it.v.series_id ? PQ.filter(x => x.v.series_id === it.v.series_id) : null;
+    if (!confirm(ser ? "¿Eliminar toda la minidrama “" + (it.v.series_title || "") + "” (" + ser.length + " partes)?" : "¿Eliminar este video?")) return;
+    const gone = ser || [it];
+    await sb.storage.from("videos").remove(gone.flatMap(x => [x.v.path, x.v.path.replace(/\.[a-z0-9]+$/i, "_t.jpg")]));
+    if (ser) await sb.from("videos").delete().eq("series_id", it.v.series_id); else await sb.from("videos").delete().eq("id", it.v.id);
+    PDirty = true; PQ = PQ.filter(x => !gone.includes(x));
     if (!PQ.length){ $("mPlayer").querySelector("[data-close]").click(); return; }
     buildQueue(); playAt(Math.min(PI, PQ.length - 1), 1);
   };
@@ -2147,8 +2180,9 @@ let upURL = null;
 function upSet(f){
   if (upURL){ URL.revokeObjectURL(upURL); upURL = null; }
   $("upDrop").classList.toggle("hidden", !!f); $("upPrevBox").classList.toggle("hidden", !f);
-  if (!f) return;
+  if (!f){ say($("upMsg"), ""); return; }
   $("upName").textContent = f.name + " · " + (f.size / 1048576).toFixed(1) + " MB";
+  say($("upMsg"), f.size > MAX_VIDEO ? "🎬 Pesa " + (f.size / 1048576).toFixed(0) + " MB: se dividirá solo en ~" + Math.ceil(f.size / PART_TARGET) + " partes y quedará como minidrama. Escribe el título de la minidrama en la descripción." : "");
   const v = $("upPrev"), flv = /\.flv$/i.test(f.name);
   $("upFlv").classList.toggle("hidden", !flv); v.classList.toggle("hidden", flv);
   if (flv) v.removeAttribute("src"); else { upURL = URL.createObjectURL(f); v.src = upURL; }
@@ -2183,7 +2217,8 @@ $("upForm").onsubmit = async e => {
   if (!f) return say($("upMsg"), "Elige un video.", "err");
   const fext = (f.name.split(".").pop() || "").toLowerCase();
   if (!(f.type.startsWith("video/") || fext === "flv" || fext === "mp4")) return say($("upMsg"), "El archivo debe ser un video MP4 o FLV.", "err");
-  if (f.size > MAX_VIDEO) return say($("upMsg"), "El video pesa más de 25 MB.", "err");
+  if (f.size > MAX_BIG) return say($("upMsg"), "El video pesa más de 400 MB. Pártelo en dos antes de subirlo.", "err");
+  if (f.size > MAX_VIDEO) return uploadSeries(f, $("upCap").value.trim(), fext);
   const cap = $("upCap").value.trim();
   upBusy = true; $("upBtn").disabled = true; $("upBar").classList.remove("hidden"); $("upPct").classList.remove("hidden");
   upProgress(0); say($("upMsg"), ""); $("upChip").classList.remove("hidden");
@@ -2958,6 +2993,193 @@ function showGift(name, g, pic){
   for (let i = 0; i < n; i++) setTimeout(() => floatEmoji(g.emoji), i * 140);
 }
 /* ═════════ FIN · JS-21 ═════════ */
+
+/* ═════════ INICIO · JS-22 · MINIDRAMAS (divide videos grandes en partes de menos de 25 MB) ═════════ */
+const MAX_BIG = 400 * 1048576, PART_TARGET = 20 * 1048576;
+const FF_CORE = "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd/";
+/* Este código corre dentro de un Worker (hilo aparte) para no congelar la página. Corta SIN recomprimir: rápido y sin perder calidad. */
+function ffWorkerMain(){
+  let core = null;
+  self.onmessage = async ({ data:{ id, type, data } }) => {
+    try {
+      let out = true; const tr = [];
+      if (type === "load"){
+        importScripts(data.coreURL);
+        core = await self.createFFmpegCore({ mainScriptUrlOrBlob: data.coreURL + "#" + btoa(JSON.stringify({ wasmURL:data.wasmURL, workerURL:data.coreURL.replace(/\.js$/, ".worker.js") })) });
+        core.setLogger(m => self.postMessage({ type:"log", data:m }));
+        core.setProgress(p => self.postMessage({ type:"progress", data:p }));
+      } else if (!core) throw new Error("El divisor no está cargado");
+      else if (type === "write") core.FS.writeFile(data.path, data.bytes);
+      else if (type === "exec"){ core.setTimeout(-1); core.exec(...data.args); out = core.ret; core.reset(); }
+      else if (type === "list") out = core.FS.readdir("/").filter(n => n.indexOf(data.prefix) === 0 && /\.(mp4|webm)$/.test(n)).sort();
+      else if (type === "read"){ const d = core.FS.readFile(data.path); out = d; tr.push(d.buffer); }
+      else if (type === "delete") core.FS.unlink(data.path);
+      self.postMessage({ id, type, data:out }, tr);
+    } catch (e) { self.postMessage({ id, type:"error", data:String((e && e.message) || e) }); }
+  };
+}
+const FF = { w:null, ready:null, id:0, pend:new Map() };
+function ffCall(type, data, tr){
+  return new Promise((res, rej) => { const id = ++FF.id; FF.pend.set(id, { res, rej }); FF.w.postMessage({ id, type, data }, tr || []); });
+}
+function ffEnd(){
+  if (FF.w){ FF.w.terminate(); FF.w = null; }
+  FF.ready = null; FF.pend.forEach(p => p.rej(new Error("Cancelado"))); FF.pend.clear();
+}
+function ffInit(){
+  if (FF.ready) return FF.ready;
+  FF.ready = (async () => {
+    const url = URL.createObjectURL(new Blob(["(" + ffWorkerMain.toString() + ")()"], { type:"text/javascript" }));
+    const w = FF.w = new Worker(url);
+    w.onmessage = ev => {
+      const m = ev.data || {};
+      if (m.type === "progress" || m.type === "log") return;
+      const p = FF.pend.get(m.id); if (!p) return; FF.pend.delete(m.id);
+      m.type === "error" ? p.rej(new Error(m.data)) : p.res(m.data);
+    };
+    w.onerror = () => { const er = new Error("No se pudo cargar el divisor de video. Revisa tu conexión a internet."); FF.pend.forEach(p => p.rej(er)); FF.pend.clear(); };
+    await ffCall("load", { coreURL:FF_CORE + "ffmpeg-core.js", wasmURL:FF_CORE + "ffmpeg-core.wasm" });
+  })().catch(e => { ffEnd(); throw e; });
+  return FF.ready;
+}
+function vidDuration(f){
+  return new Promise(res => {
+    const v = document.createElement("video"), u = URL.createObjectURL(f); let t = 0;
+    const fin = d => { clearTimeout(t); v.removeAttribute("src"); v.load(); URL.revokeObjectURL(u); res(isFinite(d) && d > 0 ? d : 0); };
+    t = setTimeout(() => fin(0), 8000); v.preload = "metadata"; v.onloadedmetadata = () => fin(v.duration); v.onerror = () => fin(0); v.src = u;
+  });
+}
+/* Divide el archivo en partes seguidas. Si alguna sale de más de 25 MB, reintenta con cortes más cortos. */
+async function splitVideo(f, ext, status){
+  const fmt = ext === "webm" ? "webm" : "mp4", mime = fmt === "webm" ? "video/webm" : "video/mp4", inName = "in." + ext;
+  try {
+    const dur = await vidDuration(f);
+    let seg = dur ? Math.max(1, Math.floor(dur * PART_TARGET / f.size)) : 60;
+    status("Descargando el divisor de video (solo la primera vez, ~30 MB)…", 3);
+    await ffInit();
+    status("Leyendo el video…", 8);
+    const bytes = new Uint8Array(await f.arrayBuffer());
+    await ffCall("write", { path:inName, bytes }, [bytes.buffer]);
+    let parts = null;
+    for (let at = 0; at < 4 && !parts; at++){
+      status("Dividiendo en partes de ~" + seg + " s… (puede tardar un poco)", 12 + at * 2);
+      const args = ["-i", inName, "-map", "0:v:0", "-map", "0:a:0?", "-c", "copy", "-f", "segment", "-segment_time", String(seg), "-reset_timestamps", "1", "-segment_format", fmt];
+      if (fmt === "mp4") args.push("-segment_format_options", "movflags=+faststart");
+      args.push("out%03d." + fmt);
+      const ret = await ffCall("exec", { args });
+      const names = await ffCall("list", { prefix:"out" });
+      if (ret !== 0 || !names.length) throw new Error("No se pudo dividir este video (formato no compatible). Prueba con un MP4 normal (H.264).");
+      const blobs = []; let max = 0;
+      for (const n of names){
+        const d = await ffCall("read", { path:n }); const b = new Blob([d], { type:mime });
+        if (b.size > max) max = b.size; blobs.push(b); await ffCall("delete", { path:n });
+      }
+      if (max <= MAX_VIDEO - 524288) parts = blobs; else seg = Math.max(1, Math.floor(seg * PART_TARGET / max * 0.9));
+    }
+    if (!parts) throw new Error("No se pudo partir en trozos de menos de 25 MB (el video tiene muy pocos cortes internos).");
+    return { parts, ext:fmt };
+  } finally { ffEnd(); }
+}
+function xhrUpPart(path, blob, token, onp){
+  return new Promise(res => {
+    const x = new XMLHttpRequest(); x.open("POST", SUPABASE_URL + "/storage/v1/object/videos/" + path);
+    x.setRequestHeader("Authorization", "Bearer " + token); x.setRequestHeader("apikey", SUPABASE_KEY);
+    x.setRequestHeader("Content-Type", blob.type || "video/mp4"); x.setRequestHeader("x-upsert", "true");
+    x.upload.onprogress = ev => { if (ev.lengthComputable) onp(ev.loaded); };
+    x.onload = () => { let m = ""; try { m = JSON.parse(x.responseText || "{}").message; } catch (e) {} res(x.status < 300 ? null : (m || "Error " + x.status)); };
+    x.onerror = () => res("Se perdió la conexión"); x.send(blob);
+  });
+}
+const newUuid = () => (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+  : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === "x" ? r : (r & 3 | 8)).toString(16); });
+async function uploadSeries(f, cap, fext){
+  const title = (cap || f.name.replace(/\.[^.]+$/, "")).trim().slice(0, 80) || "Minidrama";
+  const ext0 = (fext || "mp4").replace(/[^a-z0-9]/g, "") || "mp4";
+  upBusy = true; $("upBtn").disabled = true; say($("upMsg"), "");
+  ["upBar", "upPct"].forEach(i => $(i).classList.remove("hidden")); $("upChip").classList.remove("hidden");
+  const status = (t, p) => upProgress(p, t);
+  const uploaded = [];
+  const end = (msg, bad) => {
+    upBusy = false; $("upBtn").disabled = false; $("upChip").classList.add("hidden");
+    $("upBar").classList.add("hidden"); $("upPct").classList.add("hidden"); toastMsg(msg, 4500); if (bad) say($("upMsg"), msg, "err");
+  };
+  try {
+    const chk = await sb.from("videos").select("series_id").limit(1);
+    if (chk.error) throw new Error("Falta ejecutar supabase_minidramas.sql en Supabase (una sola vez).");
+    status("Preparando…", 1);
+    const sp = await splitVideo(f, ext0, status);
+    const n = sp.parts.length, total = sp.parts.reduce((t, b) => t + b.size, 0), sid = newUuid(), stamp = Date.now(), rows = [];
+    let sent = 0;
+    for (let i = 0; i < n; i++){
+      const blob = sp.parts[i], path = me.id + "/" + stamp + "_p" + String(i + 1).padStart(2, "0") + "." + sp.ext;
+      const { data:ss } = await sb.auth.getSession(); let err = "";
+      for (let t = 0; t < 3; t++){
+        err = await xhrUpPart(path, blob, ss.session.access_token, ld => upProgress(Math.min(98, Math.round(15 + 83 * (sent + ld) / total)), "Subiendo parte " + (i + 1) + " de " + n + "…"));
+        if (!err) break; await new Promise(r => setTimeout(r, 1500));
+      }
+      if (err) throw new Error("Falló la parte " + (i + 1) + ": " + err);
+      uploaded.push(path); sent += blob.size;
+      let th = null;
+      try {
+        const u = URL.createObjectURL(blob), r = await makeThumb(u, 320); URL.revokeObjectURL(u);
+        const jb = await (await fetch(r.data)).blob(), tp = path.replace(/\.[a-z0-9]+$/i, "_t.jpg");
+        const tu = await sb.storage.from("videos").upload(tp, jb, { contentType:"image/jpeg", upsert:true });
+        if (!tu.error){ uploaded.push(tp); th = { url:sb.storage.from("videos").getPublicUrl(tp).data.publicUrl, dur:isFinite(r.dur) && r.dur > 0 ? Math.round(r.dur * 10) / 10 : null }; }
+      } catch (e) {}
+      const row = { user_id:me.id, url:sb.storage.from("videos").getPublicUrl(path).data.publicUrl, path, caption:title + " · Parte " + (i + 1) + "/" + n, series_id:sid, series_title:title, part_no:i + 1, part_total:n };
+      if (th){ row.thumb_url = th.url; if (th.dur) row.duration = th.dur; }
+      rows.push(row);
+    }
+    upProgress(99, "Publicando…");
+    let ins = await sb.from("videos").insert(rows);
+    if (ins.error && rows.some(r => r.thumb_url)) ins = await sb.from("videos").insert(rows.map(r => { const c = Object.assign({}, r); delete c.thumb_url; delete c.duration; return c; }));
+    if (ins.error) throw new Error("No se pudo publicar: " + ins.error.message);
+    end("🎬 Minidrama publicada: " + n + " partes ✓"); closeM("mUpload"); show("Profile"); profTab("ser");
+  } catch (e) {
+    if (uploaded.length){ try { await sb.storage.from("videos").remove(uploaded); } catch (x) {} }
+    end((e && e.message) || "No se pudo subir la minidrama", true);
+  }
+}
+/* ---------- ver minidramas ---------- */
+function serCard(first, a, count, open){
+  const b = document.createElement("button"); b.type = "button"; b.className = "vcard sercard";
+  const tag = document.createElement("span"); tag.className = "sertag"; tag.textContent = "🎬 " + count + " partes";
+  const m = document.createElement("div"); m.className = "vmeta";
+  const t = document.createElement("b"); t.textContent = first.series_title || first.caption || "Minidrama";
+  const s = document.createElement("small"); s.textContent = nameOf(a);
+  m.append(t, s); b.append(tag, m); attachThumb(b, first); b.onclick = open; return b;
+}
+async function openSeries(id){
+  if (curSlide){ const v = curSlide.querySelector("video"); if (v) v.pause(); }
+  const { data, error } = await sb.from("videos").select("*").eq("series_id", id).order("part_no", { ascending:true });
+  if (error || !data || !data.length) return toastMsg("No se pudo abrir la minidrama", 3000);
+  const au = await withAuthors(data, "user_id"), list = data.map(v => ({ v, a:au[v.user_id] }));
+  openPlayer(data[0], au[data[0].user_id], list);
+}
+async function loadSeries(){
+  const box = $("serVideos"), uid = pv || me.id, isMe = !pv; box.replaceChildren(); box.className = "grid";
+  const { data, error } = await sb.from("videos").select("*").eq("user_id", uid).not("series_id", "is", null).order("created_at", { ascending:false });
+  if (error) return note(box, "Falta ejecutar supabase_minidramas.sql en Supabase.");
+  if (!data.length) return note(box, isMe ? "Aún no tienes minidramas. Sube un video de más de 25 MB y se divide solo en partes." : "Este usuario aún no tiene minidramas.");
+  const au = await withAuthors(data, "user_id"), groups = new Map();
+  data.forEach(v => { if (!groups.has(v.series_id)) groups.set(v.series_id, []); groups.get(v.series_id).push(v); });
+  groups.forEach(parts => {
+    parts.sort((x, y) => x.part_no - y.part_no);
+    const list = parts.map(v => ({ v, a:au[v.user_id] }));
+    box.append(serCard(parts[0], au[parts[0].user_id], parts[0].part_total || parts.length, () => openPlayer(parts[0], au[parts[0].user_id], list)));
+  });
+}
+async function loadDramas(){
+  const box = $("dramaGrid"); box.replaceChildren(); box.className = "grid";
+  const { data, error } = await sb.from("videos").select("*").eq("part_no", 1).not("series_id", "is", null).order("created_at", { ascending:false }).limit(60);
+  if (error) return note(box, "Falta ejecutar supabase_minidramas.sql en Supabase.");
+  if (!data.length) return note(box, "Aún no hay minidramas. Sube un video de más de 25 MB y se divide solo en partes.");
+  const au = await withAuthors(data, "user_id");
+  data.forEach(first => box.append(serCard(first, au[first.user_id], first.part_total || "", () => openSeries(first.series_id))));
+}
+$("tabSer").onclick = () => profTab("ser");
+$("navDramas").onclick = () => show("Dramas");
+/* ═════════ FIN · JS-22 ═════════ */
 
 /* ═════════ INICIO · JS-20 · ESTADO DE SESIÓN (arranque de la app) ═════════ */
 /* ---------- Estado de sesión ---------- */
