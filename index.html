@@ -146,7 +146,7 @@
     .nav{color:#a9a9b3}.nav.on{color:#fff;background:none}
     .nav span.dk{display:none}.nav span.mb{display:block}
     #navLive{display:none}
-    .nav.soon.keep{display:none}
+    .nav.soon.keep{display:flex;order:2}
     #navUpload svg{fill:#fff;stroke:#000;filter:drop-shadow(-3px 0 0 #25f4ee) drop-shadow(3px 0 0 #fe2c55)}
     .feedtabs{align-items:center}
     .feedtabs .ftlive{position:absolute;left:14px;border:2px solid #fff;border-radius:6px;font-size:.68rem;font-weight:800;color:#fff;padding:1px 5px}
@@ -516,6 +516,42 @@
   #cmForm{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}#cmForm input{flex:1;border-radius:999px}
   #cmForm .btn{border-radius:999px;padding:9px 18px}
   @media(max-width:760px){.cmp{top:auto;height:70vh;width:100%;border-left:0;border-top:1px solid var(--line);border-radius:16px 16px 0 0}}
+
+  /* ===== creador móvil (grabar / LIVE) + barra con Amigos ===== */
+  .create{position:fixed;inset:0;background:#000;z-index:50;color:#fff}
+  .create.hidden{display:none}
+  .create video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .create #crPlay{display:none;background:#000;object-fit:contain}.create.reviewing #crPlay{display:block}
+  .create.reviewing #crVideo{display:none}
+  .create button{font:inherit;color:#fff;cursor:pointer}
+  .crx{position:absolute;top:calc(14px + env(safe-area-inset-top));left:14px;width:44px;height:44px;background:none;border:0;display:grid;place-items:center;z-index:2}
+  .crx svg,.crtool svg{width:30px;height:30px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 1px 3px rgba(0,0,0,.6))}
+  .crtimer{position:absolute;top:calc(20px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);background:rgba(0,0,0,.55);padding:7px 16px;border-radius:999px;font-weight:700;font-variant-numeric:tabular-nums;z-index:2;display:none}
+  .create.recording .crtimer{display:block}.crtimer::before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;background:#fe2c55;margin-right:8px}
+  .crtools{position:absolute;right:12px;top:calc(18px + env(safe-area-inset-top));z-index:2;display:flex;flex-direction:column;gap:18px}
+  .crtool{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:.78rem;font-weight:600;text-shadow:0 1px 3px #000}
+  .create.reviewing .crtools{display:none}
+  .crbottom{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:40px 0 calc(14px + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;gap:18px;background:linear-gradient(transparent,rgba(0,0,0,.75))}
+  .create .only-cam,.create .only-live,.create .only-rev{display:none}
+  .create.m-cam:not(.reviewing) .only-cam{display:flex}.create.m-live:not(.reviewing) .only-live{display:flex}.create.reviewing .only-rev{display:flex}
+  .create.reviewing .crmodes{display:none}.create.recording .crmodes,.create.recording .crdur,.create.recording .crgal{visibility:hidden}
+  .crdur{gap:8px}.crdur button{background:none;border:0;padding:6px 14px;border-radius:999px;font-weight:700;opacity:.85}.crdur button.on{background:#fff;color:#000;opacity:1}
+  .crrec{align-items:center;justify-content:center;gap:40px;width:100%}
+  .rec{width:80px;height:80px;border-radius:50%;background:#fe2c55;border:5px solid #fff;padding:0;transition:transform .15s,border-radius .15s}
+  .create.recording .rec{transform:scale(.82);border-radius:26px}
+  .crgal{width:48px;height:48px;border-radius:12px;border:2px solid #fff;background:rgba(255,255,255,.18);display:grid;place-items:center}
+  .crgal svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.crsp{width:48px}
+  .golive{width:calc(100% - 48px);max-width:420px;height:56px;border-radius:999px;background:#fe2c55;border:0;font-weight:800;font-size:1.08rem}
+  .crhint{font-size:.85rem;opacity:.85}
+  .crmodes{display:flex;gap:34px}.crmodes button{background:none;border:0;font-weight:800;font-size:1rem;letter-spacing:.03em;color:rgba(255,255,255,.55);padding:4px 2px}.crmodes button.on{color:#fff}
+  .crrev{gap:12px;width:calc(100% - 32px);max-width:440px}.crrev button{flex:1;height:50px;border-radius:999px;border:0;font-weight:800;font-size:1rem;background:#2a2d33}.crrev button.main{background:#fe2c55}
+  @media(max-width:760px){
+    .nav.soon.keep{display:flex;order:2}
+    #ftFri{display:none}
+    .feedtabs .ftlive{position:static;margin-right:2px}.feedtabs{gap:18px;padding:0 50px 0 12px}
+    .sinfo .lrow{flex-wrap:nowrap;gap:8px}.sinfo .lrow strong{max-width:34vw}.sinfo .lrow .btn{flex:none;padding:6px 14px;font-size:.85rem}
+    .sact{width:68px;right:6px}.sact>div{width:68px}.sact .lab{white-space:nowrap;font-size:.74rem}
+  }
 </style>
 </head>
 <body>
@@ -653,7 +689,7 @@
           <div class="tkmain">
             <div class="tkname"><h3 id="pName"></h3><span class="tkuser" id="pUser"></span></div>
             <div class="tkstats"><span><b id="stFol">0</b> Siguiendo</span><span><b id="stFers">0</b> Seguidores</span><span><b id="stLikes">0</b> Me gusta</span><span><b id="stVid">0</b> Videos</span><span><b id="stViews">0</b> Reproducciones</span></div>
-            <div class="tkbtns" id="pBtnsMe"><button class="btn" id="btnEdit">Editar perfil</button><button class="btn" id="btnLogout">Salir</button></div>
+            <div class="tkbtns" id="pBtnsMe"><button class="btn main" id="btnUpProfile" type="button">Subir video</button><button class="btn" id="btnEdit">Editar perfil</button><button class="btn" id="btnLogout">Salir</button></div>
             <div class="tkbtns hidden" id="pBtnsOther"><button class="btn main" id="pFollow" type="button" data-follow="">Seguir</button><button class="btn" id="pMsg" type="button">Mensaje</button></div>
             <p class="bio" id="pBio"></p>
           </div>
@@ -713,6 +749,19 @@
 <div id="toast" class="toast hidden" role="status"></div>
 
 <div id="upChip" class="upchip hidden" role="status"><b id="upChipTxt">Subiendo 0%</b><div class="upbar"><i id="upChipBar"></i></div></div>
+<div id="mCreate" class="create hidden m-cam" role="dialog" aria-label="Crear">
+  <video id="crVideo" autoplay playsinline muted></video><video id="crPlay" playsinline controls loop></video>
+  <button class="crx" id="crClose" type="button" aria-label="Cerrar"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+  <div class="crtimer" id="crTimer">0:00</div>
+  <div class="crtools"><button class="crtool" id="crFlip" type="button"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 00-14-4M4 13a8 8 0 0014 4M5 3v4h4M19 21v-4h-4"/></svg>Girar</button></div>
+  <div class="crbottom">
+    <div class="crdur only-cam" id="crDur"><button type="button" data-s="15">15 s</button><button type="button" data-s="60" class="on">60 s</button><button type="button" data-s="180">3 min</button></div>
+    <div class="crrec only-cam"><button class="crgal" id="crGal" type="button" aria-label="Subir un video desde tu galería"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 15v4a1 1 0 001 1h14a1 1 0 001-1v-4"/></svg></button><button class="rec" id="crRec" type="button" aria-label="Grabar"></button><span class="crsp"></span></div>
+    <div class="only-live" style="flex-direction:column;align-items:center;gap:10px;width:100%"><button class="golive" id="crGo" type="button">Iniciar LIVE</button><span class="crhint">Elegirás el tema antes de salir al aire</span></div>
+    <div class="crrev only-rev"><button type="button" id="crRetry">Repetir</button><button type="button" class="main" id="crNext">Siguiente</button></div>
+    <div class="crmodes"><button type="button" data-m="live">LIVE</button><button type="button" data-m="cam" class="on">CÁMARA</button></div>
+  </div>
+</div>
 <aside id="cmPanel" class="cmp hidden" aria-label="Comentarios"><header><span id="cmTitle">Comentarios</span><button type="button" id="cmClose" aria-label="Cerrar">✕</button></header><div id="cmList"></div><form id="cmForm"><input id="cmInput" maxlength="500" placeholder="Añade un comentario…" autocomplete="off" aria-label="Comentario"><button class="btn main" type="submit">Publicar</button></form></aside>
 <div id="mUpload" class="modal hidden"><form class="mbox upbox" id="upForm">
   <h2>Subir video</h2>
@@ -1403,6 +1452,59 @@ function applySb(min){ document.body.classList.toggle("sbmin", min); const t = m
   $("sbTog").title = t; $("sbTog").setAttribute("aria-label", t); try { localStorage.setItem("ly_sbmin", min ? "1" : "0"); } catch (e) {} }
 $("sbTog").onclick = () => applySb(!document.body.classList.contains("sbmin"));
 try { if (localStorage.getItem("ly_sbmin") === "1") applySb(true); } catch (e) {}
+
+
+/* ---------- Creador móvil: grabar video / LIVE ---------- */
+const nuOrig = $("navUpload").onclick;
+$("navUpload").onclick = e => matchMedia("(max-width:760px)").matches ? openCreate() : nuOrig.call($("navUpload"), e);
+$("btnUpProfile").onclick = () => nuOrig();
+let crStream = null, crFacing = "user", crRec = null, crChunks = [], crTick = null, crMax = 60, crBlob = null, crCancel = false;
+const fmtT = t => Math.floor(t / 60) + ":" + String(Math.floor(t % 60)).padStart(2, "0");
+async function crStart(){
+  crHalt();
+  try { crStream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:crFacing, width:{ ideal:1280 }, height:{ ideal:720 } }, audio:true });
+    const v = $("crVideo"); v.srcObject = crStream; v.style.transform = crFacing === "user" ? "scaleX(-1)" : "none"; }
+  catch (e) { toastMsg("Permite la cámara y el micrófono para grabar", 3500); }
+}
+function crHalt(){ if (crStream){ crStream.getTracks().forEach(t => t.stop()); crStream = null; } }
+function crSetMode(m){ const c = $("mCreate"); c.classList.toggle("m-cam", m === "cam"); c.classList.toggle("m-live", m === "live");
+  c.querySelectorAll(".crmodes button").forEach(b => b.classList.toggle("on", b.dataset.m === m)); }
+function crReset(){ const c = $("mCreate"); c.classList.remove("reviewing", "recording"); crBlob = null; $("crPlay").removeAttribute("src"); $("crTimer").textContent = "0:00"; }
+function openCreate(){ $("mCreate").classList.remove("hidden"); crSetMode("cam"); crReset(); crStart(); }
+function closeCreate(){ crStopRec(true); crHalt(); $("mCreate").classList.add("hidden"); crReset(); }
+function crPick(){ for (const m of ["video/mp4;codecs=avc1", "video/mp4", "video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm"]) if (window.MediaRecorder && MediaRecorder.isTypeSupported(m)) return m; return ""; }
+function crStartRec(){
+  if (!crStream) return crStart();
+  if (!window.MediaRecorder) return toastMsg("Tu navegador no puede grabar aquí. Usa el botón de subir desde la galería.", 4000);
+  crChunks = []; const mime = crPick(); const opts = { videoBitsPerSecond:1500000 }; if (mime) opts.mimeType = mime;
+  try { crRec = new MediaRecorder(crStream, opts); } catch (e) { return toastMsg("No se pudo iniciar la grabación", 3000); }
+  crRec.ondataavailable = e => { if (e.data && e.data.size) crChunks.push(e.data); };
+  crRec.onstop = () => { clearInterval(crTick); if (crCancel){ crCancel = false; return; }
+    crBlob = new Blob(crChunks, { type:((crRec.mimeType || mime || "video/mp4").split(";")[0]) });
+    $("crPlay").src = URL.createObjectURL(crBlob); $("mCreate").classList.add("reviewing"); $("crPlay").play().catch(() => {}); };
+  crRec.start(1000); $("mCreate").classList.add("recording"); const t0 = Date.now();
+  crTick = setInterval(() => { const t = (Date.now() - t0) / 1000; $("crTimer").textContent = fmtT(t) + " / " + fmtT(crMax); if (t >= crMax) crStopRec(); }, 250);
+}
+function crStopRec(cancel){
+  if (crRec && crRec.state === "recording"){ if (cancel) crCancel = true; crRec.stop(); }
+  $("mCreate").classList.remove("recording"); clearInterval(crTick);
+}
+$("crRec").onclick = () => (crRec && crRec.state === "recording") ? crStopRec() : crStartRec();
+$("crClose").onclick = closeCreate;
+$("crFlip").onclick = () => { crFacing = crFacing === "user" ? "environment" : "user"; crStart(); };
+$("crDur").onclick = e => { const b = e.target.closest("button"); if (!b) return; crMax = +b.dataset.s; $("crDur").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); };
+$("mCreate").querySelector(".crmodes").onclick = e => { const b = e.target.closest("button"); if (b) crSetMode(b.dataset.m); };
+$("crGal").onclick = () => { closeCreate(); nuOrig(); };
+$("crGo").onclick = () => { closeCreate(); $("btnGoLive").click(); };
+$("crRetry").onclick = () => { crReset(); crStart(); };
+$("crNext").onclick = () => {
+  if (!crBlob) return; const ext = crBlob.type.includes("mp4") ? "mp4" : "webm";
+  const f = new File([crBlob], "video-" + Date.now() + "." + ext, { type:crBlob.type });
+  if (f.size > MAX_VIDEO) return toastMsg("El video pesa más de 50 MB. Graba uno más corto.", 4000);
+  closeCreate(); nuOrig();
+  try { const dt = new DataTransfer(); dt.items.add(f); $("upFile").files = dt.files; upSet(f); }
+  catch (e) { toastMsg("No se pudo adjuntar el video grabado. Prueba con 'Subir desde la galería'.", 4000); }
+};
 
 /* ---------- Sugerencias (columna derecha) ---------- */
 let _railPool = [];
