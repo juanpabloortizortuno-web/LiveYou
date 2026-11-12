@@ -354,6 +354,32 @@
   .ptabs button.on{color:#fff;border-bottom:2px solid var(--of)}
   #myVideos{margin-top:0}
   @media(max-width:760px){#vProfile .cover{height:140px}.pbig{width:88px;height:88px;margin-top:-44px}.pinfo{padding:0 14px}.ptabs{margin:0 -14px}}
+
+  /* ===== v4: 3 columnas estilo OnlyFans (solo computadora, solo en Para ti) ===== */
+  .rail{display:none}
+  @media(min-width:761px){.app{grid-template-columns:260px 1fr}}
+  @media(min-width:1100px){
+    .app.onfeed{grid-template-columns:260px minmax(0,600px) 340px;justify-content:center}
+    .app.onfeed .side{border-right:0}
+    .app.onfeed main{padding:0;max-width:none;margin:0;border-left:1px solid var(--line);border-right:1px solid var(--line)}
+    .app.onfeed .reel{max-width:none;border-radius:0;height:100vh}.app.onfeed .slide{border-radius:0}
+    .app.onfeed .reelnav{right:calc(50% - 248px)}
+    .app.onfeed .rail{display:block;position:sticky;top:0;height:100vh;overflow-y:auto;padding:22px 20px 20px 24px;box-sizing:border-box;scrollbar-width:none}
+  }
+  .rail h4{display:flex;justify-content:space-between;align-items:center;margin:0 0 14px;font-size:.85rem;letter-spacing:.05em;color:var(--ofgray);font-weight:600}
+  .rail h4 button{background:none;border:0;color:var(--ofgray);cursor:pointer;padding:4px;display:grid;place-items:center}.rail h4 button:hover{color:#fff}
+  .rail h4 svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+  #railList{display:flex;flex-direction:column;gap:14px}
+  .rcard{position:relative;height:140px;border-radius:8px;overflow:hidden;background:#1a1d23}
+  .rcard>img.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(14px) brightness(.55);transform:scale(1.3)}
+  .rcard .av2{position:absolute;left:14px;bottom:14px;width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid #0e0e11}
+  .rcard .rin{position:absolute;left:90px;right:12px;bottom:14px;text-shadow:0 1px 4px #000;min-width:0}
+  .rcard .rin b{display:block;font-size:1.02rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rcard .rin small{display:block;font-size:.82rem;color:#e6e9ee;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px}
+  .rcard .btn{padding:5px 14px;font-size:.78rem;border-radius:999px}
+  .railbtn{display:block;width:100%;margin-top:18px;background:var(--of);color:#fff;border:0;border-radius:999px;padding:14px;font-weight:700;letter-spacing:.04em;font-size:.85rem;cursor:pointer}
+  .railbtn:hover{background:#2bbcf5}
+  .railnote{color:var(--ofgray);font-size:.9rem;padding:20px 4px}
 </style>
 </head>
 <body>
@@ -517,6 +543,11 @@
       <div id="msgList"></div>
     </div>
   </main>
+  <aside class="rail" aria-label="Sugerencias">
+    <h4><span>SUGERENCIAS</span><button type="button" id="railRefresh" aria-label="Ver otros usuarios"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 10-2 6M20 4v7h-7"/></svg></button></h4>
+    <div id="railList"></div>
+    <button class="railbtn" type="button" id="railMore">VER DIRECTOS</button>
+  </aside>
 </section>
 
 <div id="toast" class="toast hidden" role="status"></div>
@@ -678,7 +709,8 @@ function show(v){
     const nv = $("nav"+n); if (nv) nv.classList.toggle("on", n === v);
   });
   clearInterval(livePoll);
-  if (v === "Feed") loadFeed();
+  $("app").classList.toggle("onfeed", v === "Feed");
+  if (v === "Feed"){ loadFeed(); loadRail(); }
   if (v === "Profile") loadMyVideos();
   if (v === "Live"){ loadLives(); livePoll = setInterval(loadLives, 15000); }
 }
@@ -1000,6 +1032,32 @@ $("upForm").onsubmit = async e => {
   if (error) return done("No se pudo publicar: " + error.message, true);
   done("Video publicado ✓"); closeM("mUpload"); show("Profile");
 };
+
+
+/* ---------- Sugerencias (columna derecha) ---------- */
+let _railPool = [];
+async function loadRail(){
+  if (!me) return; await loadFollows();
+  const { data } = await sb.from("profiles").select("id,username,full_name,avatar_url").neq("id", me.id).limit(40);
+  _railPool = data || []; drawRail();
+}
+function drawRail(){
+  const box = $("railList"); box.replaceChildren();
+  const f = getFollows(), pool = _railPool.filter(p => !f.includes(p.id)).sort(() => Math.random() - .5).slice(0, 3);
+  if (!pool.length){ const n = document.createElement("div"); n.className = "railnote"; n.textContent = "Por ahora no hay más usuarios para sugerirte."; box.append(n); return; }
+  pool.forEach(p => {
+    const c = document.createElement("div"); c.className = "rcard";
+    const bg = new Image(); bg.className = "bg"; bg.alt = ""; bg.src = picOf(p);
+    const av = new Image(); av.className = "av2"; av.alt = "Foto de " + nameOf(p); av.src = picOf(p);
+    const info = document.createElement("div"); info.className = "rin";
+    const b = document.createElement("b"); b.textContent = nameOf(p);
+    const u = document.createElement("small"); u.textContent = "@" + (p.username || "usuario");
+    const bt = document.createElement("button"); bt.type = "button"; bt.className = "btn main"; bt.dataset.follow = p.id; paintFollowBtn(bt);
+    info.append(b, u, bt); c.append(bg, av, info); box.append(c);
+  });
+}
+$("railRefresh").onclick = drawRail;
+$("railMore").onclick = () => $("navLive").click();
 
 /* ---------- Directos ---------- */
 const TOPICS = ["Charla","Música","Cripto","Educación","Gaming","Cocina","Deportes","Humor","Otro"];
