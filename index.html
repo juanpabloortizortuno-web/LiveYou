@@ -119,7 +119,8 @@
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
   .grid.wide{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
   .vcard{position:relative;aspect-ratio:9/16;border-radius:10px;overflow:hidden;background:#000;cursor:pointer;border:0;padding:0;color:#fff}
-  .vcard video{width:100%;height:100%;object-fit:cover;pointer-events:none;display:block}
+  .vcard video,.vcard img.vthumb{width:100%;height:100%;object-fit:cover;pointer-events:none;display:block}
+  .vcard .vph,.vp-th .vph{position:absolute;inset:0;background:linear-gradient(135deg,#2a2740,#15121f)}
   .vmeta{position:absolute;left:0;right:0;bottom:0;padding:18px 8px 8px;background:linear-gradient(transparent,rgba(0,0,0,.8));font-size:.8rem;text-align:left}
   .lcard{display:flex;flex-direction:column;gap:8px;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;color:var(--text);cursor:pointer;font:inherit}
   .lcard:hover{border-color:var(--pink)}
@@ -392,7 +393,7 @@
 .vp-no{flex:none;width:22px;padding-top:24px;text-align:center;font-size:.8rem;color:var(--muted)}
 .vp-item.on .vp-no{color:var(--pink)}
 .vp-th{position:relative;flex:none;width:124px;height:70px;border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#ff3d6e,#5b1f9e)}
-.vp-th video{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;background:#000}
+.vp-th video,.vp-th img.vthumb{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;background:#000}
 .vp-dur{position:absolute;right:5px;bottom:5px;background:rgba(0,0,0,.8);color:#fff;font-style:normal;font-size:.7rem;font-weight:700;padding:1px 5px;border-radius:5px}
 .vp-dur:empty{display:none}
 .vp-it{display:flex;flex-direction:column;gap:3px;min-width:0;padding-top:2px}
@@ -1632,12 +1633,9 @@ let flvP = null;
 function killFlv(){ if (flvP){ try { flvP.destroy(); } catch (e) {} flvP = null; } }
 function vcard(v, a, withAuthor, list){
   const b = document.createElement("button"); b.className = "vcard"; b.type = "button";
-  const vid = document.createElement("video");
-  if (!isFlv(v.url)){ vid.src = v.url + "#t=0.1"; vid.preload = "metadata"; vid.muted = true; vid.playsInline = true; }
-  else { vid.style.background = "linear-gradient(135deg,#ff3d6e,#5b1f9e)"; }
   const m = document.createElement("div"); m.className = "vmeta";
   m.textContent = (withAuthor ? nameOf(a) + " · " : "") + "▷ " + (v.views || 0);
-  b.append(vid, m); b.onclick = () => openPlayer(v, a, list);
+  b.append(m); attachThumb(b, v); b.onclick = () => openPlayer(v, a, list);
   return b;
 }
 async function fillVideos(box, query, withAuthor, emptyText){
@@ -1650,6 +1648,110 @@ async function fillVideos(box, query, withAuthor, emptyText){
   data.forEach(v => box.append(vcard(v, au[v.user_id], withAuthor, list)));
 }
 /* ═════════ FIN · JS-09 ═════════ */
+
+/* ═════════ INICIO · JS-09B · CACHÉ LOCAL (miniaturas con límite, memoria de gustos, precarga) ═════════ */
+/* Todo se guarda solo en el dispositivo del usuario. Límites: 200 miniaturas (~4 MB) y 200 creadores en la memoria de gustos. */
+const THUMB_MAX = 200;
+const THUMBS = (function(){
+  const DB = "liveyou_cache", ST = "thumbs"; let dbp = null, puts = 0;
+  const open = () => dbp || (dbp = new Promise((res, rej) => {
+    try { const r = indexedDB.open(DB, 1); r.onupgradeneeded = () => r.result.createObjectStore(ST, { keyPath:"id" }); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); } catch (e) { rej(e); }
+  }));
+  const run = (mode, fn) => open().then(db => new Promise((res, rej) => { const t = db.transaction(ST, mode), o = fn(t.objectStore(ST)); t.oncomplete = () => res(o && o.result); t.onerror = () => rej(t.error); }));
+  return {
+    get: id => run("readonly", s => s.get(String(id))).catch(() => null),
+    touch: rec => run("readwrite", s => s.put(Object.assign({}, rec, { ts:Date.now() }))).catch(() => {}),
+    async put(id, data, dur){
+      try {
+        await run("readwrite", s => s.put({ id:String(id), data, dur:dur || 0, ts:Date.now() }));
+        if (++puts % 15 === 0){
+          const all = await run("readonly", s => s.getAll());
+          if (all && all.length > THUMB_MAX){ const old = all.sort((a, b) => a.ts - b.ts).slice(0, all.length - THUMB_MAX); await run("readwrite", s => { old.forEach(r => s.delete(r.id)); return null; }); }
+        }
+      } catch (e) {}
+    }
+  };
+})();
+let thumbOk = 0, thumbBad = 0, thumbBusy = 0; const thumbWait = [];
+function makeThumb(url){
+  return new Promise((res, rej) => {
+    const vid = document.createElement("video"); let done = false;
+    const fin = (ok, val) => { if (done) return; done = true; clearTimeout(to); vid.onerror = vid.onloadeddata = vid.onseeked = null; vid.removeAttribute("src"); vid.load(); ok ? res(val) : rej(val); };
+    const to = setTimeout(() => fin(false, "timeout"), 12000);
+    vid.crossOrigin = "anonymous"; vid.muted = true; vid.playsInline = true; vid.preload = "metadata";
+    vid.onerror = () => fin(false, "error");
+    vid.onloadeddata = () => { try { vid.currentTime = Math.min(0.5, (vid.duration || 1) / 4); } catch (e) { fin(false, "seek"); } };
+    vid.onseeked = () => {
+      try {
+        const w = 200, vw = vid.videoWidth || 9, vh = vid.videoHeight || 16, c = document.createElement("canvas");
+        c.width = w; c.height = Math.round(w * vh / vw); c.getContext("2d").drawImage(vid, 0, 0, c.width, c.height);
+        fin(true, { data:c.toDataURL("image/jpeg", .7), dur:vid.duration || 0 });
+      } catch (e) { fin(false, "canvas"); }
+    };
+    vid.src = url;
+  });
+}
+function thumbPump(){
+  while (thumbBusy < 2 && thumbWait.length){
+    const job = thumbWait.shift(); thumbBusy++;
+    makeThumb(job.v.url).then(r => { thumbOk++; THUMBS.put(job.v.id, r.data, r.dur); job.ok(r); }, () => { thumbBad++; job.fail(); }).finally(() => { thumbBusy--; thumbPump(); });
+  }
+}
+const thumbIO = "IntersectionObserver" in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting){ thumbIO.unobserve(e.target); e.target._go(); } }), { rootMargin:"250px" }) : null;
+/* Pone la miniatura de un video dentro de "box": primero busca en el caché, si no la genera una sola vez; si el servidor no permite leer el cuadro, usa el método de antes (un <video> con la primera imagen). */
+function attachThumb(box, v, onDur){
+  if (isFlv(v.url)){ box.style.background = "linear-gradient(135deg,#ff3d6e,#5b1f9e)"; return; }
+  const ph = document.createElement("div"); ph.className = "vph"; box.prepend(ph);
+  const show = (src, dur) => { const im = new Image(); im.className = "vthumb"; im.alt = ""; im.decoding = "async"; im.onload = () => { ph.replaceWith(im); }; im.src = src; if (onDur && dur) onDur(dur); };
+  const fallback = () => {
+    const vid = document.createElement("video"); vid.src = v.url + "#t=0.1"; vid.preload = "metadata"; vid.muted = true; vid.playsInline = true;
+    vid.onloadedmetadata = () => { if (onDur && isFinite(vid.duration)) onDur(vid.duration); }; ph.replaceWith(vid);
+  };
+  box._go = async () => {
+    const rec = await THUMBS.get(v.id);
+    if (rec && rec.data){ THUMBS.touch(rec); show(rec.data, rec.dur); return; }
+    if (thumbBad >= 2 && thumbOk === 0){ fallback(); return; }
+    thumbWait.push({ v, ok:r => show(r.data, r.dur), fail:fallback }); thumbPump();
+  };
+  if (thumbIO) thumbIO.observe(box); else box._go();
+}
+/* Memoria de gustos: cuánto le interesa a esta persona cada creador. Se guarda solo en su dispositivo y se va olvidando con los días. */
+const TASTE = (function(){
+  const KEY = "liveyou_taste_v1", MAXA = 200; let d = {};
+  try { d = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { d = {}; }
+  const save = () => { try { const ks = Object.keys(d); if (ks.length > MAXA) ks.sort((a, b) => d[a].t - d[b].t).slice(0, ks.length - MAXA).forEach(k => delete d[k]); localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {} };
+  const score = uid => { const e = d[uid]; return e ? e.s * Math.pow(0.9, (Date.now() - e.t) / 864e5) : 0; };
+  return {
+    score,
+    bump(uid, delta){ if (!uid) return; d[uid] = { s:Math.max(-5, Math.min(20, score(uid) + delta)), t:Date.now() }; save(); },
+    clear(){ d = {}; try { localStorage.removeItem(KEY); } catch (e) {} }
+  };
+})();
+/* Videos ya vistos en este dispositivo (últimos 150): el feed los manda más abajo para que siempre haya algo nuevo. */
+const SEEN = (function(){
+  const KEY = "liveyou_seen_v1"; let a = [];
+  try { a = JSON.parse(localStorage.getItem(KEY) || "[]"); } catch (e) { a = []; } if (!Array.isArray(a)) a = [];
+  return {
+    has: id => a.includes(String(id)),
+    add(id){ id = String(id); if (a.includes(id)) return; a.push(id); if (a.length > 150) a = a.slice(-150); try { localStorage.setItem(KEY, JSON.stringify(a)); } catch (e) {} },
+    clear(){ a = []; try { localStorage.removeItem(KEY); } catch (e) {} }
+  };
+})();
+/* Orden de "Para ti": lo que más ha visto esta persona + lo reciente + creadores que sigue − lo ya visto. Un poco de azar para variar. */
+function rankFeed(list){
+  const fol = new Set(getFollows().map(String));
+  return list.map((v, i) => ({ v, s:TASTE.score(v.user_id) * 1.5 + 3 * Math.pow(0.93, i) + (fol.has(String(v.user_id)) ? 1 : 0) + (SEEN.has(v.id) ? -4 : 0) + Math.random() * 0.4 }))
+    .sort((x, y) => y.s - x.s).slice(0, 40).map(x => x.v);
+}
+/* Precarga del siguiente video: solo uno a la vez, solo con buena conexión y sin "ahorro de datos". */
+let preEl = null;
+function killPre(){ if (preEl){ preEl.removeAttribute("src"); preEl.load(); preEl = null; } }
+function canPreload(){ const c = navigator.connection || {}; return !c.saveData && !/(^|-)(2g|3g)$/.test(c.effectiveType || ""); }
+function preloadUrl(url){
+  killPre(); if (!url || isFlv(url) || !canPreload()) return;
+  preEl = document.createElement("video"); preEl.preload = "auto"; preEl.muted = true; preEl.playsInline = true; preEl.src = url;
+}
+/* ═════════ FIN · JS-09B ═════════ */
 
 /* ═════════ INICIO · JS-10 · FEED ESTILO TIKTOK (Para ti) ═════════ */
 /* --- Feed estilo TikTok --- */
@@ -1674,29 +1776,48 @@ function syncCtl(){
     s.querySelector("input").checked = autoNext;
   });
 }
+/* Carga por demanda: solo el video actual, el siguiente (con más precarga) y el anterior tienen su archivo pedido; los que quedan lejos se sueltan para no llenar la memoria. */
+function feedWarm(s, level){
+  if (!s || isFlv(s.dataset.url)) return; const vid = s.querySelector("video");
+  if (!vid.getAttribute("src")){
+    vid.preload = level; vid.src = s.dataset.url;
+    THUMBS.get(s.dataset.id).then(r => { if (r && r.data && !vid.poster) vid.poster = r.data; });
+  } else if (level === "auto" && canPreload()) vid.preload = "auto";
+}
+function feedTrim(){
+  const ss = [...$("feedBox").querySelectorAll(".slide")], i = ss.indexOf(curSlide); if (i < 0) return;
+  ss.forEach((s, k) => { if (Math.abs(k - i) > 3){ const vid = s.querySelector("video"); if (vid.getAttribute("src")){ vid.removeAttribute("src"); vid.load(); } } });
+}
+function feedCommit(s){
+  if (!s._act) return; s._act = 0;
+  const uid = s.dataset.uid; if (!uid || (me && uid === me.id)) return;
+  const d = s.querySelector("video").duration || 0, f = d ? (s._max || 0) / d : 0;
+  if (f >= 0.8) TASTE.bump(uid, 1); else if (f >= 0.4) TASTE.bump(uid, 0.3); else if ((s._max || 0) < 3) TASTE.bump(uid, -0.5);
+}
 function activate(s, on){
   const vid = s.querySelector("video");
   if (on){
-    curSlide = s;
+    curSlide = s; feedWarm(s, "auto"); feedWarm(s.nextElementSibling, "auto"); feedWarm(s.previousElementSibling, "metadata"); feedTrim();
+    s._act = Date.now(); s._max = 0; SEEN.add(s.dataset.id);
     if (isFlv(s.dataset.url) && !s._flv && window.flvjs && flvjs.isSupported()){ s._flv = flvjs.createPlayer({ type:"flv", url:s.dataset.url }); s._flv.attachMediaElement(vid); s._flv.load(); }
     vid.muted = feedMuted; vid.playbackRate = s._rate || 1;
     vid.play().catch(() => { vid.muted = true; vid.play().catch(() => {}); });
     if (!s._counted){ s._counted = 1; sb.rpc("increment_views", { vid:s.dataset.id }).then(() => {}); }
   } else {
-    vid.pause();
+    feedCommit(s); vid.pause();
     if (s._flv){ try { s._flv.destroy(); } catch (e) {} s._flv = null; } else { try { vid.currentTime = 0; } catch (e) {} }
   }
 }
 function slide(v, a){
   const s = document.createElement("section"); s.className = "slide"; s.dataset.url = v.url; s.dataset.id = v.id;
   const act = (k, label, key) => '<div><button ' + (key ? 'data-act="' + key + '"' : 'data-soon="' + label + '"') + ' aria-label="' + label + '">' + sv(IC[k]) + '</button><span class="lab">' + label + '</span></div>';
-  s.innerHTML = '<video playsinline preload="metadata" muted></video>' +
+  s.innerHTML = '<video playsinline preload="none" muted></video>' +
     '<div class="sinfo"><div class="lrow"><img class="av" alt=""><strong></strong><button class="btn main" type="button" data-follow="">Seguir</button></div><p></p></div>' +
     '<div class="sact"><div class="arr"><button type="button" data-a="up" aria-label="Video anterior"><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg></button><button type="button" data-a="down" aria-label="Video siguiente"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button></div>' + act("heart","Me gusta","like") + act("chat","Comentarios","comment") + act("save","Favoritos","save") + act("share","Compartir","share") + '<div class="views"></div></div>' +
     '<div class="sctl"><button data-a="pp" aria-label="Pausar o reproducir"></button><span class="tm">0:00 / 0:00</span><span class="sp"></span><label class="auto"><span>Pasar automáticamente</span><input type="checkbox" class="sw" checked></label><button data-a="rate" aria-label="Velocidad">1.0x</button><button data-a="mute" aria-label="Sonido"></button></div>' +
     '<div class="sbar"><i></i></div>';
   const vid = s.querySelector("video"), bar = s.querySelector(".sbar i");
-  if (!isFlv(v.url)) vid.src = v.url;
+  s.dataset.uid = v.user_id;
   const fb = s.querySelector("[data-follow]"); fb.dataset.follow = v.user_id; if (me && v.user_id === me.id) fb.remove(); else paintFollowBtn(fb);
   s.querySelector(".av").src = picOf(a);
   s.querySelector("strong").textContent = nameOf(a);
@@ -1708,7 +1829,7 @@ function slide(v, a){
   const fmt = t => { t = Math.floor(t || 0); return Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0"); };
   vid.onplay = () => pp.innerHTML = ICO.pause;
   vid.onpause = () => pp.innerHTML = ICO.play;
-  vid.ontimeupdate = () => { bar.style.width = (vid.currentTime / (vid.duration || 1) * 100) + "%"; tm.textContent = fmt(vid.currentTime) + " / " + fmt(vid.duration); };
+  vid.ontimeupdate = () => { s._max = Math.max(s._max || 0, vid.currentTime); bar.style.width = (vid.currentTime / (vid.duration || 1) * 100) + "%"; tm.textContent = fmt(vid.currentTime) + " / " + fmt(vid.duration); };
   vid.onloadedmetadata = () => tm.textContent = "0:00 / " + fmt(vid.duration);
   s.querySelector(".sbar").onclick = e => { const r = e.currentTarget.getBoundingClientRect(); if (vid.duration) vid.currentTime = (e.clientX - r.left) / r.width * vid.duration; };
   s.querySelector('[data-a="up"]').onclick = () => step(-1); s.querySelector('[data-a="down"]').onclick = () => step(1);
@@ -1725,7 +1846,7 @@ let shareBy = null;
 async function loadFeed(){
   await loadFollows();
   const box = $("feedBox"); killFeed(); box.replaceChildren(); box.className = "reel";
-  let q = sb.from("videos").select("*").order("created_at", { ascending:false }).limit(40);
+  let q = sb.from("videos").select("*").order("created_at", { ascending:false }).limit(feedMode === "all" ? 80 : 40);
   if (feedMode === "following"){
     const f = getFollows();
     if (!f.length) return note(box, "Aún no sigues a nadie. Toca Seguir en un video o en Sugerencias.");
@@ -1741,9 +1862,10 @@ async function loadFeed(){
     const ids = Object.keys(shareBy); if (!ids.length) return note(box, "Tus amigos aún no han compartido videos.");
     q = sb.from("videos").select("*").in("id", ids);
   }
-  const { data, error } = await q;
+  let { data, error } = await q;
   if (error) return note(box, "No se pudieron cargar los videos.");
   if (!data.length) return note(box, feedMode === "following" ? "Las personas que sigues aún no han subido videos." : "Aún no hay videos. Sube el primero con el botón Subir video.");
+  if (feedMode === "all") data = rankFeed(data);
   const au = await withAuthors(data, "user_id");
   data.forEach(v => box.append(slide(v, au[v.user_id])));
   feedIO = new IntersectionObserver(es => es.forEach(e => activate(e.target, e.isIntersecting && e.intersectionRatio >= 0.7)), { root:box, threshold:[0, 0.7] });
@@ -1795,10 +1917,16 @@ async function loadMyVideos(){
 }
 
 /* ═════════ REPRODUCTOR GRANDE: lista del usuario, reproducción en secuencia, deslizar, tema ═════════ */
-let PQ = [], PI = -1, PAuto = true, PRate = 1, PMuted = false, PDirty = false;
+let PQ = [], PI = -1, PAuto = true, PRate = 1, PMuted = false, PDirty = false, PWatch = null, PArm = false, PPreT = 0;
 const PRATES = [1, 1.25, 1.5, 2, 0.5];
 const pfmt = t => { t = Math.floor(t || 0); const h = Math.floor(t / 3600), m = Math.floor(t % 3600 / 60), s = t % 60; return (h ? h + ":" + String(m).padStart(2, "0") : m) + ":" + String(s).padStart(2, "0"); };
+function commitWatch(skipped){
+  const w = PWatch; PWatch = null; if (!w || !w.uid || w.uid === me.id) return;
+  const f = w.dur ? w.max / w.dur : 0;
+  if (f >= 0.8) TASTE.bump(w.uid, 1); else if (f >= 0.4) TASTE.bump(w.uid, 0.3); else if (skipped && w.max < 3) TASTE.bump(w.uid, -0.5);
+}
 function playerCleanup(){
+  commitWatch(false); killPre(); clearTimeout(PPreT); PArm = false;
   const v = $("pVideo"); killFlv(); v.pause(); v.removeAttribute("src"); v.load();
   if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
   PQ = []; PI = -1; $("pQueue").replaceChildren();
@@ -1810,12 +1938,8 @@ function buildQueue(){
     const b = document.createElement("button"); b.type = "button"; b.className = "vp-item";
     const no = document.createElement("span"); no.className = "vp-no"; no.textContent = i + 1;
     const th = document.createElement("div"); th.className = "vp-th";
-    if (!isFlv(it.v.url)){
-      const tv = document.createElement("video"); tv.src = it.v.url + "#t=0.1"; tv.preload = "metadata"; tv.muted = true; tv.playsInline = true;
-      const d = document.createElement("em"); d.className = "vp-dur";
-      tv.onloadedmetadata = () => { if (isFinite(tv.duration)) d.textContent = pfmt(tv.duration); };
-      th.append(tv, d);
-    }
+    const d = document.createElement("em"); d.className = "vp-dur"; th.append(d);
+    attachThumb(th, it.v, secs => { d.textContent = pfmt(secs); });
     const tx = document.createElement("div"); tx.className = "vp-it";
     const t = document.createElement("strong"); t.textContent = it.v.caption || "Video sin título";
     const s = document.createElement("span");
@@ -1835,7 +1959,8 @@ function markQueue(){
 }
 function playAt(i, dir){
   if (i < 0 || i >= PQ.length) return;
-  PI = i; const { v, a } = PQ[i], vid = $("pVideo"); killFlv(); vid.pause();
+  commitWatch(dir !== 0); PI = i; const { v, a } = PQ[i], vid = $("pVideo"); killFlv(); vid.pause();
+  PWatch = { uid:v.user_id, max:0, dur:0 };
   $("pSeek").value = 0; $("pTime").textContent = "0:00 / 0:00";
   vid.muted = PMuted;
   if (isFlv(v.url)){
@@ -1856,10 +1981,15 @@ function playAt(i, dir){
   $("pQCount").textContent = "Video " + (i + 1) + " de " + PQ.length;
   $("pPrev").disabled = i === 0; $("pNext").disabled = i === PQ.length - 1;
   markQueue();
+  /* el video siguiente ya quedó pidiéndose en el fondo: se suelta ahora y se prepara el que sigue después de éste */
+  killPre(); PArm = true; clearTimeout(PPreT); PPreT = setTimeout(armPre, 5000);
 }
+function armPre(){ if (!PArm) return; PArm = false; clearTimeout(PPreT); const n = PQ[PI + 1]; if (n) preloadUrl(n.v.url); }
 function openPlayer(v, a, list){
   PQ = list && list.length ? list.slice() : [{ v, a }];
   let i = PQ.findIndex(x => x.v.id === v.id); if (i < 0){ PQ = [{ v, a }]; i = 0; }
+  /* si la lista mezcla creadores, lo que sigue se ordena según lo que más ha visto esta persona (solo en su dispositivo) */
+  if (new Set(PQ.map(x => x.v.user_id)).size > 1){ const cur = PQ[i], rest = PQ.filter((x, k) => k !== i).sort((x, y) => TASTE.score(y.v.user_id) - TASTE.score(x.v.user_id)); PQ = [cur].concat(rest); i = 0; }
   buildQueue(); openM("mPlayer"); playAt(i, 0);
 }
 (function(){
@@ -1874,7 +2004,8 @@ function openPlayer(v, a, list){
   $("pPlayBig").onclick = tog; $("pPlay").onclick = () => { tog(); $("pPlay").blur(); }; v.onclick = tog;
   ["play", "pause", "ended", "emptied"].forEach(ev => v.addEventListener(ev, sync));
   v.addEventListener("loadedmetadata", () => { v.playbackRate = PRate; sync(); });
-  v.addEventListener("timeupdate", () => { if (v.duration) $("pSeek").value = v.currentTime / v.duration * 1000; $("pTime").textContent = pfmt(v.currentTime) + " / " + pfmt(v.duration); });
+  v.addEventListener("canplaythrough", armPre);
+  v.addEventListener("timeupdate", () => { if (PWatch){ PWatch.max = Math.max(PWatch.max, v.currentTime); PWatch.dur = v.duration || 0; } if (v.duration) $("pSeek").value = v.currentTime / v.duration * 1000; $("pTime").textContent = pfmt(v.currentTime) + " / " + pfmt(v.duration); });
   v.addEventListener("ended", () => { if (PAuto && PI < PQ.length - 1) playAt(PI + 1, 1); });
   $("pSeek").oninput = () => { if (v.duration) v.currentTime = $("pSeek").value / 1000 * v.duration; };
   $("pPrev").onclick = () => { if (v.currentTime > 3) v.currentTime = 0; else go(-1); $("pPrev").blur(); };
@@ -2089,6 +2220,7 @@ function paintSlide(s){
 }
 async function toggleRx(kind, s){
   if (!me) return; const o = RXK[kind], id = String(s.dataset.id), had = o.set.has(id);
+  { const u = s.dataset.uid; if (u && u !== me.id) TASTE.bump(u, had ? (kind === "like" ? -1 : 0) : (kind === "save" ? 2 : kind === "like" ? 1.5 : 1)); }
   had ? o.set.delete(id) : o.set.add(id); if (o.cnt) o.cnt[id] = Math.max(0, (o.cnt[id] || 0) + (had ? -1 : 1)); paintSlide(s);
   const r = had ? await sb.from(o.t).delete().eq("user_id", me.id).eq("video_id", id) : await sb.from(o.t).insert({ user_id: me.id, video_id: id });
   if (r.error && r.error.code !== "23505"){
