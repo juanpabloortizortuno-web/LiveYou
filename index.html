@@ -419,6 +419,16 @@
   .pprice b{color:var(--of);font-size:1.1rem}.pprice small{color:var(--ofgray);display:block;font-size:.72rem;letter-spacing:.06em}
   .pprice .btn{border-radius:999px;padding:8px 16px;background:var(--of);font-size:.8rem}
   @media(max-width:760px){#vPosts{padding-bottom:20px}#navPosts{order:2}}
+
+  /* ===== v6 ===== */
+  .reelnav{display:none!important}
+  .hero ul{list-style:none;padding:0;margin:14px 0 0;display:flex;flex-direction:column;gap:10px;font-weight:600}
+  .hero li{display:flex;align-items:center;gap:10px}.hero li::before{content:"";width:8px;height:8px;border-radius:50%;background:#fff;flex:none;opacity:.9}
+  .seg{display:grid;grid-template-columns:1fr 1fr;background:#14161b;border:1px solid var(--line);border-radius:999px;padding:4px}
+  .seg button{background:none;border:0;color:var(--muted);padding:9px;border-radius:999px;font-weight:700;cursor:pointer}.seg button.on{background:#23262d;color:#fff}
+  .box input[type=password],.box input[type=email]{width:100%;box-sizing:border-box}
+  .linkbtn{background:none;border:0;color:var(--of);cursor:pointer;font-size:.88rem;padding:4px;text-align:center}.linkbtn:hover{text-decoration:underline}
+  .pwrap{position:relative}.pwrap input{padding-right:70px}.pwrap button{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--muted);cursor:pointer;font-size:.8rem;padding:6px}
 </style>
 </head>
 <body>
@@ -429,17 +439,22 @@
     <div class="logo">LiveYou<i>.</i></div>
     <h1>Crea, mira y transmite videos cortos en vivo</h1>
     <p>Tu comunidad, tu cámara, tu momento.</p>
+    <ul><li>Videos cortos y directos en vivo</li><li>Publicaciones y ventas entre usuarios</li><li>Sigue a tus creadores favoritos</li></ul>
   </div>
   <div class="box">
     <h2>Iniciar sesión</h2>
-    <small>Entra con Google o con tu correo. Tus videos, me gusta y guardados quedan en tu cuenta.</small>
+    <small>Entra con Google o con tu correo y contraseña. Tu sesión se mantiene abierta hasta que tú pulses Salir.</small>
     <button class="btn white" id="btnGoogle">
       <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4 7.1-10 7.1-17.5z"/><path fill="#FBBC05" d="M10.5 28.7a14.5 14.5 0 0 1 0-9.4l-7.9-6.1a24 24 0 0 0 0 21.6l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.9 2.3-8.4 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>
       Continuar con Google
     </button>
     <div class="sep">o con tu correo</div>
+    <div class="seg"><button type="button" class="on" id="tabIn">Entrar</button><button type="button" id="tabUp">Crear cuenta</button></div>
     <input id="email" type="email" placeholder="Correo electrónico" autocomplete="email">
-    <button class="btn main" id="btnEmail">Enviarme un enlace de acceso</button>
+    <div class="pwrap"><input id="pass" type="password" placeholder="Contraseña (mínimo 6)" autocomplete="current-password"><button type="button" id="passEye">Ver</button></div>
+    <button class="btn main" id="btnPass">Entrar</button>
+    <button class="linkbtn" type="button" id="btnForgot">Olvidé mi contraseña</button>
+    <button class="linkbtn" id="btnEmail" type="button">Prefiero recibir un enlace de acceso por correo</button>
     <p class="msg" id="loginMsg" role="status"></p>
   </div>
 </section>
@@ -468,7 +483,7 @@
     <button class="nav on" id="navFeed"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10H3z"/></svg><span class="dk">Para ti</span><span class="mb">Inicio</span></button>
     <button class="nav" id="navPosts"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span>Publicaciones</span></button>
     <button class="nav soon" data-soon="Explorar"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 100 18 9 9 0 000-18zM15 9l-2 6-4 0 2-6z"/></svg><span>Explorar</span></button>
-    <button class="nav soon" data-soon="Siguiendo"><svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 100-8 4 4 0 000 8zM3 21c0-4 3-6 7-6s7 2 7 6"/></svg><span>Siguiendo</span></button>
+    <button class="nav soon" id="navFol"><svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 100-8 4 4 0 000 8zM3 21c0-4 3-6 7-6s7 2 7 6"/></svg><span>Siguiendo</span></button>
     <button class="nav soon keep" data-soon="Amigos"><svg viewBox="0 0 24 24"><path d="M9 11a3 3 0 100-6 3 3 0 000 6zM2 20c0-3 3-5 7-5s7 2 7 5M17 11a3 3 0 100-6M22 20c0-3-2-4-4-5"/></svg><span>Amigos</span></button>
     <button class="nav" id="navLive"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M6 6a8 8 0 000 12M18 6a8 8 0 010 12"/></svg><span>En vivo</span></button>
     <button class="nav" id="navUpload"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg><span>Subir video</span></button>
@@ -480,7 +495,7 @@
   </aside>
   <main>
     <div id="vFeed" style="position:relative">
-      <div class="feedtabs"><button class="ftlive" id="ftLive" aria-label="En vivo">LIVE</button><button data-soon="Siguiendo">Siguiendo</button><button class="on">Para ti</button><button class="ftsearch" data-soon="Buscar" aria-label="Buscar"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button></div>
+      <div class="feedtabs"><button class="ftlive" id="ftLive" aria-label="En vivo">LIVE</button><button id="ftFol">Siguiendo</button><button class="on" id="ftAll">Para ti</button><button class="ftsearch" data-soon="Buscar" aria-label="Buscar"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button></div>
       <div id="feedBox" class="reel"></div>
       <div class="reelnav"><button class="btn ghost" id="rUp" aria-label="Video anterior">▲</button><button class="btn ghost" id="rDown" aria-label="Video siguiente">▼</button></div>
     </div>
@@ -553,7 +568,7 @@
         <h3 id="pName"></h3>
         <div class="user" id="pUser"></div>
         <p class="bio" id="pBio"></p>
-        <div class="pstats"><div><b id="stVid">0</b><span>Videos</span></div><div><b id="stViews">0</b><span>Reproducciones</span></div><div><b id="stFol">0</b><span>Siguiendo</span></div></div>
+        <div class="pstats"><div><b id="stVid">0</b><span>Videos</span></div><div><b id="stViews">0</b><span>Reproducciones</span></div><div><b id="stFers">0</b><span>Seguidores</span></div><div><b id="stFol">0</b><span>Siguiendo</span></div></div>
         <div class="ptabs"><button class="on" type="button">▦ VIDEOS <i id="tabCnt">0</i></button></div>
       </div>
       <form class="info hidden" id="editForm">
@@ -675,7 +690,7 @@ const safeStorage = {
   removeItem(k){ try { localStorage.removeItem(k); } catch (e) {} try { sessionStorage.removeItem(k); } catch (e) {} delete memStore[k]; }
 };
 let lsInfo = "?"; try { let n = 0; for (let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); n += k.length + (localStorage.getItem(k) || "").length; } lsInfo = Math.round(n * 2 / 1024) + " KB, " + localStorage.length + " claves"; } catch (e) {}
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { storage: safeStorage } });
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { storage: safeStorage, persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
 const $ = id => document.getElementById(id);
 let me = null, profile = null;
 
@@ -696,7 +711,26 @@ $("btnEmail").onclick = async () => {
   error ? say($("loginMsg"), error.message, "err")
         : say($("loginMsg"), "Listo. Revisa tu correo y abre el enlace.", "ok");
 };
-$("btnLogout").onclick = async () => { await stopAll(); await sb.auth.signOut(); };
+let userLogout = false, authMode = "in";
+const setAuthMode = m => { authMode = m; $("tabIn").classList.toggle("on", m === "in"); $("tabUp").classList.toggle("on", m === "up");
+  $("btnPass").textContent = m === "in" ? "Entrar" : "Crear cuenta"; $("pass").autocomplete = m === "in" ? "current-password" : "new-password"; };
+$("tabIn").onclick = () => setAuthMode("in"); $("tabUp").onclick = () => setAuthMode("up");
+$("passEye").onclick = () => { const p = $("pass"), h = p.type === "password"; p.type = h ? "text" : "password"; $("passEye").textContent = h ? "Ocultar" : "Ver"; };
+$("btnPass").onclick = async () => {
+  const email = $("email").value.trim(), password = $("pass").value;
+  if (!email || password.length < 6) return say($("loginMsg"), "Escribe tu correo y una contraseña de al menos 6 caracteres.", "err");
+  $("btnPass").disabled = true;
+  const r = authMode === "in" ? await sb.auth.signInWithPassword({ email, password }) : await sb.auth.signUp({ email, password, options:{ emailRedirectTo: SITE_URL } });
+  $("btnPass").disabled = false;
+  if (r.error) return say($("loginMsg"), /Invalid login/i.test(r.error.message) ? "Correo o contraseña incorrectos." : r.error.message, "err");
+  if (authMode === "up" && !r.data.session) say($("loginMsg"), "Cuenta creada. Revisa tu correo para confirmarla y luego entra.", "ok");
+};
+$("btnForgot").onclick = async () => {
+  const email = $("email").value.trim(); if (!email) return say($("loginMsg"), "Escribe tu correo y vuelve a pulsar aquí.", "err");
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: SITE_URL });
+  error ? say($("loginMsg"), error.message, "err") : say($("loginMsg"), "Te enviamos un correo para cambiar la contraseña.", "ok");
+};
+$("btnLogout").onclick = async () => { userLogout = true; await stopAll(); await sb.auth.signOut(); };
 
 /* ---------- Perfil ---------- */
 async function loadProfile(user){
@@ -752,7 +786,7 @@ function openEdit(show){
 }
 $("btnEdit").onclick = () => openEdit(true);
 $("btnWho").onclick = () => show("Profile");
-$("btnLogout2").onclick = async () => { await stopAll(); await sb.auth.signOut(); };
+$("btnLogout2").onclick = async () => { userLogout = true; await stopAll(); await sb.auth.signOut(); };
 $("navProfile").onclick = () => show("Profile");
 $("navInbox").onclick = () => { show("Inbox"); loadInbox(); };
 
@@ -967,12 +1001,20 @@ function slide(v, a){
   s.querySelector("input").onchange = e => { autoNext = e.target.checked; syncCtl(); };
   return s;
 }
+let feedMode = "all";
+function setMode(m){ feedMode = m; $("ftAll").classList.toggle("on", m === "all"); $("ftFol").classList.toggle("on", m === "following"); $("navFol").classList.toggle("on", m === "following"); $("navFeed").classList.toggle("on", m === "all"); }
 async function loadFeed(){
   await loadFollows();
   const box = $("feedBox"); killFeed(); box.replaceChildren(); box.className = "reel";
-  const { data, error } = await sb.from("videos").select("*").order("created_at", { ascending:false }).limit(40);
+  let q = sb.from("videos").select("*").order("created_at", { ascending:false }).limit(40);
+  if (feedMode === "following"){
+    const f = getFollows();
+    if (!f.length) return note(box, "Aún no sigues a nadie. Toca Seguir en un video o en Sugerencias.");
+    q = q.in("user_id", f);
+  }
+  const { data, error } = await q;
   if (error) return note(box, "No se pudieron cargar los videos.");
-  if (!data.length) return note(box, "Aún no hay videos. Sube el primero con el botón Subir video.");
+  if (!data.length) return note(box, feedMode === "following" ? "Las personas que sigues aún no han subido videos." : "Aún no hay videos. Sube el primero con el botón Subir video.");
   const au = await withAuthors(data, "user_id");
   data.forEach(v => box.append(slide(v, au[v.user_id])));
   feedIO = new IntersectionObserver(es => es.forEach(e => activate(e.target, e.isIntersecting && e.intersectionRatio >= 0.7)), { root:box, threshold:[0, 0.7] });
@@ -983,6 +1025,7 @@ async function loadStats(){
   const { data } = await sb.from("videos").select("views").eq("user_id", me.id); const a = data || [];
   $("stVid").textContent = a.length; $("tabCnt").textContent = a.length;
   $("stViews").textContent = a.reduce((t, v) => t + (v.views || 0), 0); $("stFol").textContent = getFollows().length;
+  const fc = await sb.from("follows").select("*", { count:"exact", head:true }).eq("following_id", me.id); $("stFers").textContent = fc.error ? 0 : (fc.count || 0);
 }
 const loadMyVideos = () => { loadStats(); return fillVideos($("myVideos"),
   sb.from("videos").select("*").eq("user_id", me.id).order("created_at", { ascending:false }), false,
@@ -1149,6 +1192,10 @@ async function loadPosts(){
     box.append(el); });
 }
 
+{ const nf = $("navFeed").onclick; $("navFeed").onclick = e => { setMode("all"); nf && nf.call($("navFeed"), e); };
+  $("ftAll").onclick = () => { setMode("all"); loadFeed(); }; $("ftFol").onclick = () => { setMode("following"); loadFeed(); };
+  $("navFol").onclick = () => { setMode("following"); show("Feed"); $("navFol").classList.add("on"); $("navFeed").classList.remove("on"); };
+}
 /* ---------- Sugerencias (columna derecha) ---------- */
 let _railPool = [];
 async function loadRail(){
@@ -1574,7 +1621,15 @@ async function route(session){
   }
 }
 function dbg(){ const d = $("dbg"); if (d) d.textContent = "Diagnóstico (temporal): evento=" + lastEvt + " · sesión=" + dbgSession + " · tokens en la dirección=" + (hadHash ? "sí" : "no") + " · código=" + (hadCode ? "sí" : "no") + " · error=" + (urlErr ? urlErr.slice(0, 120) : "no") + " · almacenamiento=" + (storageOk ? "ok" : "bloqueado") + " (" + lsInfo + ")" + (initErr ? " · init=" + initErr.slice(0, 120) : "") + (recErr ? " · rec=" + recErr.slice(0, 120) : "") + " · " + location.host + location.pathname; }
-sb.auth.onAuthStateChange((_evt, session) => { lastEvt = _evt; dbgSession = session ? "sí" : "no"; dbg(); setTimeout(() => route(session), 0); });
+sb.auth.onAuthStateChange((_evt, session) => {
+  lastEvt = _evt; dbgSession = session ? "sí" : "no"; dbg();
+  if (_evt === "TOKEN_REFRESHED" || _evt === "USER_UPDATED") return;
+  if (_evt === "SIGNED_IN" && me && session && session.user.id === me.id) return;
+  if (_evt === "SIGNED_OUT" && !userLogout){
+    setTimeout(async () => { const r = await sb.auth.getSession(); if (!r.data.session) route(null); }, 1500); return; }
+  userLogout = false; setTimeout(() => route(session), 0);
+});
+document.addEventListener("visibilitychange", () => { if (!document.hidden && me) sb.auth.getSession(); });
 async function recoverFromHash(){
   const h = new URLSearchParams(hashRaw.replace(/^#/, "")), at = h.get("access_token"), rt = h.get("refresh_token");
   if (!at || !rt) return "faltan tokens en la dirección";
