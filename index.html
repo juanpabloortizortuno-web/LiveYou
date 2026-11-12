@@ -1035,6 +1035,18 @@
     :root[data-theme="light"] .nav{color:#6b7385}
     :root[data-theme="light"] .nav.on{color:var(--text)}
   }
+  .tkbtns{flex-wrap:wrap}
+  .sact .lab.ni{white-space:normal;line-height:1.05;max-width:64px}
+  /* LIVE al estilo TikTok: aviso rojo, lista en mosaico vertical y botones ▲▼ */
+  @keyframes lvpulse{0%{box-shadow:0 0 0 0 rgba(254,44,85,.6)}100%{box-shadow:0 0 0 9px rgba(254,44,85,0)}}
+  .feedtabs .ftlive.hot{background:#fe2c55;border-color:#fe2c55;animation:lvpulse 1.6s infinite}
+  #navLive.hot::after{content:"";width:8px;height:8px;border-radius:50%;background:#fe2c55;margin-left:auto;animation:lvpulse 1.6s infinite}
+  #liveGrid.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+  #liveGrid .lcard{flex-direction:column;align-items:stretch;gap:0;padding:0;overflow:hidden;border-radius:14px}
+  #liveGrid .lthumb{width:100%;aspect-ratio:3/4;border:0;border-radius:0}
+  #liveGrid .linfo{padding:8px 10px 10px;display:flex;flex-direction:column;gap:2px}
+  #liveGrid .linfo strong{font-size:.9rem;line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  @media(max-width:760px){.lvnav{display:none!important}}
   /* ═════════ FIN · CSS-16 ═════════ */
 </style>
 </head>
@@ -1146,7 +1158,7 @@
                 <button class="btn main hidden" id="lvFollow" type="button" style="padding:6px 12px">Seguir</button>
                 <button class="ibtn" id="lvLink" type="button" aria-label="Copiar enlace del directo"><svg viewBox="0 0 24 24"><path d="M10 14a5 5 0 007 0l3-3a5 5 0 00-7-7l-1 1M14 10a5 5 0 00-7 0l-3 3a5 5 0 007 7l1-1"/></svg></button>
                 <button class="ibtn" id="lvFull" type="button" aria-label="Pantalla completa"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
-                <button class="ibtn hidden" id="lvLeave" type="button" aria-label="Salir del directo"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+                <button class="ibtn hidden lvnav" id="lvPrev" type="button" aria-label="Directo anterior"><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg></button><button class="ibtn hidden lvnav" id="lvNext" type="button" aria-label="Siguiente directo"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button><button class="ibtn hidden" id="lvLeave" type="button" aria-label="Salir del directo"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
               </div>
             </div>
             <div id="lvStatus" class="vstat hidden"></div>
@@ -1189,7 +1201,7 @@
           <div class="tkmain">
             <div class="tkname"><h3 id="pName"></h3><span class="tkuser" id="pUser"></span></div>
             <div class="tkstats"><span><b id="stFol">0</b> Siguiendo</span><span><b id="stFers">0</b> Seguidores</span><span><b id="stLikes">0</b> Me gusta</span><span><b id="stVid">0</b> Videos</span><span><b id="stViews">0</b> Reproducciones</span></div>
-            <div class="tkbtns" id="pBtnsMe"><button class="btn main" id="btnUpProfile" type="button">Subir video</button><button class="btn" id="btnEdit">Editar perfil</button><button class="btn" id="btnLogout">Salir</button><button class="btn" type="button" data-theme-toggle aria-label="Cambiar entre modo oscuro y claro"><svg class="ti ti-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="ti ti-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 13.5A9 9 0 1110.5 3a7 7 0 0010.5 10.5z"/></svg><span data-theme-label>Modo claro</span></button></div>
+            <div class="tkbtns" id="pBtnsMe"><button class="btn main" id="btnUpProfile" type="button">Subir video</button><button class="btn" id="btnEdit">Editar perfil</button><button class="btn" id="btnLogout">Salir</button><button class="btn" type="button" data-theme-toggle aria-label="Cambiar entre modo oscuro y claro"><svg class="ti ti-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="ti ti-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 13.5A9 9 0 1110.5 3a7 7 0 0010.5 10.5z"/></svg><span data-theme-label>Modo claro</span></button><button class="btn" type="button" id="btnResetFeed" title="Borra lo que Para ti aprendió de ti en este dispositivo">Reiniciar mi feed</button></div>
             <div class="tkbtns hidden" id="pBtnsOther"><button class="btn main" id="pFollow" type="button" data-follow="">Seguir</button><button class="btn" id="pMsg" type="button">Mensaje</button></div>
             <p class="bio" id="pBio"></p>
           </div>
@@ -1278,7 +1290,7 @@
 <!-- ═════════ INICIO · HTML-13 · VENTANA · SUBIR VIDEO ═════════ -->
 <div id="mUpload" class="modal hidden"><form class="mbox upbox" id="upForm">
   <h2>Subir video</h2>
-  <label class="drop" id="upDrop" for="upFile"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></svg><strong>Toca para elegir un video</strong><span>o arrástralo aquí · MP4 o FLV · máx. 50 MB</span></label>
+  <label class="drop" id="upDrop" for="upFile"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></svg><strong>Toca para elegir un video</strong><span>o arrástralo aquí · MP4 o FLV · máx. 25 MB</span></label>
   <input id="upFile" type="file" accept="video/*,.flv,.mp4" class="hidden">
   <div id="upPrevBox" class="upprev hidden"><video id="upPrev" muted playsinline controls></video><div id="upFlv" class="upflv hidden">Video FLV listo para subir</div><div class="upinfo"><span id="upName"></span><button class="btn ghost" type="button" id="upClear">Quitar</button></div></div>
   <label for="upCap">Descripción</label><textarea id="upCap" maxlength="200" placeholder="Cuéntales de qué trata tu video…"></textarea>
@@ -1497,15 +1509,15 @@ function show(v){
   clearInterval(livePoll);
   $("app").classList.toggle("onfeed", v === "Feed");
   if (v === "Feed") loadFeed();
-  if (v === "Feed") loadRail();
+  if (v === "Feed"){ loadRail(); liveDot(); }
   if (v === "Profile"){ if (!keepPv) pv = null; keepPv = false; loadMyVideos(); }
   if (v === "Live"){ loadLives(); livePoll = setInterval(loadLives, 15000); }
 }
 $("navFeed").onclick = () => show("Feed");
-$("ftLive").onclick = () => show("Live");
+$("ftLive").onclick = () => quickLive();
 $("sideLogo").onclick = () => show("Feed");
 $("sideLogo").onkeydown = e => { if (e.key === "Enter" || e.key === " ") show("Feed"); };
-$("navLive").onclick = () => show("Live");
+$("navLive").onclick = () => quickLive();
 
 /* ═════════ FIN · JS-05 ═════════ */
 
@@ -1627,7 +1639,7 @@ document.querySelectorAll("[data-close]").forEach(b => b.onclick = () => {
 
 /* ═════════ INICIO · JS-09 · VIDEOS (subir, listar, borrar) ═════════ */
 /* ---------- Videos ---------- */
-const MAX_VIDEO = 50*1024*1024;
+const MAX_VIDEO = 25*1024*1024; /* tope de subida: cuida los datos que Supabase deja gratis cada mes */
 const isFlv = u => /\.flv(\?|#|$)/i.test(u || "");
 let flvP = null;
 function killFlv(){ if (flvP){ try { flvP.destroy(); } catch (e) {} flvP = null; } }
@@ -1673,7 +1685,7 @@ const THUMBS = (function(){
   };
 })();
 let thumbOk = 0, thumbBad = 0, thumbBusy = 0; const thumbWait = [];
-function makeThumb(url){
+function makeThumb(url, W){
   return new Promise((res, rej) => {
     const vid = document.createElement("video"); let done = false;
     const fin = (ok, val) => { if (done) return; done = true; clearTimeout(to); vid.onerror = vid.onloadeddata = vid.onseeked = null; vid.removeAttribute("src"); vid.load(); ok ? res(val) : rej(val); };
@@ -1683,7 +1695,7 @@ function makeThumb(url){
     vid.onloadeddata = () => { try { vid.currentTime = Math.min(0.5, (vid.duration || 1) / 4); } catch (e) { fin(false, "seek"); } };
     vid.onseeked = () => {
       try {
-        const w = 200, vw = vid.videoWidth || 9, vh = vid.videoHeight || 16, c = document.createElement("canvas");
+        const w = W || 200, vw = vid.videoWidth || 9, vh = vid.videoHeight || 16, c = document.createElement("canvas");
         c.width = w; c.height = Math.round(w * vh / vw); c.getContext("2d").drawImage(vid, 0, 0, c.width, c.height);
         fin(true, { data:c.toDataURL("image/jpeg", .7), dur:vid.duration || 0 });
       } catch (e) { fin(false, "canvas"); }
@@ -1707,11 +1719,16 @@ function attachThumb(box, v, onDur){
     const vid = document.createElement("video"); vid.src = v.url + "#t=0.1"; vid.preload = "metadata"; vid.muted = true; vid.playsInline = true;
     vid.onloadedmetadata = () => { if (onDur && isFinite(vid.duration)) onDur(vid.duration); }; ph.replaceWith(vid);
   };
-  box._go = async () => {
+  const normal = async () => {
     const rec = await THUMBS.get(v.id);
     if (rec && rec.data){ THUMBS.touch(rec); show(rec.data, rec.dur); return; }
     if (thumbBad >= 2 && thumbOk === 0){ fallback(); return; }
     thumbWait.push({ v, ok:r => show(r.data, r.dur), fail:fallback }); thumbPump();
+  };
+  /* videos nuevos traen su portada guardada (unos 15 KB): no hace falta tocar el video. Si falla, se usa el método de antes. */
+  box._go = () => {
+    if (!v.thumb_url) return normal();
+    const t = new Image(); t.onload = () => show(v.thumb_url, v.duration); t.onerror = normal; t.src = v.thumb_url;
   };
   if (thumbIO) thumbIO.observe(box); else box._go();
 }
@@ -1727,6 +1744,7 @@ const TASTE = (function(){
     clear(){ d = {}; try { localStorage.removeItem(KEY); } catch (e) {} }
   };
 })();
+const IC_NI = "M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zM4 12c0-4.4 3.6-8 8-8 1.8 0 3.5.6 4.9 1.7L5.7 16.9C4.6 15.5 4 13.8 4 12zm8 8c-1.8 0-3.5-.6-4.9-1.7L18.3 7.1C19.4 8.5 20 10.2 20 12c0 4.4-3.6 8-8 8z";
 /* Videos ya vistos en este dispositivo (últimos 150): el feed los manda más abajo para que siempre haya algo nuevo. */
 const SEEN = (function(){
   const KEY = "liveyou_seen_v1"; let a = [];
@@ -1747,8 +1765,9 @@ function rankFeed(list){
 let preEl = null;
 function killPre(){ if (preEl){ preEl.removeAttribute("src"); preEl.load(); preEl = null; } }
 function canPreload(){ const c = navigator.connection || {}; return !c.saveData && !/(^|-)(2g|3g)$/.test(c.effectiveType || ""); }
+const PRELOAD_NEXT = false; /* pon true para volver a precargar el siguiente video (gasta más datos) */
 function preloadUrl(url){
-  killPre(); if (!url || isFlv(url) || !canPreload()) return;
+  killPre(); if (!PRELOAD_NEXT || !url || isFlv(url) || !canPreload()) return;
   preEl = document.createElement("video"); preEl.preload = "auto"; preEl.muted = true; preEl.playsInline = true; preEl.src = url;
 }
 /* ═════════ FIN · JS-09B ═════════ */
@@ -1776,11 +1795,11 @@ function syncCtl(){
     s.querySelector("input").checked = autoNext;
   });
 }
-/* Carga por demanda: solo el video actual, el siguiente (con más precarga) y el anterior tienen su archivo pedido; los que quedan lejos se sueltan para no llenar la memoria. */
+/* Carga por demanda: solo el video actual, y el siguiente (solo sus primeros datos) tienen su archivo pedido; los que quedan lejos se sueltan para no llenar la memoria. */
 function feedWarm(s, level){
   if (!s || isFlv(s.dataset.url)) return; const vid = s.querySelector("video");
   if (!vid.getAttribute("src")){
-    vid.preload = level; vid.src = s.dataset.url;
+    vid.preload = level; vid.src = s.dataset.url; if (s.dataset.thumb) vid.poster = s.dataset.thumb;
     THUMBS.get(s.dataset.id).then(r => { if (r && r.data && !vid.poster) vid.poster = r.data; });
   } else if (level === "auto" && canPreload()) vid.preload = "auto";
 }
@@ -1794,10 +1813,24 @@ function feedCommit(s){
   const d = s.querySelector("video").duration || 0, f = d ? (s._max || 0) / d : 0;
   if (f >= 0.8) TASTE.bump(uid, 1); else if (f >= 0.4) TASTE.bump(uid, 0.3); else if ((s._max || 0) < 3) TASTE.bump(uid, -0.5);
 }
+/* "No me interesa": baja mucho el interés en ese creador, oculta el video y pasa al siguiente. Solo se guarda en este dispositivo. */
+function notInterested(s){
+  if (!s) return; const uid = s.dataset.uid;
+  if (uid && !(me && uid === me.id)) TASTE.bump(uid, -3);
+  SEEN.add(s.dataset.id); s._act = 0;
+  const vid = s.querySelector("video"); if (vid) vid.pause();
+  if (s._flv){ try { s._flv.destroy(); } catch (e) {} s._flv = null; }
+  const box = $("feedBox"), n = s.nextElementSibling || s.previousElementSibling;
+  if (feedIO) feedIO.unobserve(s);
+  if (n) n.scrollIntoView({ block:"start" });
+  s.remove();
+  if (!n){ curSlide = null; note(box, "No hay más videos por ahora. Vuelve en un rato."); }
+  toastMsg("Listo: verás menos videos así", 2500);
+}
 function activate(s, on){
   const vid = s.querySelector("video");
   if (on){
-    curSlide = s; feedWarm(s, "auto"); feedWarm(s.nextElementSibling, "auto"); feedWarm(s.previousElementSibling, "metadata"); feedTrim();
+    curSlide = s; feedWarm(s, "auto"); feedWarm(s.nextElementSibling, "metadata"); feedTrim();
     s._act = Date.now(); s._max = 0; SEEN.add(s.dataset.id);
     if (isFlv(s.dataset.url) && !s._flv && window.flvjs && flvjs.isSupported()){ s._flv = flvjs.createPlayer({ type:"flv", url:s.dataset.url }); s._flv.attachMediaElement(vid); s._flv.load(); }
     vid.muted = feedMuted; vid.playbackRate = s._rate || 1;
@@ -1813,11 +1846,11 @@ function slide(v, a){
   const act = (k, label, key) => '<div><button ' + (key ? 'data-act="' + key + '"' : 'data-soon="' + label + '"') + ' aria-label="' + label + '">' + sv(IC[k]) + '</button><span class="lab">' + label + '</span></div>';
   s.innerHTML = '<video playsinline preload="none" muted></video>' +
     '<div class="sinfo"><div class="lrow"><img class="av" alt=""><strong></strong><button class="btn main" type="button" data-follow="">Seguir</button></div><p></p></div>' +
-    '<div class="sact"><div class="arr"><button type="button" data-a="up" aria-label="Video anterior"><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg></button><button type="button" data-a="down" aria-label="Video siguiente"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button></div>' + act("heart","Me gusta","like") + act("chat","Comentarios","comment") + act("save","Favoritos","save") + act("share","Compartir","share") + '<div class="views"></div></div>' +
+    '<div class="sact"><div class="arr"><button type="button" data-a="up" aria-label="Video anterior"><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg></button><button type="button" data-a="down" aria-label="Video siguiente"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button></div>' + act("heart","Me gusta","like") + act("chat","Comentarios","comment") + act("save","Favoritos","save") + act("share","Compartir","share") + '<div><button type="button" data-act="ni" aria-label="No me interesa">' + sv(IC_NI) + '</button><span class="lab ni">No me interesa</span></div><div class="views"></div></div>' +
     '<div class="sctl"><button data-a="pp" aria-label="Pausar o reproducir"></button><span class="tm">0:00 / 0:00</span><span class="sp"></span><label class="auto"><span>Pasar automáticamente</span><input type="checkbox" class="sw" checked></label><button data-a="rate" aria-label="Velocidad">1.0x</button><button data-a="mute" aria-label="Sonido"></button></div>' +
     '<div class="sbar"><i></i></div>';
   const vid = s.querySelector("video"), bar = s.querySelector(".sbar i");
-  s.dataset.uid = v.user_id;
+  s.dataset.uid = v.user_id; s.dataset.thumb = v.thumb_url || "";
   const fb = s.querySelector("[data-follow]"); fb.dataset.follow = v.user_id; if (me && v.user_id === me.id) fb.remove(); else paintFollowBtn(fb);
   s.querySelector(".av").src = picOf(a);
   s.querySelector("strong").textContent = nameOf(a);
@@ -2017,7 +2050,7 @@ function openPlayer(v, a, list){
   $("pFs").onclick = () => { fs(); $("pFs").blur(); };
   $("pDel").onclick = async () => {
     const it = PQ[PI]; if (!it || !confirm("¿Eliminar este video?")) return;
-    await sb.storage.from("videos").remove([it.v.path]);
+    await sb.storage.from("videos").remove([it.v.path, it.v.path.replace(/\.[a-z0-9]+$/i, "_t.jpg")]);
     await sb.from("videos").delete().eq("id", it.v.id);
     PDirty = true; PQ.splice(PI, 1);
     if (!PQ.length){ $("mPlayer").querySelector("[data-close]").click(); return; }
@@ -2068,6 +2101,11 @@ function openPlayer(v, a, list){
   document.querySelectorAll("[data-theme-toggle]").forEach(b => b.addEventListener("click", () => set(cur() === "light" ? "dark" : "light")));
   set(cur());
 })();
+/* Reiniciar el feed: borra la memoria de gustos y de videos vistos de este dispositivo. No toca a quién sigues, ni me gusta ni favoritos. */
+$("btnResetFeed").onclick = () => {
+  if (!confirm("¿Reiniciar tu feed?\n\nSe borra lo que “Para ti” aprendió de lo que ves en este dispositivo y empezará de cero. No cambia a quién sigues, tus me gusta ni tus favoritos.")) return;
+  TASTE.clear(); SEEN.clear(); toastMsg("Feed reiniciado ✓ “Para ti” empieza de cero", 3000);
+};
 
 let upURL = null;
 function upSet(f){
@@ -2109,7 +2147,7 @@ $("upForm").onsubmit = async e => {
   if (!f) return say($("upMsg"), "Elige un video.", "err");
   const fext = (f.name.split(".").pop() || "").toLowerCase();
   if (!(f.type.startsWith("video/") || fext === "flv" || fext === "mp4")) return say($("upMsg"), "El archivo debe ser un video MP4 o FLV.", "err");
-  if (f.size > MAX_VIDEO) return say($("upMsg"), "El video pesa más de 50 MB.", "err");
+  if (f.size > MAX_VIDEO) return say($("upMsg"), "El video pesa más de 25 MB.", "err");
   const cap = $("upCap").value.trim();
   upBusy = true; $("upBtn").disabled = true; $("upBar").classList.remove("hidden"); $("upPct").classList.remove("hidden");
   upProgress(0); say($("upMsg"), ""); $("upChip").classList.remove("hidden");
@@ -2121,7 +2159,20 @@ $("upForm").onsubmit = async e => {
   if (err){ $("upBar").classList.add("hidden"); $("upPct").classList.add("hidden"); return done("No se pudo subir: " + err, true); }
   upProgress(100, "Publicando…");
   const url = sb.storage.from("videos").getPublicUrl(path).data.publicUrl;
-  const { error } = await sb.from("videos").insert({ user_id: me.id, url, path, caption: cap });
+  let th = null;
+  if (upURL && ext !== "flv"){ try {
+    const r = await makeThumb(upURL, 320), b64 = r.data.split(",")[1], bin = atob(b64), u8 = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    const tp = path.replace(/\.[a-z0-9]+$/i, "_t.jpg");
+    const tu = await sb.storage.from("videos").upload(tp, new Blob([u8], { type:"image/jpeg" }), { contentType:"image/jpeg", upsert:true });
+    if (!tu.error) th = { url: sb.storage.from("videos").getPublicUrl(tp).data.publicUrl, dur: isFinite(r.dur) && r.dur > 0 ? Math.round(r.dur * 10) / 10 : null };
+  } catch (e) {} }
+  const row = { user_id: me.id, url, path, caption: cap };
+  if (th){ row.thumb_url = th.url; if (th.dur) row.duration = th.dur; }
+  let ins = await sb.from("videos").insert(row);
+  /* si aún no corriste supabase_thumbs.sql, se publica igual, sin portada guardada */
+  if (ins.error && th) ins = await sb.from("videos").insert({ user_id: me.id, url, path, caption: cap });
+  const error = ins.error;
   $("upBar").classList.add("hidden"); $("upPct").classList.add("hidden");
   if (error) return done("No se pudo publicar: " + error.message, true);
   done("Video publicado ✓"); closeM("mUpload"); show("Profile");
@@ -2230,7 +2281,7 @@ async function toggleRx(kind, s){
   toastMsg(kind === "like" ? (had ? "Quitaste tu me gusta" : "Te gusta este video ♥") : kind === "save" ? (had ? "Quitado de Favoritos" : "Guardado en Favoritos ★") : (had ? "Dejaste de compartir" : "Compartido: tus amigos lo verán en Amigos ↗"));
 }
 $("feedBox").addEventListener("click", e => { const b = e.target.closest("[data-act]"); if (!b) return;
-  b.dataset.act === "comment" ? openComments(b.closest(".slide")) : toggleRx(b.dataset.act, b.closest(".slide")); });
+  b.dataset.act === "comment" ? openComments(b.closest(".slide")) : b.dataset.act === "ni" ? notInterested(b.closest(".slide")) : toggleRx(b.dataset.act, b.closest(".slide")); });
 let cmSlide = null;
 async function openComments(s){ cmSlide = s; $("cmPanel").classList.remove("hidden"); await drawComments(); $("cmInput").focus(); }
 async function drawComments(){
@@ -2314,7 +2365,7 @@ $("crRetry").onclick = () => { crReset(); crStart(); };
 $("crNext").onclick = () => {
   if (!crBlob) return; const ext = crBlob.type.includes("mp4") ? "mp4" : "webm";
   const f = new File([crBlob], "video-" + Date.now() + "." + ext, { type:crBlob.type });
-  if (f.size > MAX_VIDEO) return toastMsg("El video pesa más de 50 MB. Graba uno más corto.", 4000);
+  if (f.size > MAX_VIDEO) return toastMsg("El video pesa más de 25 MB. Graba uno más corto.", 4000);
   closeCreate(); nuOrig();
   try { const dt = new DataTransfer(); dt.items.add(f); $("upFile").files = dt.files; upSet(f); }
   catch (e) { toastMsg("No se pudo adjuntar el video grabado. Prueba con 'Subir desde la galería'.", 4000); }
@@ -2505,7 +2556,7 @@ $("lvForm").onsubmit = e => {
 function enterStage(host){
   $("lvMsgs").replaceChildren(); $("lvUnmute").classList.add("hidden");
   $("lvHostTools").classList.toggle("hidden", !host);
-  $("lvLeave").classList.toggle("hidden", host); $("lvFollow").classList.toggle("hidden", host); camOff = false; statTxt = ""; paintStat();
+  $("lvLeave").classList.toggle("hidden", host); ["lvPrev","lvNext"].forEach(i => $(i).classList.toggle("hidden", host)); $("lvFollow").classList.toggle("hidden", host); camOff = false; statTxt = ""; paintStat();
   setCount(0); show("Stage");
 }
 
@@ -2698,7 +2749,7 @@ function watchLive(l){
       conn.on("data", onWatchData); conn.on("close", () => retry("Se perdió la conexión."));
     });
     peer.on("call", call => { call.answer(); call.on("stream", s => { setStat(""); $("lvVideo").srcObject = s; playLv(); }); });
-    peer.on("error", err => { if (W !== w) return; if (err.type === "peer-unavailable") watchEnd("Este directo ya terminó.", "err"); else retry("Error de conexión."); });
+    peer.on("error", err => { if (W !== w) return; if (err.type === "peer-unavailable") watchEnd("Este directo ya terminó.", "err", true); else retry("Error de conexión."); });
   };
   start(); paintFollow();
 }
@@ -2713,7 +2764,7 @@ function onWatchData(d){
   if (d.t === "ok"){ clearTimeout(W.timer); W.tries = 0; lvSys("Estás dentro. Escribe para saludar."); }
   else if (d.t === "deny") watchEnd(d.why || "No se pudo entrar.", "err");
   else if (d.t === "kick") watchEnd("El anfitrión te sacó del directo.", "err");
-  else if (d.t === "end") watchEnd("El directo terminó. ¡Gracias por acompañar!", "ok");
+  else if (d.t === "end") watchEnd("El directo terminó. ¡Gracias por acompañar!", "ok", true);
   else if (d.t === "media"){ camOff = !d.cam; paintStat(); }
   else if (d.t === "count") setCount(d.n);
   else if (d.t === "react") floatEmoji(d.e);
@@ -2726,8 +2777,64 @@ function leaveWatch(){
   clearTimeout(w.timer); try { w.conn && w.conn.close(); } catch (e) {} try { w.peer.destroy(); } catch (e) {}
   $("lvVideo").srcObject = null;
 }
-function watchEnd(msg, type){ leaveWatch(); show("Live"); say($("liveMsg"), msg, type); }
+async function watchEnd(msg, type, next){
+  const gone = W && W.l.id; leaveWatch();
+  if (next){ toastMsg(msg, 3000); if (await quickLive(gone)) return; } else show("Live");
+  say($("liveMsg"), msg, type);
+}
 $("lvLeave").onclick = () => { leaveWatch(); show("Live"); };
+/* ---------- Entrar directo a un live (sin lista) y cambiar de live deslizando ---------- */
+async function fetchLives(){
+  const { data } = await sb.from("lives").select("*").eq("is_live", true).gte("last_seen", new Date(Date.now() - 45000).toISOString());
+  const a = (data || []).filter(l => !me || l.host_id !== me.id), f = getFollows();
+  /* primero los que sigues, luego los que tienen más gente */
+  a.sort((x, y) => (f.includes(y.host_id) - f.includes(x.host_id)) || ((y.viewers || 0) - (x.viewers || 0)));
+  if (a.length){ const au = await withAuthors(a, "host_id"); a.forEach(l => { l._a = au[l.host_id]; }); }
+  return a;
+}
+let qlBusy = false;
+async function quickLive(skipId){
+  if (H){ show("Stage"); return true; }
+  if (qlBusy) return false; qlBusy = true;
+  try {
+    const a = (await fetchLives()).filter(l => String(l.id) !== String(skipId));
+    if (!a.length){ show("Live"); return false; }
+    watchLive(a[0]);
+    try { if (a.length > 1 && !localStorage.getItem("ly_swipe_hint")){ localStorage.setItem("ly_swipe_hint", "1"); toastMsg("Desliza hacia arriba para ver otro directo", 3500); } } catch (e) {}
+    return true;
+  } catch (e) { show("Live"); return false; } finally { qlBusy = false; }
+}
+let stepBusy = false;
+async function liveStep(d){
+  if (!W || stepBusy) return; stepBusy = true;
+  try {
+    const cur = W.l.id, a = await fetchLives(); if (!W || String(W.l.id) !== String(cur)) return;
+    const i = a.findIndex(l => String(l.id) === String(cur));
+    if (!a.length || (i >= 0 && a.length < 2)) return toastMsg("No hay más directos ahora", 2000);
+    watchLive(i < 0 ? a[0] : a[(i + d + a.length) % a.length]);
+  } catch (e) {} finally { stepBusy = false; }
+}
+$("lvPrev").onclick = () => liveStep(-1); $("lvNext").onclick = () => liveStep(1);
+(function(){
+  let y0 = 0, x0 = 0;
+  $("vwrap").addEventListener("touchstart", e => { y0 = e.touches[0].clientY; x0 = e.touches[0].clientX; }, { passive:true });
+  $("vwrap").addEventListener("touchend", e => { if (!W) return; const t = e.changedTouches[0], dy = t.clientY - y0, dx = t.clientX - x0; if (Math.abs(dy) > 80 && Math.abs(dx) < 60) liveStep(dy < 0 ? 1 : -1); }, { passive:true });
+  document.addEventListener("keydown", e => {
+    if (!W || $("vStage").classList.contains("hidden") || /^(INPUT|TEXTAREA)$/.test((document.activeElement || {}).tagName)) return;
+    if (e.key === "ArrowDown") liveStep(1); else if (e.key === "ArrowUp") liveStep(-1);
+  });
+})();
+/* punto rojo en LIVE cuando alguien transmite (una consulta muy liviana cada 30 s) */
+let dotBusy = false;
+async function liveDot(){
+  if (!me || dotBusy) return; dotBusy = true;
+  try {
+    const r = await sb.from("lives").select("id", { count:"exact", head:true }).eq("is_live", true).gte("last_seen", new Date(Date.now() - 45000).toISOString());
+    const on = !r.error && (r.count || 0) > 0;
+    ["ftLive", "navLive"].forEach(i => $(i).classList.toggle("hot", on)); $("ftLive").title = on ? r.count + " en vivo ahora" : "En vivo";
+  } catch (e) {} dotBusy = false;
+}
+setInterval(liveDot, 30000);
 async function stopAll(){ leaveWatch(); await endLive(); }
 window.addEventListener("beforeunload", () => { try { H && H.peer.destroy(); W && W.peer.destroy(); } catch (e) {} });
 
