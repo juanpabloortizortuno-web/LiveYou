@@ -1,0 +1,37 @@
+name: Convertir videos a HLS
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"   # cada 5 minutos (GitHub puede tardar un poco más)
+  workflow_dispatch:         # también se puede lanzar a mano desde la pestaña Actions
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hls
+  cancel-in-progress: false
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SUPABASE_URL: https://cmnnskdmkgtyeluzsvvj.supabase.co
+      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      MAX_PER_RUN: "3"      # máximo de videos por corrida
+      RENDITIONS: "480"     # calidades HLS, ej. "360,720" para dos
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Revisar si hay videos pendientes
+        id: check
+        run: node scripts/hls-worker.mjs check
+      - name: Instalar ffmpeg
+        if: steps.check.outputs.pending == '1'
+        run: command -v ffmpeg >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg)
+      - name: Convertir
+        if: steps.check.outputs.pending == '1'
+        run: node scripts/hls-worker.mjs
