@@ -146,7 +146,7 @@
     .nav{color:#a9a9b3}.nav.on{color:#fff;background:none}
     .nav span.dk{display:none}.nav span.mb{display:block}
     #navLive{display:none}
-    .nav.soon.keep{display:flex;order:2}
+    .nav.soon.keep{display:none}
     #navUpload svg{fill:#fff;stroke:#000;filter:drop-shadow(-3px 0 0 #25f4ee) drop-shadow(3px 0 0 #fe2c55)}
     .feedtabs{align-items:center}
     .feedtabs .ftlive{position:absolute;left:14px;border:2px solid #fff;border-radius:6px;font-size:.68rem;font-weight:800;color:#fff;padding:1px 5px}
@@ -429,6 +429,36 @@
   .box input[type=password],.box input[type=email]{width:100%;box-sizing:border-box}
   .linkbtn{background:none;border:0;color:var(--of);cursor:pointer;font-size:.88rem;padding:4px;text-align:center}.linkbtn:hover{text-decoration:underline}
   .pwrap{position:relative}.pwrap input{padding-right:70px}.pwrap button{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--muted);cursor:pointer;font-size:.8rem;padding:6px}
+
+  /* ===== v7: perfil estilo TikTok ===== */
+  #vProfile{max-width:1100px;margin:0 auto;padding:0 20px 40px}
+  #vProfile .card{max-width:none;border:0;background:transparent}
+  #pCover{display:none}
+  .pinfo{padding:0}
+  .tk{display:flex;gap:32px;align-items:flex-start;padding:28px 0 22px}
+  .tkav{width:150px;height:150px;border-radius:50%;object-fit:cover;flex:none;background:#1a1d23}
+  .tkmain{min-width:0;flex:1}
+  .tkname{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}.tkname h3{margin:0;font-size:1.7rem}
+  #pName::after{display:none}
+  .tkuser{color:var(--ofgray);font-size:1.05rem}
+  .tkstats{display:flex;gap:20px;flex-wrap:wrap;margin:12px 0;color:var(--ofgray)}.tkstats b{color:#fff;font-size:1.05rem;margin-right:2px}
+  .tkbtns{display:flex;gap:8px;margin:14px 0}
+  .tkbtns .btn{padding:10px 24px;border-radius:8px;border:0;background:#2a2d33;color:#fff;font-weight:700;font-size:.95rem;text-transform:none;letter-spacing:0}
+  .tkbtns .btn:hover{background:#363a42}.tkbtns .btn.main{background:var(--pink)}.tkbtns .btn.main:hover{background:#ff4f73}
+  .tkbtns .btn.following{background:#2a2d33;color:#fff;border:0;font-weight:600}
+  .pinfo .bio{margin:10px 0 0;line-height:1.45;color:#e8eaee}
+  .ptabs{margin:0;border:0;border-bottom:1px solid var(--line);justify-content:flex-start;gap:6px}
+  .ptabs button{flex:0 0 auto;padding:14px 30px;color:var(--ofgray);font-size:1rem;letter-spacing:0;font-weight:700;text-transform:none}
+  .ptabs button.on{color:#fff;border-bottom:2px solid #fff}
+  #myVideos{grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-top:18px}
+  #myVideos .vcard{border-radius:8px;aspect-ratio:3/4}
+  #profPosts{max-width:640px;margin:0 auto}
+  @media(max-width:760px){
+    #vProfile{padding:0 12px 24px}.tk{gap:16px;padding:18px 0 14px}.tkav{width:88px;height:88px}
+    .tkname h3{font-size:1.25rem}.tkstats{gap:12px;font-size:.88rem}
+    #myVideos{grid-template-columns:repeat(3,1fr);gap:2px}#myVideos .vcard{border-radius:0}
+    .ptabs button{flex:1;padding:12px 6px}.tkbtns .btn{padding:9px 16px;font-size:.88rem}
+  }
 </style>
 </head>
 <body>
@@ -481,7 +511,6 @@
   <aside class="side">
     <div class="logo" id="sideLogo" role="button" tabindex="0" title="Ir a Para ti">LiveYou<i>.</i></div>
     <button class="nav on" id="navFeed"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10H3z"/></svg><span class="dk">Para ti</span><span class="mb">Inicio</span></button>
-    <button class="nav" id="navPosts"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span>Publicaciones</span></button>
     <button class="nav soon" data-soon="Explorar"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 100 18 9 9 0 000-18zM15 9l-2 6-4 0 2-6z"/></svg><span>Explorar</span></button>
     <button class="nav soon" id="navFol"><svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 100-8 4 4 0 000 8zM3 21c0-4 3-6 7-6s7 2 7 6"/></svg><span>Siguiendo</span></button>
     <button class="nav soon keep" data-soon="Amigos"><svg viewBox="0 0 24 24"><path d="M9 11a3 3 0 100-6 3 3 0 000 6zM2 20c0-3 3-5 7-5s7 2 7 5M17 11a3 3 0 100-6M22 20c0-3-2-4-4-5"/></svg><span>Amigos</span></button>
@@ -561,15 +590,17 @@
     <div class="card">
       <div class="cover" id="pCover"></div>
       <div class="info pinfo" id="view">
-        <div class="prow">
-          <img class="big pbig" id="pAvatar" alt="Foto de perfil">
-          <div class="pbtns"><button class="btn main" id="btnEdit">Editar perfil</button><button class="btn ghost" id="btnLogout">Salir</button></div>
+        <div class="tk">
+          <img class="tkav" id="pAvatar" alt="Foto de perfil">
+          <div class="tkmain">
+            <div class="tkname"><h3 id="pName"></h3><span class="tkuser" id="pUser"></span></div>
+            <div class="tkstats"><span><b id="stFol">0</b> Siguiendo</span><span><b id="stFers">0</b> Seguidores</span><span><b id="stVid">0</b> Videos</span><span><b id="stViews">0</b> Reproducciones</span></div>
+            <div class="tkbtns" id="pBtnsMe"><button class="btn" id="btnEdit">Editar perfil</button><button class="btn" id="btnLogout">Salir</button></div>
+            <div class="tkbtns hidden" id="pBtnsOther"><button class="btn main" id="pFollow" type="button" data-follow="">Seguir</button><button class="btn" id="pMsg" type="button">Mensaje</button></div>
+            <p class="bio" id="pBio"></p>
+          </div>
         </div>
-        <h3 id="pName"></h3>
-        <div class="user" id="pUser"></div>
-        <p class="bio" id="pBio"></p>
-        <div class="pstats"><div><b id="stVid">0</b><span>Videos</span></div><div><b id="stViews">0</b><span>Reproducciones</span></div><div><b id="stFers">0</b><span>Seguidores</span></div><div><b id="stFol">0</b><span>Siguiendo</span></div></div>
-        <div class="ptabs"><button class="on" type="button">▦ VIDEOS <i id="tabCnt">0</i></button></div>
+        <div class="ptabs"><button class="on" type="button" id="tabVid">▦ Videos <i id="tabCnt">0</i></button><button type="button" id="tabPost">▤ Publicaciones</button></div>
       </div>
       <form class="info hidden" id="editForm">
         <img class="big" id="eAvatar" alt="Foto de perfil">
@@ -586,9 +617,7 @@
       </form>
     </div>
     <div id="myVideos" class="grid"></div>
-    </div>
-    <div id="vPosts" class="hidden">
-      <div class="phead"><h2>PUBLICACIONES</h2></div>
+    <div id="profPosts" class="hidden">
       <form class="pcomp" id="poForm">
         <textarea id="poBody" maxlength="1500" placeholder="Escribir nueva publicación…" aria-label="Nueva publicación"></textarea>
         <div class="pprev" id="poPrev"><img id="poImg" alt="Vista previa"><button type="button" id="poImgX" aria-label="Quitar foto">✕</button></div>
@@ -602,6 +631,7 @@
         <p class="msg" id="poMsg" role="status"></p>
       </form>
       <div id="poList"></div>
+    </div>
     </div>
     <div id="vInbox" class="hidden">
       <h2 style="margin-bottom:14px">Bandeja de entrada</h2>
@@ -794,16 +824,15 @@ let livePoll = null;
 function show(v){
   if (v === "Live" && H) v = "Stage";
   if (v !== "Stage") leaveWatch();
-  ["Feed","Live","Stage","Profile","Inbox","Posts"].forEach(n => {
+  ["Feed","Live","Stage","Profile","Inbox"].forEach(n => {
     $("v"+n).classList.toggle("hidden", n !== v);
     const nv = $("nav"+n); if (nv) nv.classList.toggle("on", n === v);
   });
   clearInterval(livePoll);
-  $("app").classList.toggle("onfeed", v === "Feed" || v === "Posts");
+  $("app").classList.toggle("onfeed", v === "Feed");
   if (v === "Feed") loadFeed();
-  if (v === "Feed" || v === "Posts") loadRail();
-  if (v === "Posts") loadPosts();
-  if (v === "Profile") loadMyVideos();
+  if (v === "Feed") loadRail();
+  if (v === "Profile"){ if (!keepPv) pv = null; keepPv = false; loadMyVideos(); }
   if (v === "Live"){ loadLives(); livePoll = setInterval(loadLives, 15000); }
 }
 $("navFeed").onclick = () => show("Feed");
@@ -988,6 +1017,7 @@ function slide(v, a){
   const fb = s.querySelector("[data-follow]"); fb.dataset.follow = v.user_id; if (me && v.user_id === me.id) fb.remove(); else paintFollowBtn(fb);
   s.querySelector(".av").src = picOf(a);
   s.querySelector("strong").textContent = nameOf(a);
+  [s.querySelector(".av"), s.querySelector("strong")].forEach(el => { el.style.cursor = "pointer"; el.onclick = () => openUser(v.user_id); });
   s.querySelector(".sinfo p").textContent = v.caption || "";
   s.querySelector(".views").textContent = "▷ " + (v.views || 0);
   vid.onclick = () => vid.paused ? vid.play() : vid.pause();
@@ -1020,16 +1050,35 @@ async function loadFeed(){
   feedIO = new IntersectionObserver(es => es.forEach(e => activate(e.target, e.isIntersecting && e.intersectionRatio >= 0.7)), { root:box, threshold:[0, 0.7] });
   box.querySelectorAll(".slide").forEach(s => feedIO.observe(s));
 }
-async function loadStats(){
-  await loadFollows();
-  const { data } = await sb.from("videos").select("views").eq("user_id", me.id); const a = data || [];
+let pv = null, keepPv = false;
+function openUser(id){ if (!id) return; pv = (me && id === me.id) ? null : id; keepPv = true; show("Profile"); }
+function profTab(t){ const v = t === "vid"; $("myVideos").classList.toggle("hidden", !v); $("profPosts").classList.toggle("hidden", v);
+  $("tabVid").classList.toggle("on", v); $("tabPost").classList.toggle("on", !v);
+  if (!v){ $("poForm").classList.toggle("hidden", !!pv); loadPosts(pv || me.id); } }
+$("tabVid").onclick = () => profTab("vid"); $("tabPost").onclick = () => profTab("post");
+async function loadStats(uid){
+  uid = uid || me.id; await loadFollows();
+  const { data } = await sb.from("videos").select("views").eq("user_id", uid); const a = data || [];
   $("stVid").textContent = a.length; $("tabCnt").textContent = a.length;
-  $("stViews").textContent = a.reduce((t, v) => t + (v.views || 0), 0); $("stFol").textContent = getFollows().length;
-  const fc = await sb.from("follows").select("*", { count:"exact", head:true }).eq("following_id", me.id); $("stFers").textContent = fc.error ? 0 : (fc.count || 0);
+  $("stViews").textContent = a.reduce((t, v) => t + (v.views || 0), 0);
+  const c1 = await sb.from("follows").select("*", { count:"exact", head:true }).eq("following_id", uid);
+  const c2 = await sb.from("follows").select("*", { count:"exact", head:true }).eq("follower_id", uid);
+  $("stFers").textContent = c1.error ? 0 : (c1.count || 0);
+  $("stFol").textContent = c2.error ? (uid === me.id ? getFollows().length : 0) : (c2.count || 0);
 }
-const loadMyVideos = () => { loadStats(); return fillVideos($("myVideos"),
-  sb.from("videos").select("*").eq("user_id", me.id).order("created_at", { ascending:false }), false,
-  "Todavía no subiste videos. Toca el botón + para publicar el primero."); };
+async function loadMyVideos(){
+  const uid = pv || me.id, isMe = !pv; let p = profile;
+  if (!isMe){ const r = await sb.from("profiles").select("id,username,full_name,avatar_url,bio").eq("id", uid).maybeSingle(); p = r.data; }
+  if (!p){ pv = null; return loadMyVideos(); }
+  $("pName").textContent = nameOf(p); $("pUser").textContent = "@" + (p.username || ""); $("pAvatar").src = picOf(p);
+  $("pBio").textContent = p.bio || (isMe ? "Añade una biografía para que te conozcan." : ""); $("pBio").classList.toggle("hidden", !$("pBio").textContent);
+  $("pBtnsMe").classList.toggle("hidden", !isMe); $("pBtnsOther").classList.toggle("hidden", isMe);
+  if (!isMe){ $("pFollow").dataset.follow = uid; paintFollowBtn($("pFollow")); $("pMsg").onclick = () => { show("Inbox"); loadInbox(); $("mTo").value = "@" + (p.username || ""); $("mBody").focus(); }; }
+  if (isMe) openEdit(false);
+  profTab("vid"); loadStats(uid);
+  return fillVideos($("myVideos"), sb.from("videos").select("*").eq("user_id", uid).order("created_at", { ascending:false }), false,
+    isMe ? "Todavía no subiste videos. Toca el botón + para publicar el primero." : "Este usuario aún no ha subido videos.");
+}
 
 function openPlayer(v, a){
   const vid = $("pVideo"); killFlv();
@@ -1140,7 +1189,6 @@ $("upForm").onsubmit = async e => {
 let poFile = null;
 const ago = d => { const m = Math.max(1, Math.round((Date.now() - new Date(d)) / 60000));
   return m < 60 ? "hace " + m + " min" : m < 1440 ? "hace " + Math.round(m / 60) + " h" : "hace " + Math.round(m / 1440) + " d"; };
-$("navPosts").onclick = () => show("Posts");
 $("poPhoto").onclick = () => $("poFile").click();
 $("poSaleBtn").onclick = () => { const on = $("poSale").classList.toggle("on"); $("poSaleBtn").classList.toggle("on", on); if (on) $("poPrice").focus(); };
 $("poFile").onchange = () => { const f = $("poFile").files[0]; if (!f) return; poFile = f;
@@ -1167,15 +1215,15 @@ $("poForm").onsubmit = async e => {
   say($("poMsg"), ""); $("poForm").reset(); $("poImgX").onclick(); $("poSale").classList.remove("on"); $("poSaleBtn").classList.remove("on");
   toastMsg("Publicado ✓"); loadPosts();
 };
-async function loadPosts(){
-  const box = $("poList"); box.replaceChildren();
-  const { data, error } = await sb.from("posts").select("*").order("created_at", { ascending:false }).limit(50);
+async function loadPosts(uid){
+  uid = uid || pv || me.id; const box = $("poList"); box.replaceChildren();
+  const { data, error } = await sb.from("posts").select("*").eq("user_id", uid).order("created_at", { ascending:false }).limit(50);
   if (error) return note(box, "Falta crear la tabla 'posts' en Supabase (archivo posts.sql).");
-  if (!data.length) return note(box, "Aún no hay publicaciones. ¡Sé el primero!");
+  if (!data.length) return note(box, (uid === me.id ? "Aún no tienes publicaciones. ¡Escribe la primera!" : "Este usuario aún no tiene publicaciones."));
   const au = await withAuthors(data, "user_id");
   data.forEach(p => { const a = au[p.user_id], el = document.createElement("article"); el.className = "post";
     const h = document.createElement("div"); h.className = "ph";
-    const im = new Image(); im.alt = ""; im.src = picOf(a);
+    const im = new Image(); im.alt = ""; im.src = picOf(a); im.style.cursor = "pointer"; im.onclick = () => openUser(p.user_id);
     const nm = document.createElement("div"), b = document.createElement("b"), sm = document.createElement("small");
     b.textContent = nameOf(a); sm.textContent = "@" + ((a && a.username) || "usuario") + " · " + ago(p.created_at); nm.append(b, sm); h.append(im, nm);
     if (me && p.user_id === me.id){ const d = document.createElement("button"); d.className = "pdel"; d.type = "button"; d.textContent = "Eliminar";
@@ -1216,6 +1264,7 @@ function drawRail(){
     const u = document.createElement("small"); u.textContent = "@" + (p.username || "usuario");
     const bt = document.createElement("button"); bt.type = "button"; bt.className = "btn main"; bt.dataset.follow = p.id; paintFollowBtn(bt);
     info.append(b, u, bt); c.append(bg, av, info); box.append(c);
+    [av, b].forEach(el => { el.style.cursor = "pointer"; el.onclick = () => openUser(p.id); });
   });
 }
 $("railRefresh").onclick = drawRail;
@@ -1254,7 +1303,8 @@ async function toggleFollow(id){
     if (r.error && r.error.code !== "23505"){ _folDb = false; toastMsg("Falta crear la tabla 'follows' en Supabase (se guardó solo en este navegador)", 4000); }
   }
   document.querySelectorAll('[data-follow="' + id + '"]').forEach(paintFollowBtn);
-  if (typeof loadStats === "function") $("stFol").textContent = _fol.length;
+  if (pv && pv === id) $("stFers").textContent = Math.max(0, (+$("stFers").textContent || 0) + (had ? -1 : 1));
+  else if (!pv && !$("vProfile").classList.contains("hidden")) $("stFol").textContent = _fol.length;
   return !had;
 }
 function paintFollowBtn(b){
