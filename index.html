@@ -1553,8 +1553,12 @@
   /* ── Carrusel fluido: se desliza, y el video lleva controles como el reproductor principal ── */
   .pub-car{touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:grab}
   .pub-car.drag{cursor:grabbing}
-  .pub-s{translate:var(--dx,0px) 0;will-change:transform,opacity;transition:transform .65s cubic-bezier(.22,.8,.26,1),translate .65s cubic-bezier(.22,.8,.26,1),opacity .65s ease}
-  .pub-car.drag .pub-s{transition:none}
+  .pub-s{transition:none;will-change:transform,opacity}
+  .pub-s .pub-info{display:flex;opacity:var(--k,0);pointer-events:none}
+  .pub-s[data-rel="0"] .pub-info{pointer-events:auto}
+  .pub-arr{opacity:0;transition:opacity .2s,background .15s}
+  .pub-carwrap:hover .pub-arr,.pub-arr:focus-visible{opacity:1}
+  @media(hover:none){.pub-arr{opacity:1}}
   .lvc-pv{background:#000}
   .lvp{position:absolute;inset:0;z-index:4;pointer-events:none;color:#fff}
   .lvp.hidden{display:none}
@@ -3468,7 +3472,7 @@ function lvCarousel(wrap, pick){
   const arrow = (cls, label, d) => { const b = document.createElement("button"); b.type = "button"; b.className = "pub-arr " + cls; b.setAttribute("aria-label", label); b.innerHTML = '<svg viewBox="0 0 24 24"><path d="' + d + '"/></svg>'; return b; };
   const prev = arrow("l", "Anterior", "M15 6l-6 6 6 6"), next = arrow("r", "Siguiente", "M9 6l6 6-6 6"), car = document.createElement("div"); car.className = "pub-car";
   wrap.append(prev, car, next);
-  let items = [], slides = [], idx = 0, rot = 0, sig = "", vis = true, snd = false, adv = 0, drag = false, moved = false;
+  let items = [], slides = [], idx = 0, rot = 0, sig = "", vis = true, snd = false, adv = 0, drag = false, moved = false, tgt = 0, pos = 0, raf = 0;
   const IC = {
     play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
     pause:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>',
@@ -3477,7 +3481,7 @@ function lvCarousel(wrap, pick){
     fs:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>'
   };
   const fmt = t => { t = Math.max(0, Math.floor(t || 0)); return Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0"); };
-  const go = d => { idx += d; adv = 0; place(); };
+  const go = d => { tgt += d; adv = 0; place(); animTo(); };
   /* controles como los del reproductor principal: reproducir/pausar, barra para avanzar, tiempo, sonido y pantalla completa */
   const mkUi = (s, th) => {
     const root = document.createElement("div"); root.className = "lvp paused";
@@ -3510,10 +3514,41 @@ function lvCarousel(wrap, pick){
     const p = vd.play(); if (p && p.catch) p.catch(() => {});
   };
   const playActive = () => slides.forEach((s, i) => { const it = items[i]; if (!it || it.live) return; if (s._rel === 0 && vis && !document.hidden) startPv(s, it); else stopPv(s); });
+  /* ── movimiento continuo (como el carrusel de Twitch): cada cuadro calcula posición, tamaño y opacidad según su distancia fraccionaria al centro ── */
+  const mod = (a, n) => ((a % n) + n) % n;
+  const KX = [-290, -170, 0, 430, 560], KS = [.66, .82, 1, .82, .66], KO = [.3, .55, 1, .55, .3];
+  const lerpK = (r, ys) => { const f = Math.max(-2, Math.min(2, r)) + 2, i = Math.min(3, Math.floor(f)); return ys[i] + (ys[i + 1] - ys[i]) * (f - i); };
+  const render = () => {
+    const n = items.length; if (!n) return;
+    slides.forEach((s, i) => {
+      let r = i - pos; r -= n * Math.round(r / n);
+      const a = Math.abs(r); let x, sc, op;
+      if (a <= 2){ x = lerpK(r, KX); sc = lerpK(r, KS); op = lerpK(r, KO); }
+      else { const sg = r < 0 ? -1 : 1; x = KX[sg < 0 ? 0 : 4] + sg * (a - 2) * 130; sc = Math.max(.5, .66 - (a - 2) * .16); op = Math.max(0, .3 * (3 - a)); }
+      if (n >= 3) op *= Math.min(1, Math.max(0, (n / 2 - a) * 2));   /* al dar la vuelta, el cuadro se desvanece en vez de saltar */
+      s.style.transform = "translateX(" + x.toFixed(1) + "px) scale(" + sc.toFixed(3) + ")";
+      s.style.opacity = op.toFixed(3);
+      s.style.zIndex = String(Math.round(50 - a * 10));
+      s.style.pointerEvents = op < .05 ? "none" : "";
+      s.style.setProperty("--k", Math.max(0, 1 - a * 1.8).toFixed(3));
+    });
+  };
+  const animTo = () => {
+    cancelAnimationFrame(raf);
+    const p0 = pos, t0 = performance.now(), dist = tgt - p0;
+    if (Math.abs(dist) < .001){ pos = tgt = mod(tgt, items.length || 1); render(); return; }
+    const dur = Math.min(900, 450 + Math.abs(dist) * 140);
+    const step = now => {
+      const t = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - t, 4);   /* frena suave al llegar */
+      pos = p0 + dist * e; render();
+      if (t < 1) raf = requestAnimationFrame(step); else { pos = tgt = mod(tgt, items.length || 1); render(); }
+    };
+    raf = requestAnimationFrame(step);
+  };
   const place = () => {
-    const n = items.length; if (!n) return; idx = ((idx % n) + n) % n;
+    const n = items.length; if (!n) return; idx = mod(Math.round(tgt), n);
     slides.forEach((s, i) => { let rel = i - idx; if (rel > n / 2) rel -= n; if (rel < -n / 2) rel += n; s.dataset.rel = Math.abs(rel) > 2 ? "x" : String(rel); s._rel = rel; });
-    playActive();
+    playActive(); render();
   };
   if ("IntersectionObserver" in window) new IntersectionObserver(es => { vis = es[es.length - 1].isIntersecting; playActive(); }, { threshold:.2 }).observe(wrap);
   document.addEventListener("visibilitychange", () => { if (wrap.isConnected) playActive(); });
@@ -3529,13 +3564,25 @@ function lvCarousel(wrap, pick){
   next.onclick = () => { go(1); spin(); };
   /* deslizar con el mouse o el dedo: la fila sigue al puntero y al soltar se acomoda con inercia */
   car.addEventListener("dragstart", e => e.preventDefault());
+  const STEP = 380;   /* píxeles de arrastre que equivalen a pasar un cuadro */
   car.addEventListener("pointerdown", e => {
     if (e.button || e.target.closest("button,input")) return;
-    const x0 = e.clientX; let dx = 0; moved = false;
-    const mv = ev => { dx = ev.clientX - x0; if (!drag && Math.abs(dx) > 6){ drag = true; moved = true; car.classList.add("drag"); } if (drag) car.style.setProperty("--dx", dx + "px"); };
+    cancelAnimationFrame(raf);   /* si estaba deslizando, lo agarras en pleno movimiento */
+    const x0 = e.clientX, p0 = pos; let dx = 0, lx = x0, lt = performance.now(), vel = 0; moved = false;
+    const mv = ev => {
+      const now = performance.now(); dx = ev.clientX - x0;
+      const dt = now - lt; if (dt > 0) vel = vel * .6 + ((ev.clientX - lx) / dt) * .4; lx = ev.clientX; lt = now;
+      if (!drag && Math.abs(dx) > 6){ drag = true; moved = true; car.classList.add("drag"); }
+      if (drag){ pos = p0 - dx / STEP; render(); }   /* la fila sigue al puntero en tiempo real */
+    };
     const up = () => {
       document.removeEventListener("pointermove", mv); document.removeEventListener("pointerup", up); document.removeEventListener("pointercancel", up);
-      if (drag){ drag = false; car.classList.remove("drag"); car.style.removeProperty("--dx"); if (dx < -50) go(1); else if (dx > 50) go(-1); else place(); spin(); }
+      if (drag){
+        drag = false; car.classList.remove("drag");
+        const c = Math.round(p0); let t = Math.round(pos - vel * 220 / STEP);   /* inercia: un tirón rápido avanza más */
+        if (t === c && Math.abs(dx) > 50) t = c + (dx < 0 ? 1 : -1);
+        tgt = Math.max(c - 2, Math.min(c + 2, t)); adv = 0; place(); animTo(); spin();
+      } else animTo();
     };
     document.addEventListener("pointermove", mv); document.addEventListener("pointerup", up); document.addEventListener("pointercancel", up);
   });
@@ -3545,11 +3592,11 @@ function lvCarousel(wrap, pick){
       items = list || []; wrap.classList.toggle("hidden", !items.length);
       const s2 = items.map(lvItemId).join(",");
       if (s2 !== sig){
-        sig = s2; idx = 0; car.replaceChildren(); slides = [];
+        sig = s2; idx = 0; tgt = 0; pos = 0; car.replaceChildren(); slides = [];
         items.forEach((it, i) => {
           const s = document.createElement("div"); s.className = "pub-s";
           s.append(lvSlideThumb(it), lvSlideInfo(it, pick));
-          s.onclick = () => { if (moved){ moved = false; return; } if (s._rel === 0) pick(it); else if (Math.abs(s._rel) <= 2){ idx = i; adv = 0; place(); spin(); } };
+          s.onclick = () => { if (moved){ moved = false; return; } if (s._rel === 0) pick(it); else if (Math.abs(s._rel) <= 2){ go(s._rel); spin(); } };
           slides.push(s); car.append(s);
         });
         place();
