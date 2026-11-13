@@ -141,7 +141,19 @@
   .cnt{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.6);padding:3px 10px;border-radius:999px;font-size:.8rem}
   #lvUnmute{position:absolute;left:50%;bottom:14px;transform:translateX(-50%)}
   #reactLayer{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-  .fl{position:absolute;bottom:10px;font-size:1.8rem;animation:flo 2.2s ease-out forwards}
+  .fl{position:absolute;bottom:56px;left:0;line-height:1;pointer-events:none;will-change:transform,opacity;text-shadow:0 2px 8px rgba(0,0,0,.35)}
+  .fl.old{bottom:10px;font-size:1.8rem;animation:flo 2.2s ease-out forwards}
+  #giftFx{position:absolute;left:10px;top:64px;z-index:4;display:flex;flex-direction:column;gap:8px;max-width:72%;pointer-events:none}
+  .gban{display:flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;border-radius:999px;background:linear-gradient(90deg,rgba(254,44,85,.88),rgba(255,154,61,.82));color:#fff;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+  .gban img,.gban .gav{width:34px;height:34px;border-radius:50%;object-fit:cover;background:rgba(255,255,255,.25);display:grid;place-items:center;font-weight:800;flex:none}
+  .gban .gt{display:flex;flex-direction:column;min-width:0;line-height:1.15}.gban .gt b{font-size:.84rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.gban .gt span{font-size:.72rem;opacity:.92}
+  .gban .ge{font-size:1.8rem;line-height:1;margin-left:2px}
+  .gban .gx{font-weight:900;font-size:1.25rem;font-style:italic;text-shadow:0 2px 4px rgba(0,0,0,.4)}.gban .gx:empty{display:none}
+  .gpop,.ghero{position:absolute;left:50%;top:50%;line-height:1;pointer-events:none;will-change:transform,opacity;transform:translate(-50%,-50%)}
+  .ghero{filter:drop-shadow(0 0 26px rgba(255,205,90,.9))}
+  .vreact button{touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+  .vreact button.hold{transform:scale(.88)}
+  .sd-seg.sd-stk{grid-template-columns:repeat(4,1fr)}.sd-stk .sd-b{font-size:1.2rem;padding:7px 4px}
   @keyframes flo{to{transform:translateY(-220px);opacity:0}}
   .chat{background:var(--panel);border:1px solid var(--line);border-radius:14px;display:flex;flex-direction:column;height:min(560px,70vh)}
   #lvMsgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
@@ -1431,6 +1443,91 @@
     .pub-search{display:none}.pub-acts{margin-left:auto}.pub-logo{font-size:1.3rem}
     .pub-join span{font-size:.82rem}
   }
+
+  /* ── Carrusel compartido (directos / videos) ── */
+  .pub-carwrap{container-type:inline-size}
+  .pub-cart,.lvcar-t{margin:6px 0 10px;font-size:1.05rem;font-weight:800;text-align:center;color:var(--muted)}
+  .lvhero .pub-carwrap{max-width:1060px;margin:0 auto}
+  .lvc-live.vid{background:var(--violet)}
+  .vidth{background:radial-gradient(circle at 50% 40%,#2a2740,#0a0810)}
+  .vidth .vthumb,.vidth video{width:100%;height:100%;object-fit:contain;display:block}
+  .vidth .vph{position:absolute;inset:0;background:linear-gradient(135deg,#2a2740,#15121f)}
+  @container (max-width:900px){
+    .pub-car{height:auto;margin:0;overflow:visible}
+    .pub-s{position:relative;left:0;top:0;width:100%;margin:0;transform:none!important}
+    .pub-s:not([data-rel="0"]){display:none}
+    .pub-s .lvc-th{border-radius:10px 10px 0 0}
+    .pub-info{position:static;width:auto;height:auto;border:1px solid var(--line);border-top:0;border-radius:0 0 10px 10px}
+    .pub-arr{top:28%}
+  }
+
+  /* ── Estudio previo (antes de transmitir) ── */
+  #mGoLive{padding:8px}
+  #mGoLive .mbox.stud{max-width:1380px;width:100%;height:min(96vh,920px);padding:0;display:flex;flex-direction:column;overflow:hidden;border-radius:18px;background:var(--bg)}
+  .st-bar{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+  .st-bar h2{margin:0;font-size:1.05rem;flex:1}.st-bar h2 small{color:var(--muted);font-weight:500}
+  .st-tag{font-size:.78rem;color:var(--muted)}
+  .st-grid{flex:1;min-height:0;display:grid;grid-template-columns:292px minmax(0,1fr) 330px;gap:10px;padding:10px}
+  .st-col{min-height:0;min-width:0;overflow-y:auto;display:flex;flex-direction:column;gap:10px;scrollbar-width:thin}
+  .st-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
+  .st-card h3{margin:0;font-size:.98rem}
+  .st-card label{font-size:.8rem;color:var(--muted);margin:0}
+  .st-card input[type=text],.st-card input[type=number],.st-card select,.st-card input:not([type]){width:100%}
+  .st-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .st-fmt{display:flex;gap:4px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:3px}
+  .st-fmt button{border:0;background:none;color:var(--muted);border-radius:8px;padding:5px 10px;cursor:pointer;font-size:1rem}
+  .st-fmt button.on{background:var(--ly-card2);color:var(--text)}
+  .st-scene{font-weight:700;font-size:.88rem}
+  .st-sub{margin:0;font-size:.78rem;color:var(--muted);line-height:1.4}
+  .sp-srcs{display:flex;flex-direction:column;gap:6px;min-height:40px}
+  .sp-e{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:10px;background:var(--ly-card)}
+  .sp-e .ic{font-size:1.1rem;flex:none}
+  .sp-e .tx{flex:1;min-width:0}.sp-e .tx b{display:block;font-size:.88rem}
+  .sp-e .tx span{display:block;font-size:.74rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .sp-e button{flex:none;border:0;background:var(--ly-card2);color:var(--text);width:28px;height:28px;border-radius:8px;cursor:pointer;font-weight:700;padding:0}
+  .sp-e button:hover{background:var(--pink);color:#fff}
+  .st-tools{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .st-t{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:78px;padding:8px 4px;border:0;border-radius:12px;background:var(--ly-card);color:var(--text);font:inherit;font-size:.74rem;font-weight:600;line-height:1.2;text-align:center;cursor:pointer}
+  .st-t:hover{background:var(--ly-card2)}.st-t i{font-style:normal;font-size:1.35rem}
+  .st-t.soon::after{content:"Pronto";position:absolute;top:4px;right:4px;font-size:.58rem;background:var(--violet);color:#fff;border-radius:6px;padding:1px 5px}
+  .st-center{position:relative;overflow:visible}
+  .st-stage{flex:1;min-height:240px;position:relative;background:#07060c;border-radius:14px;overflow:hidden;display:flex}
+  #mGoLive .st-stage .gprev{margin:0;width:100%;height:100%;max-height:none;aspect-ratio:auto;border-radius:0;background:#07060c}
+  #mGoLive .st-stage .gprev video{object-fit:contain}
+  .gprev.on-stu video{transform:none}
+  .st-empty{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:20px;color:var(--muted);background:#07060c;font-size:.9rem}
+  .st-empty b{font-size:2.6rem;color:var(--text);line-height:1}.st-empty strong{color:var(--text)}
+  .st-tb{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+  .st-ib{display:flex;flex-direction:column;align-items:center;gap:2px;border:0;background:none;color:var(--text);font:inherit;font-size:.68rem;padding:4px 8px;border-radius:10px;cursor:pointer;min-width:54px}
+  .st-ib i{font-style:normal;font-size:1.25rem}.st-ib:hover{background:var(--ly-card)}.st-ib.on{background:var(--ly-card2)}.st-ib.off i{opacity:.4}
+  .st-tb .sep{width:1px;align-self:stretch;background:var(--line);margin:2px}.st-tb .grow{flex:1}
+  .st-vol{width:84px;accent-color:var(--pink)}
+  #glBtn{padding:12px 26px;font-size:1rem}
+  .st-hint{display:none;font-size:.76rem;color:var(--muted)}#glBtn:disabled + .st-hint{display:inline}
+  .st-pop{position:absolute;left:8px;right:8px;bottom:96px;z-index:4;max-height:55%;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:0 12px 36px rgba(0,0,0,.55);display:flex;flex-direction:column;gap:10px}
+  .st-pane{display:flex;flex-direction:column;gap:8px}.st-pane.hidden{display:none}
+  .st-pane label{font-size:.8rem;color:var(--muted)}.st-pane label.st-chk{display:flex;align-items:center;gap:8px;color:var(--text);margin-top:6px}
+  .st-pane input[type=range]{width:100%;accent-color:var(--pink)}.st-pane select{width:100%}
+  .st-res{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .st-res span{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--ly-card);border-radius:10px;padding:8px 4px;font-size:.95rem}
+  .st-chat{flex:1;min-height:150px}.st-chat-e{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;color:var(--muted);font-size:.82rem}
+  .st-chat-e i{font-style:normal;font-size:2rem}.st-chat-e p{margin:0;line-height:1.45}
+  .mbox.srcbox{max-width:920px;display:flex;flex-direction:column;gap:12px}
+  .src-top{display:flex;align-items:center;justify-content:space-between}.src-top h2{margin:0}
+  .src-body{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:18px;min-height:0;overflow:auto;max-height:60vh}
+  .src-g{margin:6px 0 8px;font-size:.82rem;color:var(--muted)}
+  .src-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+  .src-b{display:flex;align-items:center;gap:10px;text-align:left;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font:inherit;font-size:.86rem;font-weight:600;cursor:pointer}
+  .src-b:hover{border-color:var(--muted)}.src-b.on{border-color:var(--text)}.src-b.soon{opacity:.6}
+  .src-desc h3{margin:0 0 8px}.src-desc p{color:var(--muted);font-size:.88rem;line-height:1.5;margin:0 0 10px}
+  .src-desc label{display:block;margin:10px 0 4px;font-size:.8rem;color:var(--muted)}
+  .src-desc input,.src-desc select{width:100%}.src-desc p.src-soon{color:var(--text)}
+  @media(max-width:1100px){.st-grid{grid-template-columns:250px minmax(0,1fr) 270px}}
+  @media(max-width:900px){
+    #mGoLive .mbox.stud{height:96vh}.st-grid{grid-template-columns:1fr;overflow-y:auto}.st-col{overflow:visible}
+    .st-center{order:-1}.st-stage{min-height:56vh;flex:none}.st-pop{position:static;max-height:none}
+    .src-body{grid-template-columns:1fr}
+  }
   /* ═════════ FIN · CSS-15 ═════════ */
 
 </style>
@@ -1454,11 +1551,8 @@
       <div id="pubRailList"></div>
     </aside>
     <main class="pub-main">
-      <div class="pub-carwrap hidden" id="pubCarWrap">
-        <button class="pub-arr l" type="button" id="pubPrev" aria-label="Anterior"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>
-        <div class="pub-car" id="pubCar"></div>
-        <button class="pub-arr r" type="button" id="pubNext" aria-label="Siguiente"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
-      </div>
+      <h2 class="pub-cart hidden" id="pubCarT"></h2>
+      <div class="pub-carwrap hidden" id="pubCarWrap"></div>
       <h2 class="pub-h" id="pubH">En vivo en LiveYou</h2>
       <div class="lvcats" id="pubCats"></div>
       <div class="lvgrid" id="pubGrid"></div>
@@ -1640,7 +1734,7 @@
         <aside class="sd hidden" id="sdPanel" aria-label="Live Studio">
           <div class="sd-head"><b>🎛️ Live Studio</b><span class="sd-tag" id="sdInfo"></span></div>
           <div class="sd-tabs" id="sdTabs">
-            <button type="button" class="on" data-sd="scene">Escena</button><button type="button" data-sd="filters">Filtros</button><button type="button" data-sd="fx">Efectos</button><button type="button" data-sd="quality">Calidad</button>
+            <button type="button" class="on" data-sd="scene">Escena</button><button type="button" data-sd="filters">Filtros</button><button type="button" data-sd="fx">Efectos</button><button type="button" data-sd="quality">Calidad</button><button type="button" data-sd="src">Fuentes</button>
           </div>
 
           <div class="sd-pane on" data-pane="scene">
@@ -1686,6 +1780,8 @@
               <button type="button" class="sd-b" data-fx="frame">🌈 Marco arcoíris</button>
               <button type="button" class="sd-b" data-fx="vhs">📼 Estilo VHS</button>
             </div>
+            <label>Stickers (toca para lanzar)</label>
+            <div class="sd-seg sd-stk"><button type="button" class="sd-b" data-stk="🔥">🔥</button><button type="button" class="sd-b" data-stk="💯">💯</button><button type="button" class="sd-b" data-stk="👑">👑</button><button type="button" class="sd-b" data-stk="🎉">🎉</button><button type="button" class="sd-b" data-stk="😍">😍</button><button type="button" class="sd-b" data-stk="🚀">🚀</button><button type="button" class="sd-b" data-stk="⭐">⭐</button><button type="button" class="sd-b" data-stk="🙌">🙌</button></div>
             <label for="sdBanner">Rótulo en pantalla</label>
             <input id="sdBanner" type="text" maxlength="60" placeholder="Ej. Hoy: preguntas y respuestas" autocomplete="off">
           </div>
@@ -1698,6 +1794,12 @@
             <label for="sdFps">Fluidez</label>
             <select id="sdFps"><option value="24">24 fps</option><option value="30">30 fps</option></select>
             <p class="sd-note" id="sdBw"></p>
+          </div>
+          <div class="sd-pane" data-pane="src">
+            <label>Fuentes de la escena</label>
+            <div class="sp-srcs" id="sdSrcs"></div>
+            <button type="button" class="sd-b" id="sdAddSrc">＋ Añadir fuente</button>
+            <p class="sd-note">Aquí también puedes mover las metas y los contadores durante el directo.</p>
           </div>
         </aside>
         <!-- ═════════ FIN · HTML-06B ═════════ -->
@@ -1865,17 +1967,86 @@
 <div id="volPop" class="volpop" role="presentation"><div class="lyv-wrap" id="volWrap" role="slider" tabindex="0" aria-orientation="vertical" aria-label="Volumen" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><div class="lyv-track"><div class="lyv-fill"></div><div class="lyv-knob"></div></div></div></div>
 <!-- ═════════ FIN · HTML-13 ═════════ -->
 <!-- ═════════ INICIO · HTML-14 · VENTANA · TRANSMITIR EN VIVO ═════════ -->
-<div id="mGoLive" class="modal hidden"><form class="mbox" id="glForm">
-  <h2>Transmitir en vivo</h2>
-  <div class="gprev"><video id="glPrev" autoplay muted playsinline></video><div id="glCount" class="gcount hidden"></div></div>
-  <label>Filtro</label><div class="sd-fl" id="glFilters"></div>
-  <div class="sd-two"><div><label for="glOrient">Formato</label><select id="glOrient"><option value="v">Vertical 9:16</option><option value="h">Horizontal 16:9</option></select></div><div><label for="glQual">Calidad</label><select id="glQual"><option value="480">480p · ligera</option><option value="720">720p · HD</option><option value="1080">1080p · Full HD</option></select></div></div>
-  <div><label>Tipo de transmisión</label><div class="chips" id="glModes"></div><p class="lvnote hidden" id="glModeNote"></p></div>
-  <label>Elige un tema</label><div class="chips" id="glTopics"></div>
-  <label for="glTitle">Título (opcional)</label><input id="glTitle" maxlength="60" placeholder="Ej. Hablemos de cripto">
-  <p class="msg" id="glMsg" role="status"></p>
-  <div class="actions"><button class="btn main" type="submit" id="glBtn" disabled>Empezar ahora</button><button class="btn ghost" type="button" data-close="mGoLive">Cancelar</button></div>
+<div id="mGoLive" class="modal hidden"><form class="mbox stud" id="glForm" autocomplete="off">
+  <div class="st-bar"><span aria-hidden="true">🎛️</span><h2>Live Studio <small>· prepara tu directo</small></h2><span class="st-tag" id="stInfo"></span><button class="ibtn" type="button" data-close="mGoLive" aria-label="Cerrar" title="Cerrar">✕</button></div>
+  <div class="st-grid">
+    <section class="st-col st-left" aria-label="Fuentes y herramientas">
+      <div class="st-card">
+        <div class="st-h"><h3>Vista de Studio</h3><div class="st-fmt"><button type="button" id="stFmtV" title="Vertical 9:16" aria-label="Vertical">📱</button><button type="button" id="stFmtH" title="Horizontal 16:9" aria-label="Horizontal">🖥️</button></div></div>
+        <div class="st-scene" id="stScene">Solo cámara</div>
+        <div class="sp-srcs" id="stSrcs"></div>
+        <div id="stCamBox" class="hidden"><label for="stCamSel">Cámara</label><select id="stCamSel"></select></div>
+        <button type="button" class="btn ghost" id="stAdd">＋ Añadir fuente</button>
+      </div>
+      <div class="st-card"><h3>Herramientas</h3><p class="st-sub">Interactuar</p><div class="st-tools" id="stTools"></div></div>
+    </section>
+    <section class="st-col st-center" aria-label="Vista previa">
+      <div class="st-stage">
+        <div class="gprev v on-stu"><video id="glPrev" autoplay muted playsinline></video><div id="glCount" class="gcount hidden"></div></div>
+        <div class="st-empty" id="stEmpty"><b>＋</b><strong>Añadir cámara</strong><span>Permite la cámara y el micrófono para ver tu escena.</span><button class="btn main" type="button" id="stEmptyBtn">Activar cámara</button></div>
+      </div>
+      <div class="st-pop hidden" id="stPop">
+        <div class="st-pane hidden" data-pane="fx"><label>Efectos animados</label>
+          <div class="sd-seg">
+            <button type="button" class="sd-b" data-fx="hearts">💖 Corazones</button><button type="button" class="sd-b" data-fx="stars">✨ Brillos</button>
+            <button type="button" class="sd-b" data-fx="snow">❄️ Nieve</button><button type="button" class="sd-b" data-fx="confetti">🎉 Confeti</button>
+            <button type="button" class="sd-b" data-fx="vig">🌑 Viñeta</button><button type="button" class="sd-b" data-fx="frame">🌈 Marco arcoíris</button>
+            <button type="button" class="sd-b" data-fx="vhs">📼 Estilo VHS</button>
+          </div>
+          <label>Stickers (toca para lanzar)</label>
+          <div class="sd-seg sd-stk"><button type="button" class="sd-b" data-stk="🔥">🔥</button><button type="button" class="sd-b" data-stk="💯">💯</button><button type="button" class="sd-b" data-stk="👑">👑</button><button type="button" class="sd-b" data-stk="🎉">🎉</button><button type="button" class="sd-b" data-stk="😍">😍</button><button type="button" class="sd-b" data-stk="🚀">🚀</button><button type="button" class="sd-b" data-stk="⭐">⭐</button><button type="button" class="sd-b" data-stk="🙌">🙌</button></div>
+          </div>
+        <div class="st-pane hidden" data-pane="filters"><label>Filtros</label><div class="sd-fl" id="glFilters"></div>
+          <label for="spBeauty">Suavizado de piel</label><input id="spBeauty" type="range" min="0" max="100" value="0">
+          <label for="spBright">Brillo</label><input id="spBright" type="range" min="70" max="140" value="100"></div>
+        <div class="st-pane hidden" data-pane="layout"><label>Diseño de pantalla</label>
+          <div class="sd-seg">
+            <button type="button" class="sd-b on" data-layout="cam">📷 Solo cámara</button><button type="button" class="sd-b" data-layout="screen">🖥️ Solo pantalla</button>
+            <button type="button" class="sd-b" data-layout="pip">🖥️ + 📷 Burbuja</button><button type="button" class="sd-b" data-layout="split">◫ Lado a lado</button>
+          </div>
+          <label>Posición de la burbuja</label>
+          <div class="sd-seg sd-pos"><button type="button" class="sd-b" data-pip="tl">↖</button><button type="button" class="sd-b" data-pip="tr">↗</button><button type="button" class="sd-b" data-pip="bl">↙</button><button type="button" class="sd-b on" data-pip="br">↘</button></div>
+          <label for="spPipSize">Tamaño de la burbuja</label><input id="spPipSize" type="range" min="15" max="50" value="30">
+          <label for="spZoom">Zoom de cámara</label><input id="spZoom" type="range" min="100" max="250" value="100">
+          <label class="st-chk"><input id="spMirror" type="checkbox"> Espejo (voltear la cámara)</label></div>
+        <div class="st-pane hidden" data-pane="quality"><div class="sd-two">
+          <div><label for="glOrient">Formato</label><select id="glOrient"><option value="v">Vertical 9:16</option><option value="h">Horizontal 16:9</option></select></div>
+          <div><label for="glQual">Resolución</label><select id="glQual"><option value="480">480p · ligera</option><option value="720">720p · HD</option><option value="1080">1080p · Full HD</option></select></div></div>
+          <label for="glFps">Fluidez</label><select id="glFps"><option value="24">24 fps</option><option value="30">30 fps</option></select>
+          <p class="st-sub">Si tu internet es lento, elige 480p o 24 fps.</p></div>
+      </div>
+      <p class="msg" id="glMsg" role="status"></p>
+      <div class="st-tb">
+        <button type="button" class="st-ib" data-pop="fx"><i>✨</i><span>Efectos</span></button>
+        <button type="button" class="st-ib" data-pop="filters"><i>🎨</i><span>Filtros</span></button>
+        <button type="button" class="st-ib" data-pop="layout"><i>🧩</i><span>Diseño</span></button>
+        <button type="button" class="st-ib" data-pop="quality"><i>⚙️</i><span>Calidad</span></button>
+        <span class="sep"></span>
+        <button type="button" class="st-ib" id="stCam"><i>📷</i><span>Cámara</span></button>
+        <button type="button" class="st-ib" id="stMic"><i>🎤</i><span>Micrófono</span></button>
+        <input class="st-vol" id="stVol" type="range" min="0" max="150" value="100" aria-label="Volumen del micrófono" title="Volumen del micrófono">
+        <span class="grow"></span>
+        <button class="btn main" type="submit" id="glBtn" disabled>Iniciar LIVE</button><span class="st-hint">← elige un tema</span>
+      </div>
+    </section>
+    <section class="st-col st-right" aria-label="Datos del directo">
+      <div class="st-card"><h3>Resultados del LIVE</h3>
+        <div class="st-res"><span>👁<b>0</b></span><span>❤️<b>0</b></span><span>🎁<b>0</b></span></div>
+        <p class="st-sub"><b>Cada LIVE es una nueva aventura.</b> ¡Empezamos!</p></div>
+      <div class="st-card">
+        <label for="glTitle">Título (opcional)</label><input id="glTitle" maxlength="60" placeholder="Ej. Hablemos de cripto">
+        <label>Elige un tema</label><div class="chips" id="glTopics"></div>
+        <div><label>Tipo de transmisión</label><div class="chips" id="glModes"></div><p class="lvnote hidden" id="glModeNote"></p></div>
+      </div>
+      <div class="st-card st-chat"><h3>Chat LIVE</h3><div class="st-chat-e"><i>🎁</i><p>El chat, los regalos y los nuevos seguidores aparecerán aquí cuando estés en vivo.</p></div></div>
+    </section>
+  </div>
 </form></div>
+<div id="mSrc" class="modal hidden"><div class="mbox srcbox">
+  <div class="src-top"><h2>Añadir fuente</h2><button class="ibtn" type="button" data-close="mSrc" aria-label="Cerrar">✕</button></div>
+  <div class="src-body"><div id="srcList"></div><div class="src-desc" id="srcDesc"></div></div>
+  <div class="actions"><button class="btn main" type="button" id="srcAdd">Añadir</button></div>
+</div></div>
 
 <!-- ═════════ FIN · HTML-14 ═════════ -->
 <!-- ═════════ INICIO · HTML-15 · VENTANA · RESUMEN DEL DIRECTO ═════════ -->
@@ -3178,6 +3349,96 @@ function lvHeroEl(l){
   d.onclick = () => watchLive(l); d.onkeydown = e => { if (e.key === "Enter"){ e.preventDefault(); watchLive(l); } };
   return d;
 }
+/* ---------- Carrusel compartido: directos y, si no hay ninguno, videos de la comunidad ---------- */
+const lvItemId = it => it.live ? "L" + it.live.id : "V" + it.video.id;
+function lvSlideThumb(it){
+  if (it.live) return lvThumb(it.live);
+  const v = it.video, th = document.createElement("span"); th.className = "lvc-th vidth";
+  attachThumb(th, v);
+  const tg = document.createElement("span"); tg.className = "lvc-live vid"; tg.textContent = "VIDEO";
+  const vw = document.createElement("span"); vw.className = "lvc-v"; vw.textContent = "▷ " + lvNum(v.views);
+  th.append(tg, vw); return th;
+}
+function lvSlideInfo(it, pick){
+  const mk = (tag, cls, txt) => { const n = document.createElement(tag); if (cls) n.className = cls; if (txt != null) n.textContent = txt; return n; };
+  const a = it.live ? it.live._a : it.a, info = mk("div", "pub-info"), who = mk("div", "who"), im = new Image(); im.alt = ""; im.src = picOf(a);
+  who.append(im, mk("b", "", nameOf(a)));
+  const go = mk("button", "btn main", it.live ? "Ver este directo" : "Ver este video"); go.type = "button";
+  go.onclick = e => { e.stopPropagation(); pick(it); };
+  if (it.live){
+    info.append(who, mk("h4", "", it.live.title), mk("span", "lvc-tag", lvTag(it.live.topic)), mk("p", "", lvNum(it.live.viewers) + " espectadores"), go);
+  } else {
+    info.append(who, mk("h4", "", it.video.caption || "Video"), mk("span", "lvc-tag", "🎬 Video"), mk("p", "", lvNum(it.video.views) + " reproducciones"), go);
+  }
+  return info;
+}
+function lvCarousel(wrap, pick){
+  wrap.classList.add("pub-carwrap"); wrap.replaceChildren();
+  const arrow = (cls, label, d) => { const b = document.createElement("button"); b.type = "button"; b.className = "pub-arr " + cls; b.setAttribute("aria-label", label); b.innerHTML = '<svg viewBox="0 0 24 24"><path d="' + d + '"/></svg>'; return b; };
+  const prev = arrow("l", "Anterior", "M15 6l-6 6 6 6"), next = arrow("r", "Siguiente", "M9 6l6 6-6 6"), car = document.createElement("div"); car.className = "pub-car";
+  wrap.append(prev, car, next);
+  let items = [], slides = [], idx = 0, rot = 0, sig = "";
+  const place = () => {
+    const n = items.length; if (!n) return; idx = ((idx % n) + n) % n;
+    slides.forEach((s, i) => { let rel = i - idx; if (rel > n / 2) rel -= n; if (rel < -n / 2) rel += n; s.dataset.rel = Math.abs(rel) > 2 ? "x" : String(rel); s._rel = rel; });
+  };
+  const spin = () => {
+    clearInterval(rot);
+    if (items.length > 1) rot = setInterval(() => {
+      if (!wrap.isConnected){ clearInterval(rot); return; }
+      if (document.hidden || !wrap.offsetParent || car.matches(":hover")) return;
+      idx++; place();
+    }, 6500);
+  };
+  prev.onclick = () => { idx--; place(); spin(); };
+  next.onclick = () => { idx++; place(); spin(); };
+  return {
+    set(list){
+      items = list || []; wrap.classList.toggle("hidden", !items.length);
+      const s2 = items.map(lvItemId).join(",");
+      if (s2 !== sig){
+        sig = s2; idx = 0; car.replaceChildren(); slides = [];
+        items.forEach((it, i) => {
+          const s = document.createElement("div"); s.className = "pub-s";
+          s.append(lvSlideThumb(it), lvSlideInfo(it, pick));
+          s.onclick = () => { if (s._rel === 0) pick(it); else if (Math.abs(s._rel) <= 2){ idx = i; place(); spin(); } };
+          slides.push(s); car.append(s);
+        });
+        place();
+      }
+      spin();
+    },
+    stop(){ clearInterval(rot); }
+  };
+}
+let lvVidCache = { t:0, items:[] };
+async function lvLoadVideos(){
+  if (lvVidCache.items.length && Date.now() - lvVidCache.t < 60000) return lvVidCache.items;
+  try {
+    const { data, error } = await sb.from("videos").select("*").order("created_at", { ascending:false }).limit(40);
+    if (error || !data) return [];
+    const ok = data.filter(v => v.url && !isFlv(v.url));
+    let au = {}; try { au = await withAuthors(ok, "user_id"); } catch (e) {}
+    lvVidCache = { t:Date.now(), items: ok.slice().sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 8).map(v => ({ video:v, a:au[v.user_id] })) };
+  } catch (e) { return []; }
+  return lvVidCache.items;
+}
+let lvCarObj = null, lvHeroTok = 0;
+async function lvHeroShow(hero, items){
+  const tok = ++lvHeroTok; let title = "";
+  if (!items || !items.length){ items = await lvLoadVideos(); title = "Mientras nadie transmite, mira los videos de la comunidad"; }
+  if (tok !== lvHeroTok) return;
+  hero.replaceChildren();
+  if (lvCarObj){ lvCarObj.stop(); lvCarObj = null; }
+  if (!items.length){ hero.classList.add("hidden"); return; }
+  hero.classList.remove("hidden");
+  if (title){ const h = document.createElement("h3"); h.className = "lvcar-t"; h.textContent = title; hero.append(h); }
+  const w = document.createElement("div"); hero.append(w);
+  const vids = items.filter(x => x.video).map(x => ({ v:x.video, a:x.a }));
+  lvCarObj = lvCarousel(w, it => it.live ? watchLive(it.live) : openPlayer(it.video, it.a, vids));
+  lvCarObj.set(items);
+}
+
 async function loadLives(){
   const cats = $("lvFilter"); cats.replaceChildren();
   ["Todos", "Siguiendo", ...TOPICS].forEach(t => {
@@ -3195,13 +3456,13 @@ async function loadLives(){
   $("lvRail").classList.toggle("hidden", !all.length);
   let data = all;
   if (topicFilter === "Siguiendo"){
-    const f = getFollows(); if (!f.length) return note(box, "Aún no sigues a nadie. Entra a un directo y toca Seguir.");
+    const f = getFollows(); if (!f.length){ lvHeroShow(hero, null); return note(box, "Aún no sigues a nadie. Entra a un directo y toca Seguir."); }
     data = all.filter(l => f.includes(l.host_id));
   } else if (topicFilter !== "Todos") data = all.filter(l => l.topic === topicFilter);
-  if (!data.length) return note(box, "Nadie transmite ahora" + (topicFilter !== "Todos" ? " en " + topicFilter : "") + ". ¡Sé el primero!");
-  const top = data.slice().sort((a, b) => (b.viewers || 0) - (a.viewers || 0))[0];
-  hero.append(lvHeroEl(top)); hero.classList.remove("hidden");
-  data.filter(l => l !== top).forEach(l => box.append(lvCard(l)));
+  if (!data.length){ lvHeroShow(hero, null); return note(box, "Nadie transmite ahora" + (topicFilter !== "Todos" ? " en " + topicFilter : "") + ". ¡Sé el primero!"); }
+  const byV = data.slice().sort((a, b) => (b.viewers || 0) - (a.viewers || 0));
+  lvHeroShow(hero, byV.slice(0, 8).map(l => ({ live:l })));
+  data.forEach(l => box.append(lvCard(l)));
 }
 
 /* ═════════ FIN · JS-16 ═════════ */
@@ -3219,10 +3480,158 @@ function addLv(name, text, cls, pic){
   $("lvMsgs").append(d); $("lvMsgs").scrollTop = $("lvMsgs").scrollHeight;
 }
 const lvSys = t => addLv("", t, "sys");
-function floatEmoji(e){
+/* ---------- Reacciones (corazones) y regalos: animación ---------- */
+const RM = matchMedia("(prefers-reduced-motion: reduce)");
+const rnd = (a, b) => a + Math.random() * (b - a);
+/* Un emoji que sube con balanceo, rebote al aparecer y desvanecido suave.
+   o: x (px, centro), y0 (px desde abajo), size (rem), rise (px; negativo = cae), spread (px), bias (px), dur (ms) */
+function floatEmoji(e, o){
+  o = o || {};
+  const layer = $("reactLayer"); if (!layer || document.hidden) return;
+  const w0 = layer.clientWidth || 300, h0 = layer.clientHeight || 400;
+  const live = layer.querySelectorAll(".fl"); if (live.length >= 70) live[0].remove();
   const s = document.createElement("span"); s.className = "fl"; s.textContent = e;
-  s.style.left = (8 + Math.random()*80) + "%"; $("reactLayer").append(s);
-  setTimeout(() => s.remove(), 2300);
+  const size = o.size || rnd(1.5, 2.7), x0 = o.x != null ? o.x : w0 - 38 + rnd(-12, 12), y0 = o.y0 != null ? o.y0 : 56;
+  s.style.fontSize = size + "rem"; s.style.left = (x0 - size * 8) + "px"; s.style.bottom = y0 + "px";
+  layer.append(s);
+  if (!s.animate){ s.classList.add("old"); setTimeout(() => s.remove(), 2400); return; }
+  const rise = o.rise != null ? o.rise : Math.min(520, Math.max(160, (h0 - y0) * rnd(.55, .85)));
+  const spread = o.spread != null ? o.spread : 60, dx = rnd(-spread, spread) + (o.bias != null ? o.bias : -30);
+  const a = rnd(12, 30) * (Math.random() < .5 ? -1 : 1), rot = rnd(6, 16) * (Math.random() < .5 ? -1 : 1);
+  const T = (x, y, sc, r) => "translate(" + x.toFixed(1) + "px," + y.toFixed(1) + "px) scale(" + sc + ") rotate(" + r.toFixed(1) + "deg)";
+  const dur = RM.matches ? 1200 : (o.dur || rnd(2600, 3800));
+  const fr = RM.matches
+    ? [{ transform:T(0, 0, 1, 0), opacity:0 }, { transform:T(0, -30, 1, 0), opacity:1, offset:.3 }, { transform:T(0, -50, 1, 0), opacity:0 }]
+    : [{ transform:T(0, 0, .2, 0), opacity:0, offset:0 },
+       { transform:T(dx * .1, -rise * .14, 1.25, rot), opacity:1, offset:.1 },
+       { transform:T(a + dx * .35, -rise * .45, 1, -rot), opacity:1, offset:.35 },
+       { transform:T(-a + dx * .65, -rise * .76, .95, rot * .6), opacity:.95, offset:.65 },
+       { transform:T(dx, -rise, .8, 0), opacity:0, offset:1 }];
+  const an = s.animate(fr, { duration:dur, easing:"linear", fill:"forwards" }); an.onfinish = () => s.remove();
+}
+/* varias reacciones seguidas, repartidas en ~250 ms para que se vean como una ráfaga y no como un bloque */
+function reactBurst(e, n, o){
+  n = Math.max(1, Math.min(8, n | 0));
+  for (let i = 0; i < n; i++) setTimeout(() => floatEmoji(e, o), (i / n) * 240 + rnd(0, 40));
+}
+/* corazón grande donde tocaste dos veces (como TikTok) */
+function popHeart(x, y){
+  const L = $("reactLayer"); if (!L || !L.animate) return;
+  const el = document.createElement("div"); el.className = "gpop"; el.textContent = "❤️";
+  el.style.left = x + "px"; el.style.top = y + "px"; el.style.fontSize = "4.2rem"; L.append(el);
+  const r = rnd(-14, 14), T = (dy, sc, rr) => "translate(-50%,-50%) translateY(" + dy + "px) scale(" + sc + ") rotate(" + rr + "deg)";
+  const an = el.animate(RM.matches ? [{ opacity:0 }, { opacity:1, offset:.3 }, { opacity:0 }] :
+    [{ transform:T(0, .3, r), opacity:0, offset:0 }, { transform:T(-8, 1.3, r), opacity:1, offset:.25 }, { transform:T(-14, 1, r), opacity:1, offset:.6 }, { transform:T(-70, 1.1, r), opacity:0, offset:1 }], { duration:900, easing:"ease-out" });
+  an.onfinish = () => el.remove();
+}
+let lastReact = 0;
+function sendReact(e, o){
+  const now = performance.now(); if (now - lastReact < 90) return false; lastReact = now;
+  if (H){ H.reacts = (H.reacts || 0) + 1; floatEmoji(e, o); queueReact("host", e); return true; }
+  if (W && W.conn && W.conn.open){ floatEmoji(e, o); try { W.conn.send({ t:"react", e }); } catch (x) {} return true; }
+  return false;
+}
+/* anfitrión: limita a cada espectador (≈8/s), junta las reacciones cada 250 ms y las reparte sin devolverle al autor las suyas */
+function queueReact(from, e){
+  if (!H) return; if (!H.rq) H.rq = new Map();
+  const m = H.rq.get(from) || {}; m[e] = (m[e] || 0) + 1; H.rq.set(from, m);
+  if (!H.rqt) H.rqt = setTimeout(flushReacts, 250);
+}
+function flushReacts(){
+  if (!H) return; H.rqt = null; const q = H.rq; H.rq = new Map(); if (!q || !q.size) return;
+  H.viewers.forEach((v, id) => {
+    const tot = {}; q.forEach((m, from) => { if (from === id) return; for (const k in m) tot[k] = (tot[k] || 0) + m[k]; });
+    const items = Object.keys(tot).map(k => [k, tot[k]]); if (!items.length) return;
+    try { v.conn.send({ t:"reacts", items }); } catch (x) {}
+  });
+}
+function hostReact(id, e){
+  const v = H && H.viewers.get(id); if (!v) return;
+  const now = Date.now(); v.tk = Math.min(10, (v.tk == null ? 10 : v.tk) + (now - (v.tl || now)) / 1000 * 8); v.tl = now;
+  if (v.tk < 1) return; v.tk--;
+  H.reacts = (H.reacts || 0) + 1; floatEmoji(e); queueReact(id, e);
+}
+document.querySelectorAll("[data-react]").forEach(b => {
+  const e = b.dataset.react; let tm = null;
+  const stop = () => { clearInterval(tm); tm = null; b.classList.remove("hold"); };
+  b.onclick = ev => { if (ev.detail === 0) sendReact(e); };           /* teclado */
+  b.onpointerdown = ev => { if (ev.button) return; sendReact(e); b.classList.add("hold"); clearInterval(tm); tm = setInterval(() => sendReact(e), 130); };   /* mantener pulsado = lluvia */
+  ["pointerup", "pointerleave", "pointercancel", "blur"].forEach(t => b.addEventListener(t, stop));
+  b.oncontextmenu = ev => ev.preventDefault();
+});
+{ /* doble toque sobre el video = corazón */
+  const vw = $("vwrap"); let lt = 0, lx = 0, ly = 0;
+  vw.addEventListener("pointerdown", ev => {
+    if (ev.target.closest("button,.vtop,.gifttray,input,a,.vbot")) return;
+    const r = $("reactLayer").getBoundingClientRect(), x = ev.clientX - r.left, y = ev.clientY - r.top, now = Date.now();
+    if (now - lt < 320 && Math.hypot(x - lx, y - ly) < 60){ lt = 0; if (sendReact("❤️", { x, y0:r.height - y, spread:80, bias:0, rise:240 })) popHeart(x, y); }
+    else { lt = now; lx = x; ly = y; }
+  });
+}
+
+/* ---- regalos: tarjeta con combo + lluvia de emojis + animación grande para los caros ---- */
+const gCombo = new Map(); let heroQ = [], heroBusy = false;
+function giftFxEl(){ let g = $("giftFx"); if (g) return g; g = document.createElement("div"); g.id = "giftFx"; $("vwrap").append(g); return g; }
+function giftFxReset(){
+  gCombo.forEach(c => clearTimeout(c.t)); gCombo.clear(); heroQ = []; heroBusy = false;
+  const g = $("giftFx"); if (g) g.replaceChildren(); const l = $("reactLayer"); if (l) l.replaceChildren();
+}
+function bannerOut(key){
+  const c = gCombo.get(key); if (!c) return; gCombo.delete(key);
+  if (c.el.animate && !RM.matches) c.el.animate([{ opacity:1, transform:"none" }, { opacity:0, transform:"translateX(-30%)" }], { duration:300, fill:"forwards" }).onfinish = () => c.el.remove();
+  else c.el.remove();
+}
+function giftBanner(name, g, pic){
+  const box = giftFxEl(), key = name + "|" + g.name, old = gCombo.get(key);
+  if (old && old.el.isConnected){
+    old.n++; old.cnt.textContent = "x" + old.n; clearTimeout(old.t); old.t = setTimeout(() => bannerOut(key), 4500);
+    if (old.cnt.animate && !RM.matches) old.cnt.animate([{ transform:"scale(1)" }, { transform:"scale(1.7)" }, { transform:"scale(1)" }], { duration:320 });
+    return;
+  }
+  while (box.children.length >= 3){
+    const f = box.firstChild; gCombo.forEach((c, k) => { if (c.el === f){ clearTimeout(c.t); gCombo.delete(k); } }); f.remove();
+  }
+  const el = document.createElement("div"); el.className = "gban";
+  let av; if (pic && /^https:\/\//.test(pic)){ av = document.createElement("img"); av.alt = ""; av.src = pic; } else { av = document.createElement("span"); av.className = "gav"; av.textContent = (name || "?").slice(0, 1).toUpperCase(); }
+  const tx = document.createElement("div"); tx.className = "gt"; const b = document.createElement("b"), sp = document.createElement("span"); b.textContent = name; sp.textContent = "envió " + g.name; tx.append(b, sp);
+  const em = document.createElement("span"); em.className = "ge"; em.textContent = g.emoji;
+  const cnt = document.createElement("span"); cnt.className = "gx";
+  el.append(av, tx, em, cnt); box.append(el);
+  if (el.animate && !RM.matches) el.animate([{ transform:"translateX(-120%)", opacity:0 }, { transform:"translateX(6%)", opacity:1, offset:.7 }, { transform:"none", opacity:1 }], { duration:420, easing:"ease-out" });
+  gCombo.set(key, { el, cnt, n:1, t:setTimeout(() => bannerOut(key), 4500) });
+}
+function giftPop(emoji, scale){
+  const L = $("reactLayer"); if (!L || !L.animate) return;
+  const el = document.createElement("div"); el.className = "gpop"; el.textContent = emoji; el.style.fontSize = Math.min(L.clientWidth || 300, L.clientHeight || 400) * scale + "px"; L.append(el);
+  const T = sc => "translate(-50%,-50%) scale(" + sc + ")";
+  el.animate(RM.matches ? [{ opacity:0 }, { opacity:1, offset:.3 }, { opacity:0 }] :
+    [{ transform:T(.2), opacity:0, offset:0 }, { transform:T(1.25), opacity:1, offset:.25 }, { transform:T(1), opacity:1, offset:.7 }, { transform:T(1.15), opacity:0, offset:1 }], { duration:1300, easing:"ease-out" }).onfinish = () => el.remove();
+}
+function heroNext(){
+  const g = heroQ.shift(); if (!g){ heroBusy = false; return; } heroBusy = true;
+  const L = $("reactLayer"); if (!L){ heroBusy = false; return; }
+  const w = L.clientWidth || 300, h = L.clientHeight || 400, rocket = (+g.price || 0) >= 100;
+  const el = document.createElement("div"); el.className = "ghero"; el.textContent = g.emoji; el.style.fontSize = Math.min(w, h) * .5 + "px"; L.append(el);
+  const T = (y, sc, r) => "translate(-50%,-50%) translateY(" + y + "px) scale(" + sc + ") rotate(" + r + "deg)";
+  const end = () => {
+    el.remove();
+    if (!RM.matches){ for (let i = 0; i < (rocket ? 16 : 12); i++) setTimeout(() => floatEmoji(g.emoji, rocket
+      ? { x:w / 2 + rnd(-w * .3, w * .3), y0:h * .3, spread:w * .4, bias:0, size:rnd(1.4, 2.6), rise:h * .5 }
+      : { x:rnd(20, w - 20), y0:h - 24, spread:30, bias:0, size:rnd(1.2, 2.2), rise:-h * .7 }), i * 70); }
+    setTimeout(heroNext, 300);
+  };
+  if (!el.animate){ setTimeout(end, 1500); return; }
+  const fr = RM.matches ? [{ opacity:0 }, { opacity:1, offset:.2 }, { opacity:1, offset:.8 }, { opacity:0 }]
+    : rocket ? [{ transform:T(h * .55, .5, -14), opacity:0, offset:0 }, { transform:T(h * .25, .95, -8), opacity:1, offset:.2 }, { transform:T(-h * .1, 1.15, -4), opacity:1, offset:.6 }, { transform:T(-h * .8, 1.3, 0), opacity:0, offset:1 }]
+    : [{ transform:T(0, .2, -10), opacity:0, offset:0 }, { transform:T(0, 1.35, 6), opacity:1, offset:.2 }, { transform:T(0, 1, -4), opacity:1, offset:.38 }, { transform:T(0, 1.05, 4), opacity:1, offset:.7 }, { transform:T(-20, 1.6, 0), opacity:0, offset:1 }];
+  el.animate(fr, { duration:rocket ? 2200 : 2000, easing:"ease-out", fill:"forwards" }).onfinish = end;
+}
+function giftShow(g){
+  const p = +g.price || 0, L = $("reactLayer"); if (!L) return;
+  if (p >= 50){ heroQ.push(g); if (heroQ.length > 3) heroQ.shift(); if (!heroBusy) heroNext(); return; }
+  const w = L.clientWidth || 300, h = L.clientHeight || 400, n = p >= 20 ? 10 : p >= 10 ? 6 : 4;
+  for (let i = 0; i < n; i++) setTimeout(() => floatEmoji(g.emoji, { x:w / 2 + rnd(-w * .18, w * .18), y0:40, spread:w * .28, bias:0, size:rnd(1.8, 3), rise:h * rnd(.35, .7) }), i * 110);
+  if (p >= 20) giftPop(g.emoji, .4);
 }
 function setCount(n){ $("lvCount").textContent = n + " viendo"; }
 function playLv(){
@@ -3239,11 +3648,6 @@ $("lvFull").onclick = () => {
   if (w.requestFullscreen) w.requestFullscreen().catch(() => {});
   else if (v.webkitEnterFullscreen) v.webkitEnterFullscreen();
 };
-document.querySelectorAll("[data-react]").forEach(b => b.onclick = () => {
-  const e = b.dataset.react;
-  if (H){ H.reacts = (H.reacts || 0) + 1; floatEmoji(e); bcast({ t:"react", e }); }
-  else if (W && W.conn && W.conn.open) W.conn.send({ t:"react", e });
-});
 $("lvForm").onsubmit = e => {
   e.preventDefault();
   const t = $("lvInput").value.trim().slice(0, 300); if (!t) return;
@@ -3252,7 +3656,7 @@ $("lvForm").onsubmit = e => {
   else if (W && W.conn && W.conn.open) W.conn.send({ t:"chat", text:t });
 };
 function enterStage(host){
-  $("lvMsgs").replaceChildren(); $("lvUnmute").classList.add("hidden");
+  giftFxReset(); $("lvMsgs").replaceChildren(); $("lvUnmute").classList.add("hidden");
   $("lvHostTools").classList.toggle("hidden", !host); $("stageBox").classList.toggle("host", host); $("sdPanel").classList.toggle("hidden", !host);
   $("lvLeave").classList.toggle("hidden", host); ["lvPrev","lvNext"].forEach(i => $(i).classList.toggle("hidden", host)); $("lvFollow").classList.toggle("hidden", host); camOff = false; statTxt = ""; paintStat();
   $("lvGiftBtn").classList.toggle("hidden", host); $("giftTray").classList.add("hidden");
@@ -3273,10 +3677,19 @@ let prevStream = null, glCancelled = false;
 const MEDIA = () => ({ video:{ width:{ ideal:1280 }, height:{ ideal:720 }, facingMode:"user" }, audio:{ echoCancellation:true, noiseSuppression:true } });
 async function startPrev(){
   stopPrev();
-  try { prevStream = await navigator.mediaDevices.getUserMedia(MEDIA()); $("glPrev").srcObject = prevStream; }
-  catch (e) { say($("glMsg"), "Permite la cámara y el micrófono para verte antes de salir al aire.", "err"); }
+  let s;
+  try { s = await navigator.mediaDevices.getUserMedia(MEDIA()); }
+  catch (e) { say($("glMsg"), "Permite la cámara y el micrófono para verte antes de salir al aire.", "err"); if (window.lySrcRender) window.lySrcRender(); return; }
+  if (glCancelled || H){ s.getTracks().forEach(t => t.stop()); return; }
+  prevStream = s; $("glPrev").srcObject = s; $("glPrev").parentElement.classList.remove("on-stu");
+  try {
+    await stuStart(s);
+    if (glCancelled){ stuStop(); return; }
+    $("glPrev").srcObject = STU.out; $("glPrev").style.filter = ""; $("glPrev").parentElement.classList.add("on-stu");
+  } catch (e) { console.warn(e); say($("glMsg"), "Este navegador no admite el Studio completo: se transmitirá en modo simple.", ""); }
+  if (window.lySrcRender) window.lySrcRender();
 }
-function stopPrev(){ if (prevStream){ prevStream.getTracks().forEach(t => t.stop()); prevStream = null; } $("glPrev").srcObject = null; }
+function stopPrev(){ if (prevStream){ prevStream.getTracks().forEach(t => t.stop()); prevStream = null; } $("glPrev").srcObject = null; if (STU.on && !H) stuStop(); if (window.lySrcRender) window.lySrcRender(); }
 document.querySelectorAll('[data-close="mGoLive"]').forEach(b => b.addEventListener("click", () => { glCancelled = true; stopPrev(); $("glCount").classList.add("hidden"); }));
 function bcast(m){ if (H) H.viewers.forEach(v => { try { v.conn.send(m); } catch (e) {} }); }
 function refreshViewers(){
@@ -3309,7 +3722,7 @@ function hostConn(conn){
   conn.on("data", d => {
     const v = H && H.viewers.get(conn.peer); if (!v || !d) return;
     if (d.t === "chat"){ const text = String(d.text || "").trim().slice(0, 300); if (!text) return; addLv(v.name, text, "", v.pic); bcast({ t:"chat", name:v.name, text, pic:v.pic }); }
-    else if (d.t === "react" && REACTS.includes(d.e)){ H.reacts = (H.reacts || 0) + 1; floatEmoji(d.e); bcast({ t:"react", e:d.e }); }
+    else if (d.t === "react" && REACTS.includes(d.e)) hostReact(conn.peer, d.e);
     else if (d.t === "gift" && typeof d.id === "string") hostGift(v, d.id);
   });
   conn.on("close", () => dropViewer(conn.peer));
@@ -3317,7 +3730,7 @@ function hostConn(conn){
 }
 function cleanupHost(){ try { if (window.lyPreScr){ window.lyPreScr.getTracks().forEach(t => t.stop()); window.lyPreScr = null; } } catch (x) {}
   if (!H) return;
-  clearInterval(H.hb); clearInterval(H.th); H.stream.getTracks().forEach(t => t.stop()); stuStop(); try { H.peer.destroy(); } catch (e) {}
+  clearInterval(H.hb); clearInterval(H.th); clearTimeout(H.rqt); H.stream.getTracks().forEach(t => t.stop()); stuStop(); try { H.peer.destroy(); } catch (e) {}
   H = null; $("glBtn").disabled = !pickedTopic;
 }
 $("glForm").onsubmit = async e => {
@@ -3331,7 +3744,7 @@ $("glForm").onsubmit = async e => {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
     return say($("glMsg"), "Tu navegador no permite usar la cámara. Abre la página con https en Chrome, Edge o Firefox.", "err");
   $("glBtn").disabled = true; glCancelled = false;
-  let stream = prevStream;
+  let stream = (STU.on && STU.out) ? STU.out : prevStream;
   if (!stream){
     say($("glMsg"), "Activando cámara…");
     try { stream = await navigator.mediaDevices.getUserMedia(MEDIA()); prevStream = stream; $("glPrev").srcObject = stream; }
@@ -3340,10 +3753,10 @@ $("glForm").onsubmit = async e => {
   say($("glMsg"), "");
   for (const n of [3, 2, 1]){ if (glCancelled) break; $("glCount").textContent = n; $("glCount").classList.remove("hidden"); await new Promise(r => setTimeout(r, 900)); }
   $("glCount").classList.add("hidden");
-  if (glCancelled || !stream.active){ stream.getTracks().forEach(t => t.stop()); if (preScr){ preScr.getTracks().forEach(t => t.stop()); window.lyPreScr = null; } prevStream = null; $("glBtn").disabled = !pickedTopic; return; }
+  if (glCancelled || !stream.active){ if (STU.on) stuStop(); stream.getTracks().forEach(t => t.stop()); if (preScr){ preScr.getTracks().forEach(t => t.stop()); window.lyPreScr = null; } prevStream = null; $("glBtn").disabled = !pickedTopic; return; }
   prevStream = null; $("glPrev").srcObject = null; $("glPrev").style.filter = "";
   say($("glMsg"), "Preparando Live Studio…");
-  try { stream = await stuStart(stream); } catch (err) { console.error(err); say($("glMsg"), "El Studio no está disponible en este navegador: se transmite en modo simple."); }
+  if (!STU.on) try { stream = await stuStart(stream); } catch (err) { console.error(err); say($("glMsg"), "El Studio no está disponible en este navegador: se transmite en modo simple."); }
   say($("glMsg"), "Conectando con el servicio de directos…");
   const title = $("glTitle").value.trim() || ("Directo de " + nameOf(profile));
   const peer = new Peer("liveyou-" + Math.random().toString(36).slice(2, 10), { config: ICE });
@@ -3359,6 +3772,7 @@ $("glForm").onsubmit = async e => {
     $("lvTitle").textContent = title; $("lvTopic").textContent = H.topic; setHost(profile);
     $("lvVideo").srcObject = stream; $("lvVideo").muted = true; playLv();
     enterStage(true); lvSys("Estás en vivo. Los espectadores aparecerán aquí.");
+    if (STU.on){ try { setTb($("lvMic"), !STU.micOn, "Silenciar micrófono", "Activar micrófono"); setTb($("lvCam"), !STU.camOn, "Apagar cámara", "Encender cámara"); stuSyncMedia(); } catch (e) {} }
     if (preScr){ const ps = preScr; window.lyPreScr = null; stuShare("screen", ps); }
     snap(); setTimeout(snap, 4000); H.th = setInterval(snap, 30000);
     H.hb = setInterval(() => sb.from("lives").update({ last_seen:new Date().toISOString(), viewers:H.viewers.size }).eq("id", H.row.id).then(() => {}), 15000);
@@ -3548,10 +3962,45 @@ function stuRR(c, x, y, w, h, r){
   c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
 }
 const STU_CONF = ["#fe2c55", "#25f4ee", "#ffd23f", "#7b61ff", "#3ddc97", "#ff9a3d"];
+/* ---- widgets en pantalla (meta, contador, cuenta atrás) ---- */
+function stuWidgets(c, W, Hh, k){
+  const g = STU.wg; if (!g || !(g.goal || g.counter || g.cd)) return;
+  const vert = Hh > W, fs = Math.round(24 * k), mx = Math.round(18 * k), BG = "rgba(20,16,40,.78)";
+  let y = Math.round(Hh * (vert ? .09 : .05));
+  c.save(); c.textBaseline = "middle"; c.textAlign = "left";
+  const pill = txt => {
+    c.font = "700 " + fs + "px system-ui,sans-serif";
+    const w = Math.min(W - mx * 2, c.measureText(txt).width + 34 * k), h = fs + 20 * k;
+    c.fillStyle = BG; stuRR(c, mx, y, w, h, h / 2); c.fill();
+    c.fillStyle = "#fff"; c.fillText(txt, mx + 17 * k, y + h / 2 + 1, w - 28 * k); y += h + 10 * k;
+  };
+  if (g.cd){
+    const left = Math.max(0, Math.ceil((g.cd.end - Date.now()) / 1000)), m = Math.floor(left / 60), s = left % 60;
+    pill(left > 0 ? "⏳ " + g.cd.label + " " + m + ":" + String(s).padStart(2, "0") : "🎉 ¡Empezamos!");
+  }
+  if (g.counter) pill(g.counter.label + ": " + g.counter.n);
+  if (g.goal){
+    const cur = g.goal.mode === "viewers" ? (H ? H.viewers.size : 0) : g.goal.val, p = Math.min(1, cur / g.goal.target);
+    const bw = Math.min(W - mx * 2, Math.max(W * .62, 260 * k)), ch = fs + 14 * k + 16 * k + 24 * k, ix = mx + 16 * k, iw = bw - 32 * k, by = y + ch - 16 * k - 14 * k;
+    c.fillStyle = BG; stuRR(c, mx, y, bw, ch, 16 * k); c.fill();
+    c.fillStyle = "#fff"; c.font = "700 " + fs + "px system-ui,sans-serif";
+    c.fillText("🎯 " + g.goal.title + " · " + cur + "/" + g.goal.target, ix, y + 14 * k + fs / 2, iw);
+    c.fillStyle = "rgba(255,255,255,.2)"; stuRR(c, ix, by, iw, 14 * k, 7 * k); c.fill();
+    if (p > 0){ const gr = c.createLinearGradient(ix, 0, ix + iw, 0); gr.addColorStop(0, "#fe2c55"); gr.addColorStop(1, "#ff9a3d"); c.fillStyle = gr; stuRR(c, ix, by, Math.max(14 * k, iw * p), 14 * k, 7 * k); c.fill(); }
+    y += ch + 10 * k;
+  }
+  c.restore();
+}
+function stuSticker(e){
+  if (!STU.on){ toastMsg("Activa la cámara para usar stickers", 2500); return; }
+  const r = Math.random; if (!STU.stk) STU.stk = []; if (STU.stk.length >= 8) STU.stk.shift();
+  STU.stk.push({ e, x:.18 + r() * .64, y:.22 + r() * .5, s:120 + r() * 70, rot:(r() - .5) * .5, age:0, max:Math.round(STU.fps * 3.4) });
+}
 function stuFx(c, W, Hh, k){
   const f = STU.fx, r = Math.random, P = STU.parts, add = o => P.push(Object.assign({ age:0, rot:0, vr:0, vx:0, sw:0, ph:0 }, o));
   if (P.length < 90){
     if (f.has("hearts") && r() < .2){ const vy = -(2.2 + r() * 2.4) * k; add({ e:["❤️", "💖", "💗", "💕"][r() * 4 | 0], x:r() * W, y:Hh + 40 * k, vy, sw:1.2 * k, ph:r() * 6, s:(28 + r() * 30) * k, max:(Hh + 80 * k) / Math.abs(vy) + 5 }); }
+    if (f.has("hearts") && STU.frame % (STU.fps * 3) === 0){ for (let i = 0; i < 6; i++){ const vy = -(3 + r() * 2) * k; add({ e:["❤️", "💖", "💗", "💕", "💝"][r() * 5 | 0], x:W * (.3 + r() * .4), y:Hh + 30 * k, vx:(i - 2.5) * .8 * k, vy, sw:.8 * k, ph:r() * 6, s:(34 + r() * 28) * k, max:(Hh + 80 * k) / Math.abs(vy) + 5 }); } }
     if (f.has("snow") && r() < .3){ const vy = (1.4 + r() * 1.8) * k; add({ e:"❄️", x:r() * W, y:-30 * k, vy, sw:.9 * k, ph:r() * 6, s:(18 + r() * 22) * k, max:(Hh + 60 * k) / vy + 5 }); }
     if (f.has("confetti") && r() < .5){ const vy = (3 + r() * 3) * k; add({ col:STU_CONF[r() * STU_CONF.length | 0], x:r() * W, y:-20 * k, vx:(r() - .5) * 2 * k, vy, vr:(r() - .5) * .3, s:(10 + r() * 10) * k, max:(Hh + 40 * k) / vy + 5 }); }
     if (f.has("stars") && r() < .25) add({ e:["✨", "⭐", "🌟"][r() * 3 | 0], x:r() * W, y:r() * Hh, vy:0, s:(22 + r() * 26) * k, star:1, max:30 + (r() * 30 | 0) });
@@ -3561,11 +4010,23 @@ function stuFx(c, W, Hh, k){
     p.age++; p.x += p.vx + (p.sw ? Math.sin(p.age / 12 + p.ph) * p.sw : 0); p.y += p.vy; p.rot += p.vr;
     c.globalAlpha = Math.max(0, p.star ? Math.sin(Math.PI * p.age / p.max) : Math.min(1, p.age / 8, (p.max - p.age) / 14));
     c.save(); c.translate(p.x, p.y); c.rotate(p.rot);
+    if (!p.col){ const u = Math.min(1, p.age / 12), sc = 1 + 2.70158 * Math.pow(u - 1, 3) + 1.70158 * Math.pow(u - 1, 2); c.scale(sc, sc); }
     if (p.col){ c.fillStyle = p.col; c.fillRect(-p.s / 2, -p.s / 3, p.s, p.s * .6); }
     else { c.font = Math.round(p.s) + "px 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',serif"; c.fillText(p.e, 0, 0); }
     c.restore();
   });
   c.globalAlpha = 1; STU.parts = P.filter(p => p.age < p.max);
+  if (STU.stk && STU.stk.length){
+    c.textAlign = "center"; c.textBaseline = "middle";
+    STU.stk.forEach(s => {
+      s.age++; const t = s.age / s.max, u = Math.min(1, s.age / 10);
+      const sc = (1 + 2.70158 * Math.pow(u - 1, 3) + 1.70158 * Math.pow(u - 1, 2)) * (1 + .04 * Math.sin(s.age / 5));
+      c.globalAlpha = t > .8 ? Math.max(0, 1 - (t - .8) / .2) : 1;
+      c.save(); c.translate(s.x * W, s.y * Hh - s.age * .25 * k); c.rotate(s.rot + Math.sin(s.age / 9) * .07); c.scale(sc, sc);
+      c.font = Math.round(s.s * k) + "px 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',serif"; c.fillText(s.e, 0, 0); c.restore();
+    });
+    c.globalAlpha = 1; STU.stk = STU.stk.filter(s => s.age < s.max);
+  }
   if (f.has("vig")){
     const g = c.createRadialGradient(W / 2, Hh / 2, Math.min(W, Hh) * .35, W / 2, Hh / 2, Math.hypot(W, Hh) * .55);
     g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,.6)"); c.fillStyle = g; c.fillRect(0, 0, W, Hh);
@@ -3576,6 +4037,7 @@ function stuFx(c, W, Hh, k){
     c.fillStyle = "rgba(255,255,255,.05)"; c.fillRect(0, (STU.frame * 6) % (Hh + 200) - 100, W, 80 * k);
   }
   if (f.has("frame")){ const lw = 14 * k; c.lineWidth = lw; c.strokeStyle = "hsl(" + (STU.frame * 4 % 360) + ",100%,60%)"; c.strokeRect(lw / 2, lw / 2, W - lw, Hh - lw); }
+  stuWidgets(c, W, Hh, k);
   if (STU.banner){
     const t = STU.banner.slice(0, 60), fs = Math.round(30 * k); c.font = "700 " + fs + "px system-ui,sans-serif";
     const tw = Math.min(W * .9, c.measureText(t).width + 44 * k), bh = fs + 26 * k, bx = (W - tw) / 2, by = Hh > W ? Hh * .2 : Hh - bh - Hh * .1;
@@ -3614,7 +4076,7 @@ function stuAudio(){
   if (ac.state === "suspended") ac.resume().catch(() => {});
 }
 function stuMicApply(){
-  if (STU.micGain) STU.micGain.gain.value = STU.micOn ? 1 : 0;
+  if (STU.micGain) STU.micGain.gain.value = STU.micOn ? (STU.micVol == null ? 1 : STU.micVol) : 0;
   else if (STU.micStream) STU.micStream.getAudioTracks().forEach(t => { t.enabled = STU.micOn; });
 }
 
@@ -3634,14 +4096,15 @@ async function stuCams(){
     const d = (await navigator.mediaDevices.enumerateDevices()).filter(x => x.kind === "videoinput"), sel = $("sdCamSel");
     const t = STU.camStream && STU.camStream.getVideoTracks()[0], cur = t ? (t.getSettings().deviceId || "") : "";
     sel.replaceChildren(); d.forEach((x, i) => { const o = document.createElement("option"); o.value = x.deviceId; o.textContent = x.label || ("Cámara " + (i + 1)); sel.append(o); });
-    if (cur) sel.value = cur; $("sdCamBox").classList.toggle("hidden", d.length < 2);
+    if (cur) sel.value = cur; $("sdCamBox").classList.toggle("hidden", d.length < 2); if (window.lySrcRender) window.lySrcRender();
   } catch (e) {}
 }
 async function stuStart(raw){
   if (!raw || !HTMLCanvasElement.prototype.captureStream) throw new Error("Sin captureStream");
   const Q = STU_Q[STU.q], vert = STU.orient === "v";
+  STU.wg = { goal:null, counter:null, cd:null }; STU.micVol = 1; STU.scrLabel = ""; STU.scrIc = "";
   Object.assign(STU, { W:vert ? Q.s : Q.l, H:vert ? Q.l : Q.s, layout:"cam", pip:"br", pipSize:.3, beauty:0, bright:1, zoom:1, mirror:false,
-    camOn:true, micOn:true, facing:"user", camId:"", fx:new Set(), banner:"", parts:[], frame:0, last:0, scan:null });
+    camOn:true, micOn:true, facing:"user", camId:"", fx:new Set(), banner:"", parts:[], stk:[], frame:0, last:0, scan:null });
   try {
     STU.micStream = new MediaStream(raw.getAudioTracks()); STU.camStream = new MediaStream(raw.getVideoTracks());
     const box = STU.box = document.createElement("div");
@@ -3671,7 +4134,7 @@ function stuStop(keepRaw){
   try { STU.ac && STU.ac.close(); } catch (e) {}
   if (STU.box){ STU.box.remove(); STU.box = null; }
   STU.camStream = STU.micStream = STU.scrStream = STU.out = STU.ac = STU.dest = STU.micGain = STU.scrSrc = null;
-  STU.camV = STU.scrV = STU.cv = STU.ctx = STU.bd = STU.scan = null; STU.parts = [];
+  STU.camV = STU.scrV = STU.cv = STU.ctx = STU.bd = STU.scan = null; STU.parts = []; STU.stk = [];
   try { $("lvShare").lastElementChild.textContent = "Compartir pantalla"; } catch (e) {}
 }
 
@@ -3684,7 +4147,7 @@ async function stuShare(kind, pre){
   if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia)
     return lvSys("Tu dispositivo no permite compartir pantalla ni páginas web (en el celular casi ningún navegador lo permite). Usa una computadora con Chrome o Edge.");
   const tab = kind === "tab";
-  const opts = { video:{ frameRate:{ ideal:STU.fps }, width:{ max:1920 }, height:{ max:1080 }, displaySurface: tab ? "browser" : "monitor" }, audio:true };
+  const opts = { video:{ frameRate:{ ideal:STU.fps }, width:{ max:1920 }, height:{ max:1080 }, displaySurface: tab ? "browser" : (kind === "window" ? "window" : "monitor") }, audio:true };
   if (tab){ opts.selfBrowserSurface = "exclude"; opts.preferCurrentTab = false; } else opts.systemAudio = "include";
   let s = pre || null; if (!s) try { s = await navigator.mediaDevices.getDisplayMedia(opts); } catch (e) { if (e && e.name !== "NotAllowedError") lvSys("No se pudo compartir: " + (e.message || e)); return; }
   if (!STU.on){ s.getTracks().forEach(t => t.stop()); return; }
@@ -3724,16 +4187,16 @@ function stuUiSync(){
   $("sdOrient").value = STU.orient; $("sdRes").value = STU.q; $("sdFps").value = String(STU.fps);
   $("sdInfo").textContent = STU.W + "×" + STU.H + " · " + STU.fps + " fps";
   $("sdBw").textContent = "Subida aprox.: " + (stuBitrate() / 1e6).toFixed(1) + " Mbps por espectador (se reduce solo si entra mucha gente).";
-  stuMarkFilters();
+  stuMarkFilters(); if (window.lySrcRender) window.lySrcRender();
 }
 function stuModalInit(){
-  stuFilterButtons($("glFilters"), () => { $("glPrev").style.filter = stuCss(); });
-  $("glPrev").style.filter = stuCss();
+  stuFilterButtons($("glFilters"), () => { $("glPrev").style.filter = STU.on ? "" : stuCss(); });
+  $("glPrev").style.filter = STU.on ? "" : stuCss();
   $("glOrient").value = STU.orient; $("glQual").value = STU.q;
   $("glPrev").parentElement.classList.toggle("v", STU.orient === "v");
 }
-$("glOrient").onchange = () => { STU.orient = $("glOrient").value; stuSave(); $("glPrev").parentElement.classList.toggle("v", STU.orient === "v"); };
-$("glQual").onchange = () => { STU.q = $("glQual").value; stuSave(); };
+$("glOrient").onchange = () => { STU.orient = $("glOrient").value; stuSave(); $("glPrev").parentElement.classList.toggle("v", STU.orient === "v"); if (window.lyPreApply) window.lyPreApply(); };
+$("glQual").onchange = () => { STU.q = $("glQual").value; stuSave(); if (window.lyPreApply) window.lyPreApply(); };
 stuFilterButtons($("sdFilters"));
 
 document.querySelectorAll("#sdTabs [data-sd]").forEach(b => b.onclick = () => {
@@ -3747,6 +4210,7 @@ document.querySelectorAll("[data-layout]").forEach(b => b.onclick = () => {
 });
 document.querySelectorAll("[data-pip]").forEach(b => b.onclick = () => { STU.pip = b.dataset.pip; stuUiSync(); });
 document.querySelectorAll("[data-fx]").forEach(b => b.onclick = () => { const k = b.dataset.fx; STU.fx.has(k) ? STU.fx.delete(k) : STU.fx.add(k); stuUiSync(); });
+document.querySelectorAll("[data-stk]").forEach(b => b.onclick = () => stuSticker(b.dataset.stk));
 $("sdBeauty").oninput = e => { STU.beauty = +e.target.value; };
 $("sdBright").oninput = e => { STU.bright = e.target.value / 100; };
 $("sdZoom").oninput = e => { STU.zoom = e.target.value / 100; };
@@ -3845,7 +4309,8 @@ function onWatchData(d){
   else if (d.t === "end") watchEnd("El directo terminó. ¡Gracias por acompañar!", "ok", true);
   else if (d.t === "media"){ camOff = !d.cam; paintStat(); }
   else if (d.t === "count") setCount(d.n);
-  else if (d.t === "react") floatEmoji(d.e);
+  else if (d.t === "react"){ if (REACTS.includes(d.e)) floatEmoji(d.e); }
+  else if (d.t === "reacts" && Array.isArray(d.items)) d.items.slice(0, 6).forEach(it => { if (Array.isArray(it) && REACTS.includes(it[0])) reactBurst(it[0], Math.max(1, Math.min(99, it[1] | 0))); });
   else if (d.t === "gift") showGift(String(d.name || "Alguien").slice(0, 30), { emoji:String(d.e || "🎁").slice(0, 4), name:String(d.g || "regalo").slice(0, 20), price:+d.p || 0 }, d.pic);
   else if (d.t === "chat"){
     if (d.sys) lvSys(d.text); else addLv(d.name, d.text, d.host ? "host" : (d.name === nameOf(profile) ? "me" : ""), d.pic);
@@ -3994,8 +4459,7 @@ async function hostGift(v, id){
 }
 function showGift(name, g, pic){
   addLv(name, "envió " + g.emoji + " " + g.name + " (" + g.price + " pts)", "gift", pic);
-  const n = Math.min(10, Math.max(3, Math.round(g.price / 10)));
-  for (let i = 0; i < n; i++) setTimeout(() => floatEmoji(g.emoji), i * 140);
+  giftBanner(name, g, pic); giftShow(g);
 }
 /* ═════════ FIN · JS-21 ═════════ */
 
@@ -4746,9 +5210,9 @@ sb.auth.getSession().then(async ({ data }) => {
   const canShare = !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) && !matchMedia("(max-width:760px)").matches;
   const MODES = {
     cam:   { label:"📷 Cámara",   topic:null,         screen:false, ph:"Ej. Hablemos de cripto", note:"" },
-    game:  { label:"🎮 Juego",    topic:"Gaming",     screen:true,  orient:"h", ph:"Ej. Jugando con suscriptores", note:"Al empezar, el navegador te pedirá qué pantalla o ventana compartir (marca «compartir audio» para que se oiga el juego). Tu cámara saldrá pequeña en una esquina." },
-    tuto:  { label:"🛠️ Tutorial", topic:"Tutoriales", screen:true,  orient:"h", ph:"Ej. Cómo crear una página web paso a paso", note:"Al empezar, el navegador te pedirá qué pantalla o ventana compartir. Tu cámara saldrá pequeña en una esquina y podrás cambiar el diseño en el Studio." },
-    curso: { label:"🎓 Curso",    topic:"Cursos",     screen:true,  orient:"h", ph:"Ej. Curso de Excel · Clase 1", note:"Al empezar, el navegador te pedirá qué pantalla o ventana compartir. Explica en vivo y responde preguntas en el chat." }
+    game:  { label:"🎮 Juego",    topic:"Gaming",     screen:true,  orient:"h", ph:"Ej. Jugando con suscriptores", note:"Pulsa «Añadir fuente» → «Captura de juego» o «Grabación de pantalla» para mostrar tu pantalla; tu cámara saldrá en una esquina." },
+    tuto:  { label:"🛠️ Tutorial", topic:"Tutoriales", screen:true,  orient:"h", ph:"Ej. Cómo crear una página web paso a paso", note:"Pulsa «Añadir fuente» → «Captura de juego» o «Grabación de pantalla» para mostrar tu pantalla; tu cámara saldrá en una esquina." },
+    curso: { label:"🎓 Curso",    topic:"Cursos",     screen:true,  orient:"h", ph:"Ej. Curso de Excel · Clase 1", note:"Pulsa «Añadir fuente» → «Captura de juego» o «Grabación de pantalla» para mostrar tu pantalla; tu cámara saldrá en una esquina." }
   };
   window.lyMode = MODES.cam;
   const keys = canShare ? ["cam", "game", "tuto", "curso"] : ["cam"];
@@ -4762,7 +5226,7 @@ sb.auth.getSession().then(async ({ data }) => {
     box.parentElement.classList.toggle("hidden", keys.length < 2);
   }
   function set(k){
-    const m = MODES[k] || MODES.cam; window.lyMode = m; draw(k in MODES ? k : "cam");
+    const m = MODES[k] || MODES.cam; window.lyMode = Object.assign({}, m, { screen:false }); draw(k in MODES ? k : "cam");
     note.textContent = m.note; note.classList.toggle("hidden", !m.note);
     $("glTitle").placeholder = m.ph;
     if (m.topic){
@@ -4770,7 +5234,7 @@ sb.auth.getSession().then(async ({ data }) => {
       chips($("glTopics"), TOPICS, m.topic, t => { pickedTopic = t; $("glBtn").disabled = false; });
     }
     if (m.orient){
-      STU.orient = m.orient; $("glOrient").value = m.orient; $("glPrev").parentElement.classList.toggle("v", m.orient === "v"); stuSave();
+      $("glOrient").value = m.orient; $("glOrient").onchange();
     }
   }
   const go = $("btnGoLive"), orig = go.onclick;
@@ -4783,13 +5247,232 @@ sb.auth.getSession().then(async ({ data }) => {
   if (!canShare) $("lvModes").classList.add("hidden");
 })();
 
+/* ---------- Estudio previo (como TikTok LIVE Studio): fuentes, herramientas y ajustes antes de transmitir ---------- */
+(function(){
+  const CAN = !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
+  const tst = (t, ms) => toastMsg(t, ms || 3500);
+  const mk = (tag, cls, txt) => { const n = document.createElement(tag); if (cls) n.className = cls; if (txt != null) n.textContent = txt; return n; };
+  const LAYOUT_NAME = { cam:"Solo cámara", screen:"Solo pantalla", pip:"Pantalla + cámara", split:"Lado a lado" };
+  const wg = () => STU.wg || (STU.wg = { goal:null, counter:null, cd:null });
+
+  /* ---- cámara y micrófono ---- */
+  async function toggleCam(){
+    if (!STU.on) return tst("El Studio aún no está listo: espera a que cargue tu cámara.");
+    STU.camOn = !STU.camOn;
+    if (!STU.camOn){ if (STU.camStream) STU.camStream.getTracks().forEach(t => t.stop()); }
+    else { try { await stuSetCam(stuCamConstraint()); } catch (e) { STU.camOn = false; tst("No se pudo encender la cámara."); } }
+    stuSyncMedia(); render();
+  }
+  function toggleMic(){ if (!STU.on) return; STU.micOn = !STU.micOn; stuMicApply(); render(); }
+  async function addCam(){
+    if (!STU.on){ tst("El Studio aún no está listo: espera a que cargue tu cámara."); return false; }
+    if (!STU.camOn) await toggleCam(); else tst("Tu cámara ya está en la escena. Si tienes otra (o una tarjeta de captura), elígela en la lista «Cámara».");
+    return true;
+  }
+
+  /* ---- pantalla, ventana, pestaña, imagen y video ---- */
+  async function shareAs(kind, label, ic, pre){
+    const fail = m => { if (m) tst(m); if (pre) pre.getTracks().forEach(t => t.stop()); return false; };
+    if (!STU.on) return fail("El Studio aún no está listo: espera a que cargue tu cámara.");
+    if (!pre && !CAN) return fail("Tu dispositivo no permite compartir pantalla. Usa una computadora con Chrome o Edge.");
+    const before = STU.scrStream;
+    await stuShare(kind, pre);
+    if (!STU.scrStream || STU.scrStream === before) return false;
+    STU.scrLabel = label; STU.scrIc = ic; render(); return true;
+  }
+  function addImage(file){
+    return new Promise(res => {
+      const url = URL.createObjectURL(file), img = new Image();
+      img.onerror = () => { URL.revokeObjectURL(url); tst("No se pudo leer esa imagen."); res(false); };
+      img.onload = async () => {
+        const k = Math.min(1, 1920 / img.naturalWidth, 1080 / img.naturalHeight), cv = document.createElement("canvas");
+        cv.width = Math.max(2, Math.round(img.naturalWidth * k)); cv.height = Math.max(2, Math.round(img.naturalHeight * k));
+        const cx = cv.getContext("2d"), draw = () => cx.drawImage(img, 0, 0, cv.width, cv.height); draw();
+        const s = cv.captureStream(5), tr = s.getVideoTracks()[0];
+        const iv = setInterval(() => { if (tr.readyState === "ended"){ clearInterval(iv); URL.revokeObjectURL(url); } else draw(); }, 400);
+        res(await shareAs("screen", file.name.slice(0, 40) || "Imagen", "🖼️", s));
+      };
+      img.src = url;
+    });
+  }
+  async function addVideo(file){
+    const cap0 = HTMLVideoElement.prototype.captureStream || HTMLVideoElement.prototype.mozCaptureStream;
+    if (!cap0){ tst("Tu navegador no permite usar videos como fuente. Usa Chrome, Edge o Firefox."); return false; }
+    const url = URL.createObjectURL(file), v = document.createElement("video");
+    v.src = url; v.loop = true; v.playsInline = true; v.preload = "auto"; v.style.cssText = "position:fixed;left:0;bottom:0;width:2px;height:2px;opacity:.01;pointer-events:none;z-index:-1";
+    document.body.append(v);
+    const done = () => { try { v.pause(); } catch (e) {} v.remove(); URL.revokeObjectURL(url); };
+    try { await v.play(); } catch (e) { done(); tst("No se pudo reproducir ese video."); return false; }
+    const s = cap0.call(v);
+    const iv = setInterval(() => { if (STU.scrStream !== s){ clearInterval(iv); done(); } }, 800);
+    const ok = await shareAs("screen", file.name.slice(0, 40) || "Vídeo", "▶️", s);
+    if (!ok){ clearInterval(iv); done(); }
+    return ok;
+  }
+
+  /* ---- lista de fuentes de la escena ---- */
+  function entries(){
+    const out = [], g = STU.wg || {};
+    out.push({ ic:"📷", n:"Cámara", sub:STU.camOn ? "Activa" : "Apagada", acts:[{ t:STU.camOn ? "👁" : "🚫", title:"Encender o apagar", f:toggleCam }] });
+    if (STU.scrStream) out.push({ ic:STU.scrIc || "🖥️", n:STU.scrLabel || "Pantalla", sub:"En la escena", acts:[{ t:"✕", title:"Quitar", f:() => stuStopShare() }] });
+    if (STU.banner) out.push({ ic:"🅰️", n:"Texto", sub:STU.banner, acts:[{ t:"✕", title:"Quitar", f:() => { STU.banner = ""; $("sdBanner").value = ""; render(); } }] });
+    if (g.goal){
+      const cur = g.goal.mode === "viewers" ? (H ? H.viewers.size : 0) : g.goal.val, a = [];
+      if (g.goal.mode === "manual") a.push({ t:"−", title:"Restar", f:() => { g.goal.val = Math.max(0, g.goal.val - 1); render(); } }, { t:"+", title:"Sumar", f:() => { g.goal.val++; render(); } });
+      a.push({ t:"✕", title:"Quitar", f:() => { g.goal = null; render(); } });
+      out.push({ ic:"🎯", n:"Objetivo", sub:g.goal.title + " · " + cur + "/" + g.goal.target, acts:a });
+    }
+    if (g.counter) out.push({ ic:"🔢", n:"Contador", sub:g.counter.label + ": " + g.counter.n, acts:[
+      { t:"−", title:"Restar", f:() => { g.counter.n--; render(); } }, { t:"+", title:"Sumar", f:() => { g.counter.n++; render(); } }, { t:"✕", title:"Quitar", f:() => { g.counter = null; render(); } }] });
+    if (g.cd) out.push({ ic:"⏱️", n:"Cuenta atrás", sub:g.cd.label, acts:[{ t:"↻", title:"Reiniciar", f:() => { g.cd.end = Date.now() + g.cd.mins * 60000; render(); } }, { t:"✕", title:"Quitar", f:() => { g.cd = null; render(); } }] });
+    return out;
+  }
+  function entryEl(e){
+    const d = mk("div", "sp-e"), tx = mk("div", "tx");
+    tx.append(mk("b", "", e.n), mk("span", "", e.sub)); d.append(mk("span", "ic", e.ic), tx);
+    e.acts.forEach(a => { const b = mk("button", "", a.t); b.type = "button"; b.title = a.title; b.setAttribute("aria-label", a.title); b.onclick = ev => { ev.preventDefault(); a.f(); }; d.append(b); });
+    return d;
+  }
+  function render(){
+    const on = !!STU.on, ents = on ? entries() : [];
+    document.querySelectorAll(".sp-srcs").forEach(box => {
+      box.replaceChildren();
+      if (!on) box.append(mk("p", "st-sub", "Activa tu cámara para empezar a armar la escena."));
+      ents.forEach(e => box.append(entryEl(e)));
+    });
+    $("stScene").textContent = LAYOUT_NAME[STU.layout] || "Solo cámara";
+    $("stInfo").textContent = on ? STU.W + "×" + STU.H + " · " + STU.fps + " fps" : "";
+    $("stFmtV").classList.toggle("on", STU.orient === "v"); $("stFmtH").classList.toggle("on", STU.orient === "h");
+    $("stMic").classList.toggle("off", !STU.micOn); $("stCam").classList.toggle("off", !STU.camOn);
+    $("stMic").lastElementChild.textContent = STU.micOn ? "Micrófono" : "Silenciado"; $("stCam").lastElementChild.textContent = STU.camOn ? "Cámara" : "Apagada";
+    $("stEmpty").classList.toggle("hidden", on || !!prevStream);
+    const sel = $("stCamSel"), src = $("sdCamSel"); sel.innerHTML = src.innerHTML; sel.value = src.value; $("stCamBox").classList.toggle("hidden", src.options.length < 2);
+    $("glPrev").parentElement.classList.toggle("v", STU.orient === "v");
+  }
+  window.lySrcRender = render;
+  setInterval(() => { if ($("mGoLive").classList.contains("hidden") || !STU.on) return; const g = STU.wg; if (g && g.cd) render(); }, 5000);
+
+  /* ---- selector «Añadir fuente» ---- */
+  const field = (box, label, el) => { box.append(mk("label", "", label), el); return el; };
+  const inp = (type, ph, val) => { const i = document.createElement("input"); i.type = type; if (ph) i.placeholder = ph; if (val != null) i.value = val; return i; };
+  const FORMS = {
+    img(box){ const i = field(box, "Elige una imagen", inp("file")); i.accept = "image/*"; return () => i.files[0] ? addImage(i.files[0]) : (tst("Elige una imagen primero."), false); },
+    vid(box){ const i = field(box, "Elige un video", inp("file")); i.accept = "video/*"; return () => i.files[0] ? addVideo(i.files[0]) : (tst("Elige un video primero."), false); },
+    text(box){ const i = field(box, "Texto en pantalla", inp("text", "Ej. Hoy: preguntas y respuestas", STU.banner || "")); i.maxLength = 60;
+      return () => { const t = i.value.trim(); if (!t){ tst("Escribe un texto."); return false; } STU.banner = t.slice(0, 60); $("sdBanner").value = STU.banner; render(); return true; }; },
+    url(box){ const i = field(box, "Dirección de la página", inp("text", "ejemplo.com"));
+      return () => { if (!i.value.trim()){ tst("Escribe la dirección."); return false; } $("sdWebUrl").value = i.value.trim(); $("sdWebOpen").click(); return true; }; },
+    goal(box){
+      const t = field(box, "Título de la meta", inp("text", "Ej. Llegar a 50 espectadores")), n = field(box, "Meta (número)", inp("number", "", "10")), m = field(box, "Cómo se mide", document.createElement("select"));
+      t.maxLength = 40; n.min = 1; n.max = 100000; m.innerHTML = '<option value="viewers">Espectadores conectados</option><option value="manual">Manual (con + y −)</option>';
+      return () => { const target = Math.max(1, Math.min(100000, parseInt(n.value, 10) || 10)); wg().goal = { title:t.value.trim().slice(0, 40) || "Meta del directo", target, mode:m.value, val:0 }; render(); return true; };
+    },
+    counter(box){
+      const t = field(box, "Nombre del contador", inp("text", "Ej. Preguntas respondidas", "Contador")); t.maxLength = 30;
+      return () => { wg().counter = { label:t.value.trim().slice(0, 30) || "Contador", n:0 }; render(); return true; };
+    },
+    cd(box){
+      const t = field(box, "Texto", inp("text", "", "Empezamos en")), n = field(box, "Minutos", inp("number", "", "5")); t.maxLength = 30; n.min = 1; n.max = 180;
+      return () => { const mins = Math.max(1, Math.min(180, parseInt(n.value, 10) || 5)); wg().cd = { label:t.value.trim().slice(0, 30) || "Empezamos en", mins, end:Date.now() + mins * 60000 }; render(); return true; };
+    }
+  };
+  const SRC = [
+    { g:"General", id:"game", ic:"🎮", n:"Captura de juego", d:"Captura la ventana de tu juego en el equipo. Marca «compartir audio» para que se oiga el juego.", share:1, run:() => shareAs("window", "Juego", "🎮") },
+    { id:"cam", ic:"📷", n:"Cámara", d:"Importa tu cámara web o cualquier cámara virtual. Ajusta zoom, espejo, filtros y suavizado desde la barra de abajo.", run:addCam },
+    { id:"screen", ic:"🖥️", n:"Grabación de pantalla", d:"Comparte toda tu pantalla con su audio, ideal para tutoriales y cursos.", share:1, run:() => shareAs("screen", "Pantalla", "🖥️") },
+    { id:"phone", ic:"📱", n:"Cámara del teléfono", d:"Usa tu teléfono como cámara adicional.", soon:1 },
+    { id:"win", ic:"🪟", n:"Captura de ventana", d:"Muestra solo una ventana de tu equipo.", share:1, run:() => shareAs("window", "Ventana", "🪟") },
+    { id:"img", ic:"🖼️", n:"Imagen", d:"Muestra una imagen: un logo, una portada o una diapositiva.", form:"img" },
+    { id:"text", ic:"🅰️", n:"Texto", d:"Un rótulo de texto en la pantalla del directo.", form:"text" },
+    { id:"link", ic:"🌐", n:"Enlace", d:"Muestra una página web: se abre en otra pestaña y luego la compartes como pestaña.", form:"url" },
+    { id:"vid", ic:"▶️", n:"Vídeo", d:"Reproduce un video de tu equipo dentro del directo, con su audio. Usa audífonos para evitar eco.", form:"vid" },
+    { id:"tab", ic:"🗂️", n:"Pestaña del navegador", d:"Comparte una pestaña con su audio (marca «Compartir audio de la pestaña»).", share:1, run:() => shareAs("tab", "Pestaña", "🗂️") },
+    { id:"card", ic:"🎛️", n:"Tarjeta de captura", d:"Una tarjeta de captura aparece como otra cámara: añade la cámara y elígela en la lista «Cámara».", run:addCam },
+    { id:"recast", ic:"🔁", n:"Retransmisión de una emisión", d:"Retransmite otro directo en el tuyo.", soon:1 },
+    { g:"Widget", id:"alert", ic:"🔔", n:"Alerta", d:"Avisos animados cuando alguien te sigue o te envía un regalo.", soon:1 },
+    { id:"goal", ic:"🎯", n:"Objetivo", d:"Una barra de progreso en pantalla: por ejemplo, llegar a 50 espectadores.", form:"goal" },
+    { id:"chat", ic:"💬", n:"Ventana de chat", d:"Muestra el chat dentro del video.", soon:1 },
+    { id:"counter", ic:"🔢", n:"Contador", d:"Un número en pantalla que sumas o restas a mano (preguntas respondidas, rondas, victorias…).", form:"counter" },
+    { id:"rank", ic:"🔥", n:"Clasificaciones de creadores", d:"Ranking de creadores en pantalla.", soon:1 },
+    { id:"vrank", ic:"📊", n:"Clasificación de espectadores", d:"Ranking de tus mejores espectadores.", soon:1 },
+    { id:"cd", ic:"⏱️", n:"Cuenta atrás", d:"Un temporizador en pantalla, ideal para empezar a la hora exacta.", form:"cd" }
+  ];
+  let cur = null, getAct = null, built = false;
+  const canAdd = s => !!s && !s.soon && !(s.share && !CAN);
+  function pickSrc(s){
+    cur = s; getAct = null;
+    document.querySelectorAll("#srcList .src-b").forEach(b => b.classList.toggle("on", b.dataset.id === s.id));
+    const box = $("srcDesc"); box.replaceChildren(); box.append(mk("h3", "", s.n), mk("p", "", s.d));
+    if (s.soon) box.append(mk("p", "src-soon", "🕒 Esta opción llegará pronto."));
+    else if (s.share && !CAN) box.append(mk("p", "src-soon", "Tu dispositivo no permite compartir pantalla. Usa una computadora con Chrome o Edge."));
+    else if (s.form) getAct = FORMS[s.form](box);
+    $("srcAdd").disabled = !canAdd(s);
+  }
+  function buildList(){
+    if (built) return; built = true;
+    const L = $("srcList"); let grid = null;
+    SRC.forEach(s => {
+      if (s.g){ L.append(mk("h4", "src-g", s.g)); grid = mk("div", "src-grid"); L.append(grid); }
+      const b = mk("button", "src-b" + (s.soon ? " soon" : "")); b.type = "button"; b.dataset.id = s.id; b.append(mk("span", "", s.ic), mk("span", "", s.n));
+      b.onclick = () => pickSrc(s); grid.append(b);
+    });
+  }
+  function openPicker(id){ buildList(); pickSrc(SRC.find(s => s.id === id) || SRC[0]); openM("mSrc"); }
+  $("srcAdd").onclick = async () => {
+    if (!cur) return; $("srcAdd").disabled = true; let ok = false;
+    try { ok = cur.run ? await cur.run() : (getAct ? await getAct() : false); } catch (e) { console.error(e); tst("No se pudo añadir la fuente."); }
+    $("srcAdd").disabled = !canAdd(cur); if (ok) closeM("mSrc");
+  };
+  $("stAdd").onclick = () => openPicker(); $("sdAddSrc").onclick = () => openPicker();
+
+  /* ---- herramientas ---- */
+  const TOOLS = [["🔗", "Coemisión"], ["👥", "Varios invitados"], ["🎯", "Objetivo del LIVE", "goal"], ["🎮", "Juegos interactivos"], ["🎁", "Favorito del público"], ["🕹️", "Juego en equipo"], ["📊", "Encuesta y votar con…"], ["🛍️", "Bolsa de obsequios"]];
+  TOOLS.forEach(([ic, name, src]) => {
+    const b = mk("button", "st-t" + (src ? "" : " soon")); b.type = "button"; b.append(mk("i", "", ic), mk("span", "", name));
+    b.onclick = () => src ? openPicker(src) : tst("«" + name + "» estará disponible pronto.");
+    $("stTools").append(b);
+  });
+
+  /* ---- barra inferior y ventanas flotantes ---- */
+  let pop = null;
+  function setPop(k){
+    pop = pop === k ? null : k;
+    document.querySelectorAll("#glForm [data-pop]").forEach(b => b.classList.toggle("on", b.dataset.pop === pop));
+    document.querySelectorAll("#glForm .st-pane").forEach(p => p.classList.toggle("hidden", p.dataset.pane !== pop));
+    $("stPop").classList.toggle("hidden", !pop);
+  }
+  document.querySelectorAll("#glForm [data-pop]").forEach(b => b.onclick = () => setPop(b.dataset.pop));
+  $("stCam").onclick = toggleCam; $("stMic").onclick = toggleMic;
+  $("stVol").oninput = e => { STU.micVol = e.target.value / 100; if (STU.on && STU.micOn) stuMicApply(); };
+  $("spBeauty").oninput = e => { STU.beauty = +e.target.value; };
+  $("spBright").oninput = e => { STU.bright = e.target.value / 100; };
+  $("spZoom").oninput = e => { STU.zoom = e.target.value / 100; };
+  $("spPipSize").oninput = e => { STU.pipSize = e.target.value / 100; };
+  $("spMirror").onchange = e => { STU.mirror = e.target.checked; };
+  $("stFmtV").onclick = () => { $("glOrient").value = "v"; $("glOrient").onchange(); };
+  $("stFmtH").onclick = () => { $("glOrient").value = "h"; $("glOrient").onchange(); };
+  $("glFps").onchange = () => { STU.fps = +$("glFps").value; stuSave(); window.lyPreApply(); };
+  $("stCamSel").onchange = e => { const s = $("sdCamSel"); s.value = e.target.value; if (s.onchange) s.onchange(); };
+  $("stEmptyBtn").onclick = () => { glCancelled = false; say($("glMsg"), ""); startPrev(); };
+  window.lyPreApply = () => {
+    if (!STU.on || H) return;
+    $("sdOrient").value = STU.orient; $("sdRes").value = STU.q; $("sdFps").value = String(STU.fps); stuApplyQuality(); render();
+  };
+  function stReset(){
+    setPop(null); pop = null; $("stPop").classList.add("hidden");
+    $("spBeauty").value = 0; $("spBright").value = 100; $("spZoom").value = 100; $("spPipSize").value = 30; $("spMirror").checked = false; $("stVol").value = 100;
+    $("glFps").value = String(STU.fps); render();
+  }
+  const go = $("btnGoLive"), prevGo = go.onclick;
+  go.onclick = e => { const wasLive = !!H; prevGo.call(go, e); if (!wasLive) stReset(); };
+})();
+
 /* ---------- Panel público de directos (se ve antes de iniciar sesión) ---------- */
 (function(){
-  const root = $("pubHome"), car = $("pubCar"), grid = $("pubGrid"), rail = $("pubRailList"), cats = $("pubCats");
-  let data = [], idx = 0, cat = "Todos", term = "", rot = 0, poll = 0, shown = false;
+  const root = $("pubHome"), grid = $("pubGrid"), rail = $("pubRailList"), cats = $("pubCats");
+  let data = [], cat = "Todos", term = "", poll = 0, shown = false, vtok = 0;
   $("pubLogo").innerHTML = $("sideLogo").innerHTML;
   const norm = s => (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  const el = (tag, cls, txt) => { const n = document.createElement(tag); if (cls) n.className = cls; if (txt != null) n.textContent = txt; return n; };
 
   function goLogin(mode, msg){
     window.lyWantLogin = true; stop();
@@ -4800,6 +5483,7 @@ sb.auth.getSession().then(async ({ data }) => {
     try { localStorage.setItem("ly_after_live", l.id); } catch (e) {}
     goLogin("up", "Crea tu cuenta gratis o inicia sesión para ver «" + l.title + "».");
   }
+  const carObj = lvCarousel($("pubCarWrap"), it => it.live ? gate(it.live) : goLogin("up", "Crea tu cuenta gratis o inicia sesión para ver este video."));
   $("pubIn").onclick = () => goLogin("in", "");
   $("pubUp").onclick = $("pubJoin").onclick = $("pubEmptyBtn").onclick = () => goLogin("up", "");
   $("btnBackPub").onclick = () => { window.lyWantLogin = false; $("btnBackPub").classList.add("hidden"); say($("loginMsg"), "", ""); showPub(); };
@@ -4812,34 +5496,22 @@ sb.auth.getSession().then(async ({ data }) => {
   function drawCats(){
     cats.replaceChildren();
     ["Todos", ...TOPICS].forEach(t => {
-      const b = el("button", "lvcat" + (t === cat ? " on" : ""), lvTag(t) || t); b.type = "button";
-      b.onclick = () => { cat = t; idx = 0; render(); }; cats.append(b);
+      const b = document.createElement("button"); b.className = "lvcat" + (t === cat ? " on" : ""); b.textContent = lvTag(t) || t; b.type = "button";
+      b.onclick = () => { cat = t; render(); }; cats.append(b);
     });
   }
-  function drawCar(list){
-    car.replaceChildren(); const n = list.length; $("pubCarWrap").classList.toggle("hidden", !n); if (!n) return;
-    idx = ((idx % n) + n) % n;
-    list.forEach((l, i) => {
-      let rel = i - idx; if (rel > n / 2) rel -= n; if (rel < -n / 2) rel += n;
-      const s = el("div", "pub-s"); s.dataset.rel = Math.abs(rel) > 2 ? "x" : String(rel);
-      s.append(lvThumb(l));
-      if (rel === 0){
-        const info = el("div", "pub-info"), who = el("div", "who"), im = new Image(); im.alt = ""; im.src = picOf(l._a);
-        const nm = el("b", "", nameOf(l._a)); who.append(im, nm);
-        const t = el("h4", "", l.title), tag = el("span", "lvc-tag", lvTag(l.topic)), v = el("p", "", lvNum(l.viewers) + " espectadores");
-        const go = el("button", "btn main", "Ver este directo"); go.type = "button";
-        info.append(who, t, tag, v, go); s.append(info);
-      }
-      s.onclick = () => { if (rel === 0) gate(l); else if (Math.abs(rel) <= 2){ idx = i; drawCar(list); spin(list); } };
-      car.append(s);
-    });
+  async function videoCar(){
+    const tk = ++vtok, items = await lvLoadVideos();
+    if (tk !== vtok || !shown) return;
+    $("pubCarT").textContent = "Mientras nadie transmite, mira los videos de la comunidad";
+    $("pubCarT").classList.toggle("hidden", !items.length); carObj.set(items);
   }
-  function spin(list){ clearInterval(rot); if (list.length > 1) rot = setInterval(() => { if (document.hidden || car.matches(":hover")) return; idx++; drawCar(list); }, 7000); }
   function render(){
     drawCats();
     const list = visible(), byV = list.slice().sort((a, b) => (b.viewers || 0) - (a.viewers || 0));
     rail.replaceChildren(); data.slice().sort((a, b) => (b.viewers || 0) - (a.viewers || 0)).slice(0, 20).forEach(l => { const r = lvRow(l); r.onclick = () => gate(l); rail.append(r); });
-    drawCar(byV.slice(0, 8)); spin(byV.slice(0, 8));
+    if (byV.length){ vtok++; $("pubCarT").classList.add("hidden"); carObj.set(byV.slice(0, 8).map(l => ({ live:l }))); }
+    else videoCar();
     grid.replaceChildren(); $("pubH").classList.toggle("hidden", !list.length);
     list.forEach(l => { const c = lvCard(l); c.onclick = () => gate(l); grid.append(c); });
     const none = !list.length;
@@ -4859,15 +5531,13 @@ sb.auth.getSession().then(async ({ data }) => {
     } catch (e) { data = []; }
     if (shown) render();
   }
-  function stop(){ shown = false; clearInterval(rot); clearInterval(poll); }
+  function stop(){ shown = false; vtok++; carObj.stop(); clearInterval(poll); }
   function showPub(){
     if (window.lyWantLogin) return;
     $("login").classList.add("hidden"); root.classList.remove("hidden"); shown = true; render(); load();
     clearInterval(poll); poll = setInterval(load, 20000);
   }
-  $("pubSearch").addEventListener("input", e => { term = e.target.value; idx = 0; render(); });
-  $("pubPrev").onclick = () => { idx--; render(); };
-  $("pubNext").onclick = () => { idx++; render(); };
+  $("pubSearch").addEventListener("input", e => { term = e.target.value; render(); });
 
   /* Sin sesión: se ve este panel. Con sesión: la app de siempre. */
   const baseRoute = route;
