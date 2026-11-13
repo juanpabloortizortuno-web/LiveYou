@@ -2406,6 +2406,7 @@
         <button type="button" class="st-ib" data-pop="layout"><i>🧩</i><span>Diseño</span></button>
         <button type="button" class="st-ib" data-pop="quality"><i>⚙️</i><span>Calidad</span></button>
         <button type="button" class="st-ib" data-pop="text"><i>🅰️</i><span>Texto</span></button>
+        <button type="button" class="st-ib" id="lyFrameBtn"><i>🪟</i><span>Cuadro</span></button>
         <span class="sep"></span>
         <button type="button" class="st-ib" id="stCam"><i>📷</i><span>Cámara</span></button>
         <button type="button" class="st-ib" id="stMic"><i>🎤</i><span>Micrófono</span></button>
@@ -4404,9 +4405,9 @@ const STU_FILTERS = [
 ];
 /* s = lado corto, l = lado largo, cw/ch = tamaño pedido a la cámara, br = bits por segundo por espectador */
 const STU_Q = {
-  "480":  { s:480,  l:854,  cw:854,  ch:480,  br:1000000 },
-  "720":  { s:720,  l:1280, cw:1280, ch:720,  br:2000000 },
-  "1080": { s:1080, l:1920, cw:1920, ch:1080, br:3500000 }
+  "480":  { s:480,  l:854,  cw:854,  ch:480,  br:1500000 },
+  "720":  { s:720,  l:1280, cw:1280, ch:720,  br:3500000 },
+  "1080": { s:1080, l:1920, cw:1920, ch:1080, br:6000000 }
 };
 const STU = {
   on:false, out:null, cv:null, ctx:null, box:null, camV:null, scrV:null, bd:null, scan:null,
@@ -4436,9 +4437,9 @@ function stuBitrate(){
 function stuApplyBitrate(){
   if (!H || !STU.on) return; const br = stuBitrate();
   H.viewers.forEach(v => { try { v.call.peerConnection.getSenders().forEach(x => { if (x.track && x.track.kind === "video"){
-    const p = x.getParameters(); if (!p.encodings || !p.encodings.length) p.encodings = [{}]; p.encodings[0].maxBitrate = br; x.setParameters(p).catch(() => {}); } }); } catch (e) {} });
+    const p = x.getParameters(); if (!p.encodings || !p.encodings.length) p.encodings = [{}]; p.encodings[0].maxBitrate = br; p.encodings[0].maxFramerate = STU.fps; p.encodings[0].scaleResolutionDownBy = 1; try { p.degradationPreference = "maintain-resolution"; } catch (e) {} x.setParameters(p).catch(() => {}); } }); } catch (e) {} });
 }
-setInterval(stuApplyBitrate, 20000);
+setInterval(stuApplyBitrate, 3000);
 
 /* ---- ritmo del dibujo: un Worker no se frena cuando la pestaña queda en segundo plano ---- */
 function stuTicker(fn, ms){
@@ -4633,7 +4634,7 @@ function stuMicApply(){
 const stuCamConstraint = () => STU.camId ? { deviceId:{ exact:STU.camId } } : { facingMode:{ ideal:STU.facing } };
 async function stuSetCam(extra){
   const q = STU_Q[STU.q], swap = STU.orient === "v" && matchMedia("(pointer:coarse)").matches;
-  const vc = Object.assign({ width:{ ideal:swap ? q.ch : q.cw }, height:{ ideal:swap ? q.cw : q.ch }, frameRate:{ ideal:STU.fps } }, extra || {});
+  const vc = Object.assign({ width:{ ideal:swap ? 720 : Math.max(1280, q.cw) }, height:{ ideal:swap ? 1280 : Math.max(720, q.ch) }, frameRate:{ ideal:STU.fps } }, extra || {});
   const s = await navigator.mediaDevices.getUserMedia({ video:vc });
   if (!STU.on){ s.getTracks().forEach(t => t.stop()); return; }
   const old = STU.camStream; STU.camStream = s; STU.camV.srcObject = s; STU.camV.play().catch(() => {});
@@ -6041,6 +6042,7 @@ sb.auth.getSession().then(async ({ data }) => {
   const field = (box, label, el) => { box.append(mk("label", "", label), el); return el; };
   const inp = (type, ph, val) => { const i = document.createElement("input"); i.type = type; if (ph) i.placeholder = ph; if (val != null) i.value = val; return i; };
   const FORMS = {
+    cam2(box){ return window.lyCamForm(box); },
     img(box){ const i = field(box, "Elige una imagen", inp("file")); i.accept = "image/*"; return () => i.files[0] ? addImage(i.files[0]) : (tst("Elige una imagen primero."), false); },
     vid(box){ const i = field(box, "Elige un video", inp("file")); i.accept = "video/*"; return () => i.files[0] ? addVideo(i.files[0]) : (tst("Elige un video primero."), false); },
     text(box){ const i = field(box, "Texto en pantalla", inp("text", "Ej. Hoy: preguntas y respuestas", STU.banner || "")); i.maxLength = 60;
@@ -6063,10 +6065,11 @@ sb.auth.getSession().then(async ({ data }) => {
   };
   const SRC = [
     { g:"General", id:"game", ic:"🎮", n:"Captura de juego", d:"Captura la ventana de tu juego en el equipo. Marca «compartir audio» para que se oiga el juego.", share:1, run:() => shareAs("window", "Juego", "🎮") },
-    { id:"cam", ic:"📷", n:"Cámara", d:"Importa tu cámara web o cualquier cámara virtual. Ajusta zoom, espejo, filtros y suavizado desde la barra de abajo.", run:addCam },
+    { id:"cam", ic:"📷", n:"Cámara", d:"Importa tu cámara web o cualquier cámara virtual. Ajusta zoom, espejo, filtros y suavizado desde la barra de abajo. Puedes añadir hasta 3 cámaras a la vez.", form:"cam2" },
     { id:"screen", ic:"🖥️", n:"Grabación de pantalla", d:"Comparte toda tu pantalla con su audio, ideal para tutoriales y cursos.", share:1, run:() => shareAs("screen", "Pantalla", "🖥️") },
     { id:"phone", ic:"📱", n:"Cámara del teléfono", d:"Usa tu teléfono como cámara adicional.", soon:1 },
     { id:"win", ic:"🪟", n:"Captura de ventana", d:"Muestra solo una ventana de tu equipo.", share:1, run:() => shareAs("window", "Ventana", "🪟") },
+    { id:"frame", ic:"🪟", n:"Cuadro flotante", d:"Abre un cuadro movible dentro de la página para mostrar un video, una película, un juego o una web.", run:() => window.lyFrameNew() },
     { id:"img", ic:"🖼️", n:"Imagen", d:"Muestra una imagen: un logo, una portada o una diapositiva.", form:"img" },
     { id:"text", ic:"🅰️", n:"Texto", d:"Un rótulo de texto en la pantalla del directo.", form:"text" },
     { id:"link", ic:"🌐", n:"Enlace", d:"Muestra una página web: se abre en otra pestaña y luego la compartes como pestaña.", form:"url" },
@@ -6588,5 +6591,132 @@ sb.auth.getSession().then(async ({ data }) => {
 .vwrap .vbot .chip{font-size:.65rem;padding:2px 8px}
 /* ═════════ FIN · CSS-24 ═════════ */
 </style>
+<style>
+.lyx{position:fixed;z-index:99990;display:flex;flex-direction:column;min-width:180px;min-height:110px;background:#0b0d11;border:2px solid #fe2c55;border-radius:12px;overflow:hidden;resize:both;box-shadow:0 10px 34px rgba(0,0,0,.6)}
+.lyx-h{display:flex;align-items:center;gap:6px;padding:4px 8px;background:#1b1626;color:#fff;font-size:.78rem;cursor:grab;touch-action:none;user-select:none}
+.lyx-h b{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lyx-h button,.lyx-bar button{background:#2a2438;color:#fff;border:0;border-radius:8px;padding:3px 9px;cursor:pointer}
+.lyx-bar{display:flex;gap:4px;padding:4px;background:#14101d}.lyx-bar input{flex:1;min-width:0;padding:4px 8px;font-size:.8rem}
+.lyx-b{flex:1;min-height:0;position:relative;background:#000;display:flex}
+.lyx-b video,.lyx-b iframe{width:100%;height:100%;display:block;object-fit:contain;border:0}
+.lyx-b.cam video{object-fit:cover}
+.lyx-b p{margin:auto;padding:10px;color:#aaa;font-size:.8rem;text-align:center}
+</style>
+<script>
+/* ═════════ INICIO · JS-25 · CUADRO FLOTANTE (video / web / juego) Y VARIAS CÁMARAS ═════════
+   Cada cuadro es una ventana dentro de la página: se mueve con la barra superior y se estira desde la esquina.
+   Lo que queda sobre la vista previa del Studio es lo que ven tus espectadores. */
+(function(){
+  "use strict";
+  if (typeof STU === "undefined") return;
+  const X = STU.X = [], MAXCAM = 2; let z = 99990, tabS = null;
+  const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+  const say = (t, ms) => toastMsg(t, ms || 4000);
+  const prev = () => document.getElementById("glPrev");
+
+  function addAudio(stream, v){   /* manda el sonido del cuadro al directo */
+    try {
+      if (!STU.ac || !STU.dest) return;
+      if (v){ if (v._ra) return; v._ra = 1; const s = STU.ac.createMediaElementSource(v); s.connect(STU.dest); s.connect(STU.ac.destination); }
+      else if (stream.getAudioTracks().length) STU.ac.createMediaStreamSource(new MediaStream(stream.getAudioTracks())).connect(STU.dest);
+    } catch (e) {}
+  }
+  function mkBox(title, w, h){
+    const r = prev().getBoundingClientRect(), ok = r.width > 50, n = X.length * 18;
+    const b = el("div", "lyx"), hd = el("div", "lyx-h", "<b></b><span></span>"), body = el("div", "lyx-b"), x = el("button", "", "✕");
+    hd.firstChild.textContent = title; x.type = "button"; x.title = "Cerrar"; hd.lastChild.append(x); b.append(hd, body); document.body.append(b);
+    b.style.cssText = "width:" + w + "px;height:" + h + "px;left:" + Math.max(8, ok ? r.right - w - 12 - n : innerWidth - w - 20) + "px;top:" + Math.max(8, ok ? r.bottom - h - 12 - n : innerHeight - h - 90) + "px";
+    hd.addEventListener("pointerdown", ev => {
+      if (ev.target.closest("button")) return; b.style.zIndex = ++z;
+      const ox = ev.clientX - b.offsetLeft, oy = ev.clientY - b.offsetTop; hd.setPointerCapture(ev.pointerId);
+      hd.onpointermove = m => { b.style.left = Math.min(innerWidth - 60, Math.max(60 - b.offsetWidth, m.clientX - ox)) + "px"; b.style.top = Math.min(innerHeight - 30, Math.max(0, m.clientY - oy)) + "px"; };
+      hd.onpointerup = () => { hd.onpointermove = hd.onpointerup = null; };
+    });
+    const e = { box: b, body, kind: "", vid: null, g: null, stop: null, close(){ const i = X.indexOf(e); if (i >= 0) X.splice(i, 1); if (e.stop) e.stop(); b.remove(); } };
+    x.onclick = () => e.close(); X.push(e); return e;
+  }
+  /* posición del cuadro dentro del video que ven los espectadores */
+  function rect(e){
+    const r = prev().getBoundingClientRect(), b = e.body.getBoundingClientRect();
+    if (r.width > 50 && b.width > 0){
+      const W = STU.W, H = STU.H, a = W / H; let w = r.width, h = r.height; if (w / h > a) w = h * a; else h = w / a;
+      const l = r.left + (r.width - w) / 2, t = r.top + (r.height - h) / 2, k = w / W;
+      e.g = { x: (b.left - l) / k, y: (b.top - t) / k, w: b.width / k, h: b.height / k };
+    }
+    return e.g || { x: STU.W * .6, y: STU.H * .6, w: STU.W * .35, h: STU.H * .35 };
+  }
+  const P0 = stuPaint;
+  stuPaint = function(){
+    P0(); const c = STU.ctx;
+    X.forEach(e => {
+      const v = e.vid; if (!v || !v.videoWidth) return; const g = rect(e);
+      if (g.x >= STU.W || g.y >= STU.H || g.x + g.w <= 0 || g.y + g.h <= 0) return;
+      c.save(); c.beginPath(); c.rect(g.x, g.y, g.w, g.h); c.clip(); c.fillStyle = "#000"; c.fillRect(g.x, g.y, g.w, g.h);
+      if (e.kind === "cam") stuCover(c, v, g.x, g.y, g.w, g.h, false, 1);
+      else { const s = Math.min(g.w / v.videoWidth, g.h / v.videoHeight), w = v.videoWidth * s, h = v.videoHeight * s; c.imageSmoothingQuality = "high"; c.drawImage(v, g.x + (g.w - w) / 2, g.y + (g.h - h) / 2, w, h); }
+      c.restore(); c.strokeStyle = "rgba(255,255,255,.85)"; c.lineWidth = 3 * Math.min(STU.W, STU.H) / 720; c.strokeRect(g.x, g.y, g.w, g.h);
+    });
+  };
+  const S0 = stuStop;
+  stuStop = function(k){ X.slice().forEach(e => e.close()); if (tabS){ tabS.getTracks().forEach(t => t.stop()); tabS = null; } return S0(k); };
+
+  /* ---- varias cámaras ---- */
+  async function addCam(id){
+    if (!STU.on) return say("Activa tu cámara primero."), false;
+    if (X.filter(e => e.kind === "cam").length >= MAXCAM) return say("Máximo 3 cámaras a la vez (la principal + 2 más)."), false;
+    let s; try { s = await navigator.mediaDevices.getUserMedia({ video: Object.assign({ width:{ ideal:1280 }, height:{ ideal:720 }, frameRate:{ ideal:STU.fps } }, id ? { deviceId:{ exact:id } } : {}) }); }
+    catch (x) { say("No se pudo abrir esa cámara (¿la usa otra aplicación?)."); return false; }
+    const e = mkBox("📷 " + (((s.getVideoTracks()[0] || {}).label) || "Cámara").slice(0, 26), 240, 150), v = el("video");
+    e.kind = "cam"; e.body.classList.add("cam"); v.muted = v.autoplay = v.playsInline = true; v.srcObject = s; v.play().catch(() => {});
+    e.body.append(v); e.vid = v; e.stop = () => s.getTracks().forEach(t => t.stop()); return true;
+  }
+  window.lyCamForm = function(box){
+    const s = el("select"); box.append(el("label", "", "Elige la cámara (puedes añadir hasta 3 a la vez)"), s);
+    navigator.mediaDevices.enumerateDevices().then(d => d.filter(x => x.kind === "videoinput").forEach((x, i) => { const o = el("option"); o.value = x.deviceId; o.textContent = x.label || ("Cámara " + (i + 1)); s.append(o); }));
+    return () => addCam(s.value);
+  };
+
+  /* ---- cuadro flotante: video, película, página web o juego ---- */
+  async function capture(e){
+    if (!window.RestrictionTarget || !("restrictTo" in MediaStreamTrack.prototype))
+      return say("Para mostrar páginas web o juegos en el directo usa Chrome, Edge o Brave actualizados. Los videos de tu equipo y las cámaras funcionan en cualquier navegador.", 8000);
+    try {
+      if (!tabS || !tabS.active){
+        tabS = await navigator.mediaDevices.getDisplayMedia({ video:{ frameRate:{ ideal:STU.fps } }, audio:true, preferCurrentTab:true, selfBrowserSurface:"include", surfaceSwitching:"exclude", systemAudio:"exclude" });
+        addAudio(tabS); tabS.getVideoTracks()[0].onended = () => { tabS = null; };
+      }
+      const t = tabS.getVideoTracks()[0].clone(); e.body.style.isolation = "isolate";
+      await t.restrictTo(await RestrictionTarget.fromElement(e.body));
+      const v = el("video"); v.muted = v.autoplay = v.playsInline = true; v.srcObject = new MediaStream([t]); (STU.box || document.body).append(v); v.play().catch(() => {});
+      e.vid = v; e.stop = () => { t.stop(); v.remove(); }; say("Listo: tus espectadores ven este cuadro.", 3000);
+    } catch (x) { say("Para mostrar páginas web hay que permitir «Esta pestaña» una sola vez en el aviso del navegador."); }
+  }
+  function frameNew(){
+    if (!STU.on) return say("Activa tu cámara primero para usar el cuadro.");
+    const e = mkBox("🪟 Cuadro", 380, 250); e.kind = "media"; e.body.innerHTML = "<p>Pulsa 📂 para elegir un video o película de tu equipo, o pega un enlace (video, YouTube, juego, página web).</p>";
+    const bar = el("div", "lyx-bar", '<button type="button" title="Abrir video o película de tu equipo">📂</button><input placeholder="Pega un enlace y pulsa Enter…"><button type="button" title="Mostrar">▶</button>');
+    const file = el("input"); file.type = "file"; file.accept = "video/*"; e.box.insertBefore(bar, e.body);
+    const reset = () => { if (e.stop){ e.stop(); e.stop = null; } e.vid = null; e.body.style.isolation = ""; };
+    function media(src){
+      reset(); const v = el("video"); v.controls = v.loop = v.playsInline = true; if (!/^blob:/.test(src)) v.crossOrigin = "anonymous";
+      v.onerror = () => say("No se pudo reproducir ese video (el sitio puede bloquearlo)."); v.src = src; e.body.replaceChildren(v); e.vid = v; addAudio(null, v); v.play().catch(() => {});
+      e.stop = () => { v.pause(); if (/^blob:/.test(src)) URL.revokeObjectURL(src); };
+    }
+    function url(u){
+      u = u.trim(); if (!u) return; if (!/^https?:\/\//i.test(u)) u = "https://" + u;
+      let U; try { U = new URL(u); } catch (x) { return say("Esa dirección no es válida."); }
+      const h = U.hostname.replace(/^www\./, ""), yt = h === "youtu.be" ? U.pathname.slice(1) : (/youtube\.com$/.test(h) ? (U.searchParams.get("v") || (U.pathname.match(/\/(?:embed|shorts|live)\/([\w-]+)/) || [])[1]) : "");
+      if (/\.(mp4|webm|ogv|mov)$/i.test(U.pathname)) return media(U.href);
+      reset(); const f = el("iframe"); f.allow = "autoplay; fullscreen; encrypted-media; picture-in-picture"; f.allowFullscreen = true;
+      f.src = yt ? "https://www.youtube.com/embed/" + yt + "?autoplay=1&rel=0" : U.href; e.body.replaceChildren(f); capture(e);
+    }
+    const [bf, , bg] = bar.children, inp = bar.children[1];
+    bf.onclick = () => file.click(); bg.onclick = () => url(inp.value); inp.onkeydown = ev => { if (ev.key === "Enter"){ ev.preventDefault(); url(inp.value); } };
+    file.onchange = () => { if (file.files[0]){ e.hd = null; media(URL.createObjectURL(file.files[0])); } };
+  }
+  window.lyFrameNew = frameNew; document.getElementById("lyFrameBtn").onclick = frameNew;
+})();
+/* ═════════ FIN · JS-25 ═════════ */
+</script>
 </body>
 </html>
