@@ -4492,7 +4492,7 @@ function stuCam(x, y, w, h){
 function stuScreen(x, y, w, h){
   const c = STU.ctx, v = STU.scrV, vw = v.videoWidth, vh = v.videoHeight; if (!vw || !vh) return;
   if (Math.abs((vw / vh) / (w / h) - 1) > .12){ /* fondo difuso para rellenar los lados */
-    const b = STU.bd; b.getContext("2d").drawImage(v, 0, 0, b.width, b.height);
+    const b = STU.bd; if (!STU._bdf || STU.frame - STU._bdf > 24 || STU._bdf > STU.frame){ STU._bdf = STU.frame; b.getContext("2d").drawImage(v, 0, 0, b.width, b.height); }
     stuCover(c, b, x, y, w, h, false, 1); c.fillStyle = "rgba(0,0,0,.5)"; c.fillRect(x, y, w, h);
   }
   const s = Math.min(w / vw, h / vh), dw = vw * s, dh = vh * s;
@@ -4605,7 +4605,7 @@ function stuPaint(){
   let L = STU.layout; if (L !== "cam" && !scr) L = "cam";
   if (L === "cam"){ if (cam) stuCam(0, 0, W, Hh); else stuNoCam(0, 0, W, Hh, k); }
   else if (L === "screen") stuScreen(0, 0, W, Hh);
-  else if (L === "pip"){ if (window.lyLayers) lyLayers(c, W, Hh, scr, cam, k); else stuScreen(0, 0, W, Hh); } else if (Hh > W){ const h1 = Math.round(Hh * .55); stuScreen(0, 0, W, h1); if (cam) stuCam(0, h1, W, Hh - h1); else stuNoCam(0, h1, W, Hh - h1, k); }
+  else if (L === "pip"){ if (window.lyLayers) lyLayers(c, W, Hh, scr, cam, k); else stuScreen(0, 0, W, Hh); } else if (Hh > W){ const h1 = Math.round(Hh * .62); stuScreen(0, 0, W, h1); if (cam) stuCam(0, h1, W, Hh - h1); else stuNoCam(0, h1, W, Hh - h1, k); }
   else { const w1 = Math.round(W * .65); stuScreen(0, 0, w1, Hh); if (cam) stuCam(w1, 0, W - w1, Hh); else stuNoCam(w1, 0, W - w1, Hh, k); }
   stuFx(c, W, Hh, k);
   if (window.lyTxtDraw) lyTxtDraw(c, W, Hh, k);
@@ -6305,7 +6305,7 @@ sb.auth.getSession().then(async ({ data }) => {
   stage.addEventListener("dblclick", () => { STU.pipXY = null; });
 
   /* ---------- 2) Fuente de texto con marquesina continua ---------- */
-  const T = STU.txt = { on: false, text: "", color: "#ffffff", size: 56, bg: "#000000", bgA: .55, marquee: true, speed: 4, y: .85, bold: true };
+  const T = STU.txt = { on: false, text: "", color: "#ffffff", size: 56, bg: "#000000", bgA: .55, marquee: true, speed: 4, y: .76, bold: true };
   window.lyTxtDraw = function(c, W, H, k){
     if (!T.on || !T.text) return;
     const fs = Math.round(T.size * k), y = T.y * H;
@@ -6492,5 +6492,101 @@ sb.auth.getSession().then(async ({ data }) => {
 })();
 /* ═════════ FIN · JS-23 ═════════ */
 </script>
+
+<script>
+/* ═════════ INICIO · JS-24 · TEXTO EN VIVO: pestaña «Texto» con tamaño, guardar cambios, minimizar panel y sin espejo ═════════ */
+(function(){
+  "use strict";
+  const T = window.STU && STU.txt, tabs = document.getElementById("sdTabs"), panel = document.getElementById("sdPanel");
+  if (!T || !tabs || !panel) return;
+  const st = document.createElement("style");
+  st.textContent = ".sd-tabs{flex-wrap:wrap;border-radius:16px}.sd-tabs button{flex:1 1 28%}" +
+    ".sd-head{display:flex;align-items:center;gap:8px}.sd-head .sd-tag{margin-left:auto}" +
+    ".sd-minb{background:var(--bg);border:1px solid var(--line);color:var(--text);width:30px;height:30px;border-radius:50%;font-size:1rem;line-height:1;cursor:pointer}" +
+    ".sd.sd-min .sd-tabs,.sd.sd-min .sd-pane{display:none!important}" +
+    ".sx-save{background:#fe2c55;color:#fff;border:0;border-radius:999px;padding:10px 14px;font-weight:800;cursor:pointer;flex:1}" +
+    ".sx-del{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:999px;padding:10px 14px;font-weight:700;cursor:pointer}" +
+    ".sx-bar{display:flex;gap:8px;margin-top:10px}.sx-note{font-size:.74rem;opacity:.7;margin:6px 0 0}" +
+    "body.ly-nomir .gprev video,body.ly-nomir .stage.host.selfie #lvVideo{transform:none!important}";
+  document.head.append(st);
+
+  /* pestaña + panel */
+  const tb = document.createElement("button"); tb.type = "button"; tb.dataset.sd = "text"; tb.textContent = "Texto";
+  tb.onclick = () => { tabs.querySelectorAll("[data-sd]").forEach(x => x.classList.toggle("on", x === tb));
+    panel.querySelectorAll(".sd-pane").forEach(p => p.classList.toggle("on", p.dataset.pane === "text")); panel.classList.remove("sd-min"); };
+  tabs.append(tb);
+  const pane = document.createElement("div"); pane.className = "sd-pane lt-pane"; pane.dataset.pane = "text";
+  pane.innerHTML =
+    '<label for="sxTxt">Texto en pantalla (máx. 200)</label><textarea id="sxTxt" maxlength="200" placeholder="Escribe tu mensaje…"></textarea>' +
+    '<div class="lt-row"><label>Color <input id="sxCol" type="color"></label><label>Fondo <input id="sxBg" type="color"></label><label class="st-chk"><input id="sxMq" type="checkbox"> Desplazamiento</label></div>' +
+    '<label for="sxSize">Tamaño del texto</label><input id="sxSize" type="range" min="20" max="160">' +
+    '<label for="sxSpd">Velocidad</label><input id="sxSpd" type="range" min="1" max="12">' +
+    '<label for="sxY">Posición vertical</label><input id="sxY" type="range" min="8" max="94">' +
+    '<label for="sxBgA">Opacidad del fondo</label><input id="sxBgA" type="range" min="0" max="100">' +
+    '<div class="sx-bar"><button type="button" class="sx-save" id="sxSave">Guardar cambios</button><button type="button" class="sx-del" id="sxDel">Quitar texto</button></div>' +
+    '<p class="sx-note">Los cambios se ven al instante en el directo. «Guardar» los recuerda para la próxima vez.</p>';
+  panel.append(pane);
+
+  /* botón minimizar */
+  const head = panel.querySelector(".sd-head"), mb = document.createElement("button");
+  mb.type = "button"; mb.className = "sd-minb"; mb.textContent = "–"; mb.title = "Minimizar o expandir la configuración"; mb.setAttribute("aria-label", mb.title);
+  mb.onclick = () => { const m = panel.classList.toggle("sd-min"); mb.textContent = m ? "+" : "–"; };
+  head.append(mb);
+
+  /* datos ↔ controles (los de antes de empezar y los de esta pestaña quedan sincronizados) */
+  const D = [
+    { k:"Txt",  get:() => T.text,                 set:v => { T.text = v; T.on = !!v.trim(); } },
+    { k:"Col",  get:() => T.color,                set:v => T.color = v },
+    { k:"Bg",   get:() => T.bg,                   set:v => T.bg = v },
+    { k:"Mq",   chk:1, get:() => T.marquee,       set:v => T.marquee = v },
+    { k:"Size", get:() => T.size,                 set:v => T.size = +v },
+    { k:"Spd",  get:() => T.speed,                set:v => T.speed = +v },
+    { k:"Y",    get:() => Math.round(T.y * 100),  set:v => T.y = v / 100 },
+    { k:"BgA",  get:() => Math.round(T.bgA * 100),set:v => T.bgA = v / 100 }
+  ];
+  const el = (pre, k) => document.getElementById(pre + k);
+  function show(){ D.forEach(d => ["lt", "sx"].forEach(pre => { const e = el(pre, d.k); if (!e || document.activeElement === e) return; if (d.chk) e.checked = !!d.get(); else e.value = d.get(); })); }
+  const KEY = "ly_text", sv = document.getElementById("sxSave"), mark = f => { sv.textContent = f ? "Guardar cambios •" : "Guardado ✓"; };
+  try { const o = JSON.parse(localStorage.getItem(KEY) || "null"); if (o){ ["text","color","bg","marquee","size","speed","y","bgA"].forEach(k => { if (o[k] != null) T[k] = o[k]; }); T.on = !!(T.text || "").trim(); } } catch (e) {}
+  show(); mark(false);
+  D.forEach(d => {
+    const n = el("sx", d.k), o = el("lt", d.k); if (!n) return;
+    n.addEventListener("input", () => { d.set(d.chk ? n.checked : n.value); if (o){ if (d.chk) o.checked = n.checked; else o.value = n.value; } mark(true); });
+    if (o) o.addEventListener("input", () => { show(); mark(true); });
+  });
+  sv.onclick = () => {
+    try { localStorage.setItem(KEY, JSON.stringify({ text:T.text, color:T.color, bg:T.bg, marquee:T.marquee, size:T.size, speed:T.speed, y:T.y, bgA:T.bgA })); mark(false);
+      if (typeof toastMsg === "function") toastMsg("Cambios guardados ✓", 2000); } catch (e) { if (typeof toastMsg === "function") toastMsg("No se pudo guardar", 2500); }
+  };
+  document.getElementById("sxDel").onclick = () => { T.text = ""; T.on = false; show(); mark(true); };
+
+  /* la vista previa no se voltea cuando hay texto o pantalla compartida (así las letras se leen bien) */
+  setInterval(() => document.body.classList.toggle("ly-nomir", !!(T.on && T.text) || (STU.layout && STU.layout !== "cam")), 300);
+})();
+/* ═════════ FIN · JS-24 ═════════ */
+</script>
+<style>
+/* ═════════ INICIO · CSS-24 · DISEÑO LIMPIO DEL DIRECTO (cabecera, íconos, título) ═════════ */
+.vwrap .vtop{padding:10px 10px 22px;gap:6px;align-items:center;background:linear-gradient(rgba(0,0,0,.55),transparent)}
+.vwrap .vhost{flex:1 1 auto;gap:8px;min-width:0}
+.vwrap .lav.sm{width:34px;height:34px;padding:1.5px;box-shadow:none;background:rgba(255,255,255,.9)}
+.vwrap .lav.sm::after{display:none}
+.vwrap .lav.sm img{border:0}
+.vwrap .vhname{gap:2px;min-width:0}
+.vwrap .vhname b{font-size:.8rem;max-width:100%;color:#fff;font-weight:700}
+.vwrap .vhname .badge{font-size:.56rem;padding:1px 6px;border-radius:4px;white-space:nowrap;background:#fe2c55;color:#fff;letter-spacing:.05em;font-weight:800}
+.vwrap .vtools{gap:5px}
+.vwrap .cnt{padding:4px 8px;font-size:.68rem;white-space:nowrap}
+.vwrap .vtop .ibtn{width:28px;height:28px}
+.vwrap .vtop .ibtn svg{width:14px;height:14px}
+.vwrap .vreact{right:8px;gap:8px}
+.vwrap .vreact button{width:34px;height:34px;font-size:1rem}
+.vwrap .vreact button svg{width:17px;height:17px}
+.vwrap .tk-act span{font-size:.56rem}
+.vwrap .vbot{right:56px;padding:30px 12px 10px;gap:4px}
+.vwrap .vbot h2{font-size:.85rem;font-weight:700;letter-spacing:0}
+.vwrap .vbot .chip{font-size:.65rem;padding:2px 8px}
+/* ═════════ FIN · CSS-24 ═════════ */
+</style>
 </body>
 </html>
