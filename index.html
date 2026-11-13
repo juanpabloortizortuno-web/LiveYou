@@ -1070,6 +1070,11 @@
   .wrow{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:.88rem}
   .wrow:last-child{border-bottom:0}
   .wrow .wbtns{display:flex;gap:6px}
+  .wchips{display:flex;gap:8px;margin-bottom:10px}
+  .wchip{flex:1;padding:9px 6px}
+  .waddr{font-size:.85rem;letter-spacing:0;word-break:break-all;font-weight:600}
+  .wlink{color:inherit;text-decoration:underline;opacity:.85}
+  .wtx{width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--bg,transparent);color:inherit;font:inherit;margin:8px 0}
   .wform{display:grid;gap:8px}
   .wform input,.wform select{width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:inherit;font:inherit}
   .gifttray{position:absolute;left:12px;right:72px;bottom:12px;z-index:6;background:var(--panel-glass);backdrop-filter:var(--glass);border:1px solid var(--line);border-radius:16px;padding:10px 12px;color:var(--text)}
@@ -1387,6 +1392,7 @@
   <div class="actions"><button class="btn main" id="wClaim" type="button">Reclamar 50 puntos gratis de hoy</button></div>
 
   <h3>🛒 Comprar puntos</h3>
+  <div class="wchips" id="wRegion"><button class="btn wchip" type="button" data-r="bo">🇧🇴 Bolivia (QR)</button><button class="btn wchip" type="button" data-r="world">🌍 Otro país (USDT)</button></div>
   <div class="wpacks" id="wPacks"></div>
   <div class="wbox hidden" id="wOrderBox"></div>
   <div id="wOrders"></div>
@@ -1394,8 +1400,8 @@
   <h3>💵 Cobrar mis ganancias</h3>
   <div class="wform">
     <input id="wPayPts" type="number" inputmode="numeric" min="1" placeholder="Puntos a retirar">
-    <select id="wPayMethod"><option>QR Simple</option><option>Transferencia bancaria</option><option>Tigo Money</option></select>
-    <input id="wPayAcc" type="text" maxlength="120" placeholder="Tu número de cuenta / celular / nombre del titular">
+    <select id="wPayMethod"><option>QR Simple</option><option>Transferencia bancaria</option><option>Tigo Money</option><option>USDT (indica la red y tu dirección)</option></select>
+    <input id="wPayAcc" type="text" maxlength="120" placeholder="Cuenta, celular o dirección USDT con su red">
     <button class="btn main" id="wPay" type="button">Pedir retiro</button>
   </div>
   <div id="wPayouts"></div>
@@ -3029,12 +3035,17 @@ function showGift(name, g, pic){
 }
 /* ═════════ FIN · JS-21 ═════════ */
 
-/* ═════════ INICIO · JS-21b · COMPRAR PUNTOS · RETIRAR · PANEL ADMIN ═════════ */
+/* ═════════ INICIO · JS-21b · COMPRAR PUNTOS (QR Bolivia · USDT mundo) · RETIRAR · PANEL ADMIN ═════════ */
 let SET = { creator_pct:0.6, payout_bs_per_point:0.08, min_payout_points:500, pay_instructions:"" };
+let METHODS = [];
+let REGION = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone === "America/La_Paz" ? "bo" : "world"; } catch (e) { return "world"; } })();
 const mk = (tag, text, cls) => { const e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls; return e; };
 const fmtDate = d => new Date(d).toLocaleString("es-BO", { dateStyle:"short", timeStyle:"short" });
 const ST = { pendiente:"⏳ Pendiente", pagado:"✅ Pagado", rechazado:"❌ Rechazado" };
 const bsOf = n => (Number(n) || 0).toFixed(2);
+const money = (n, cur) => cur === "USDT" ? Number(n).toFixed(3) + " USDT" : "Bs " + bsOf(n);
+const curMethod = () => METHODS.filter(m => m.scope === REGION).sort((x, y) => x.sort - y.sort)[0] || null;
+function copyTxt(t, msg){ try { navigator.clipboard.writeText(t); } catch (e) {} toastMsg(msg || "Copiado"); }
 function paintEarnBs(){
   const el = $("wEarnBs"); if (!el) return;
   el.textContent = "≈ Bs " + bsOf(myEarn * SET.payout_bs_per_point) + " · mínimo para retirar: " + SET.min_payout_points + " pts (Bs " + bsOf(SET.min_payout_points * SET.payout_bs_per_point) + ")";
@@ -3046,40 +3057,78 @@ async function loadSettings(){
   } catch (e) {}
   paintEarnBs();
 }
+function paintRegion(){
+  document.querySelectorAll("#wRegion .wchip").forEach(b => b.classList.toggle("main", b.dataset.r === REGION));
+}
+document.querySelectorAll("#wRegion .wchip").forEach(b => b.onclick = () => { REGION = b.dataset.r; paintRegion(); paintPacks(); });
 async function loadShop(){
   if (!me) return;
   await loadSettings();
-  const box = $("wPacks"); box.replaceChildren();
-  const { data, error } = await sb.from("point_packs").select("id,bs,points").order("bs");
-  if (error){ box.append(mk("p", needSql(error.message) ? "Falta ejecutar supabase_pagos.sql en Supabase." : error.message, "wnote in")); return; }
-  (data || []).forEach(k => {
-    const b = mk("button", null, "btn wpack"); b.type = "button";
-    b.append(mk("b", k.points + " pts"), mk("small", "Bs " + bsOf(k.bs)));
-    b.onclick = () => buyPack(k, b); box.append(b);
-  });
-  loadOrders(); loadPayouts(); checkAdmin();
+  const r = await sb.from("payment_methods").select("id,kind,name,scope,network,address,instructions,explorer,sort").order("sort");
+  METHODS = r.error ? [] : (r.data || []);
+  paintRegion(); paintPacks(); loadOrders(); loadPayouts(); checkAdmin();
 }
-async function buyPack(k, btn){
+async function paintPacks(){
+  const box = $("wPacks"); box.replaceChildren(); $("wOrderBox").classList.add("hidden");
+  const { data, error } = await sb.from("point_packs").select("id,bs,usd,points").order("bs");
+  if (error){ box.append(mk("p", needSql(error.message) ? "Falta ejecutar supabase_ganancias_v3.sql en Supabase." : error.message, "wnote in")); return; }
+  const m = curMethod();
+  if (!m){ box.append(mk("p", REGION === "bo" ? "Todavía no hay un QR de pago activo." : "Todavía no hay una billetera USDT activa.", "wnote in")); return; }
+  (data || []).forEach(k => {
+    const price = REGION === "bo" ? "Bs " + bsOf(k.bs) : (k.usd != null ? "≈ " + Number(k.usd).toFixed(2) + " USDT" : "—");
+    const b = mk("button", null, "btn wpack"); b.type = "button";
+    b.append(mk("b", k.points + " pts"), mk("small", price));
+    b.onclick = () => buyPack(k, b, m); box.append(b);
+  });
+}
+async function buyPack(k, btn, m){
   btn.disabled = true;
-  const { data, error } = await sb.rpc("create_order", { p_pack:k.id });
+  const { data, error } = await sb.rpc("create_order", { p_pack:k.id, p_method:m.id });
   btn.disabled = false;
-  if (error) return say($("wMsg"), /demasiadas_pendientes/.test(error.message) ? "Ya tienes 3 compras pendientes. Espera a que se confirmen." : error.message, "err");
+  if (error) return say($("wMsg"),
+    /demasiadas_pendientes/.test(error.message) ? "Ya tienes 3 compras pendientes. Espera a que se confirmen."
+    : /precio_usd_faltante/.test(error.message) ? "Este paquete aún no tiene precio en USDT."
+    : needSql(error.message) ? "Falta ejecutar supabase_ganancias_v3.sql en Supabase." : error.message, "err");
   say($("wMsg"), "");
   showOrder(data); loadOrders();
 }
 function showOrder(o){
-  const bx = $("wOrderBox");
-  const cp = mk("button", "Copiar código", "btn"); cp.type = "button";
-  cp.onclick = () => { try { navigator.clipboard.writeText(o.ref); } catch (e) {} toastMsg("Código copiado"); };
-  bx.replaceChildren(mk("b", "Paga Bs " + bsOf(o.bs) + " y escribe este código en la glosa:"), mk("div", o.ref, "wref"), mk("p", SET.pay_instructions, "wnote in"), cp);
-  bx.classList.remove("hidden");
+  const bx = $("wOrderBox"), m = METHODS.find(x => x.id === o.method_id), cur = o.currency || "BOB";
+  const amt = o.amount != null ? o.amount : o.bs, kids = [];
+  if (cur === "USDT"){
+    kids.push(mk("b", "Envía exactamente " + Number(amt).toFixed(3) + " USDT" + (m && m.network ? " por la red " + m.network : "")));
+    if (m && m.address){
+      kids.push(mk("div", m.address, "wref waddr"));
+      const c = mk("button", "Copiar dirección", "btn"); c.type = "button"; c.onclick = () => copyTxt(m.address, "Dirección copiada"); kids.push(c);
+    }
+    kids.push(mk("p", "El monto debe ser exacto: los decimales identifican tu compra. Usa solo la red indicada; si envías por otra red, el dinero se pierde.", "wnote in"));
+    if (m && m.instructions) kids.push(mk("p", m.instructions, "wnote in"));
+    kids.push(mk("small", "Orden: " + o.ref));
+    const inp = mk("input", null, "wtx"); inp.type = "text"; inp.maxLength = 100; inp.placeholder = "Pega aquí el TXID de tu envío"; inp.value = o.txid || "";
+    const sv = mk("button", "Guardar TXID", "btn main"); sv.type = "button";
+    sv.onclick = async () => {
+      sv.disabled = true;
+      const { error } = await sb.rpc("submit_txid", { p_order:o.id, p_txid:inp.value });
+      sv.disabled = false;
+      if (error) return say($("wMsg"), /txid_ya_usado/.test(error.message) ? "Ese TXID ya fue usado en otra compra."
+        : /txid_invalido/.test(error.message) ? "El TXID no parece válido. Cópialo completo desde tu billetera."
+        : error.message, "err");
+      say($("wMsg"), "TXID guardado ✓ Revisaremos tu pago y acreditaremos tus puntos.", "ok"); o.txid = inp.value.trim(); loadOrders();
+    };
+    kids.push(inp, sv);
+  } else {
+    const cp = mk("button", "Copiar código", "btn"); cp.type = "button"; cp.onclick = () => copyTxt(o.ref, "Código copiado");
+    kids.push(mk("b", "Paga Bs " + bsOf(amt) + " y escribe este código en la glosa:"), mk("div", o.ref, "wref"),
+              mk("p", (m && m.instructions) || SET.pay_instructions, "wnote in"), cp);
+  }
+  bx.replaceChildren(...kids); bx.classList.remove("hidden");
 }
 async function loadOrders(){
   const box = $("wOrders"); box.replaceChildren();
-  const { data } = await sb.from("orders").select("id,ref,bs,points,status,created_at").eq("user_id", me.id).order("created_at", { ascending:false }).limit(5);
+  const { data } = await sb.from("orders").select("id,ref,bs,points,status,created_at,method_id,amount,currency,txid").eq("user_id", me.id).order("created_at", { ascending:false }).limit(5);
   (data || []).forEach(o => {
     const r = mk("div", null, "wrow");
-    r.append(mk("span", o.ref + " · " + o.points + " pts · Bs " + bsOf(o.bs)), mk("span", ST[o.status] || o.status));
+    r.append(mk("span", o.ref + " · " + o.points + " pts · " + money(o.amount != null ? o.amount : o.bs, o.currency || "BOB")), mk("span", ST[o.status] || o.status));
     if (o.status === "pendiente"){ r.style.cursor = "pointer"; r.title = "Ver cómo pagar"; r.onclick = () => showOrder(o); }
     box.append(r);
   });
@@ -3108,7 +3157,7 @@ $("wPay").onclick = async () => {
   $("wPay").disabled = false;
   if (error) return say($("wMsg"), payErr(error.message), "err");
   myEarn = data.earned; paintWallet(); $("wPayPts").value = "";
-  say($("wMsg"), "Solicitud enviada ✓ Recibirás Bs " + bsOf(data.bs) + " cuando se confirme el pago.", "ok");
+  say($("wMsg"), "Solicitud enviada ✓ Su valor es de Bs " + bsOf(data.bs) + ". Se pagará cuando se confirme.", "ok");
   loadPayouts();
 };
 
@@ -3121,26 +3170,42 @@ async function checkAdmin(){
 }
 async function adminAct(fn, args, okTxt){
   const { error } = await sb.rpc(fn, args);
-  if (error) return say($("wMsg"), error.message, "err");
+  if (error) return say($("wMsg"), /falta_txid/.test(error.message) ? "Esa compra USDT aún no tiene TXID." : error.message, "err");
   say($("wMsg"), okTxt, "ok"); loadAdmin();
 }
 async function loadAdmin(){
   const { data, error } = await sb.rpc("admin_queue");
   const bo = $("wAdminOrders"), bp = $("wAdminPayouts"); bo.replaceChildren(); bp.replaceChildren();
-  if (error){ bo.append(mk("p", needSql(error.message) ? "Falta ejecutar supabase_ganancias_v2.sql" : error.message, "wnote in")); return; }
+  if (error){ bo.append(mk("p", needSql(error.message) ? "Falta ejecutar supabase_ganancias_v3.sql" : error.message, "wnote in")); return; }
   bo.append(mk("b", "Compras por confirmar (" + data.orders.length + ")"));
   data.orders.forEach(o => {
-    const r = mk("div", null, "wrow"), bt = mk("div", null, "wbtns");
+    const usdt = o.currency === "USDT", r = mk("div", null, "wrow"), bt = mk("div", null, "wbtns");
     const ok = mk("button", "Confirmar", "btn main"), no = mk("button", "Rechazar", "btn ghost");
-    ok.onclick = () => { if (confirm("¿Ya recibiste Bs " + bsOf(o.bs) + " de " + o.who + " con la glosa " + o.ref + "?")) adminAct("confirm_order", { p_order:o.id }, "Compra confirmada: +" + o.points + " pts a " + o.who); };
+    const txt = money(o.amount, o.currency);
+    if (usdt && !o.txid) ok.disabled = true;
+    ok.onclick = () => {
+      const q = usdt ? "¿Verificaste en el explorador que llegaron " + txt + " a tu billetera, por la red correcta, con el TXID " + o.txid + ", y que la transferencia es POSTERIOR a la creación de la orden? Usuario: " + o.who
+                     : "¿Ya recibiste " + txt + " de " + o.who + " con la glosa " + o.ref + "?";
+      if (confirm(q)) adminAct("confirm_order", { p_order:o.id }, "Compra confirmada: +" + o.points + " pts a " + o.who);
+    };
     no.onclick = () => { if (confirm("¿Rechazar esta compra?")) adminAct("reject_order", { p_order:o.id }, "Compra rechazada"); };
-    bt.append(ok, no); r.append(mk("span", o.who + " · " + o.ref + " · Bs " + bsOf(o.bs) + " → " + o.points + " pts"), bt); bo.append(r);
+    bt.append(ok, no);
+    const info = mk("span", o.who + " · " + o.ref + " · " + txt + " → " + o.points + " pts");
+    r.append(info, bt); bo.append(r);
+    if (usdt){
+      const t = mk("div", null, "wrow");
+      t.append(mk("span", o.txid ? "TXID: " + o.txid : "⏳ Esperando que el usuario envíe el TXID"));
+      if (o.txid && o.explorer && /^https:\/\//.test(o.explorer)){
+        const a = mk("a", "Verificar en explorador", "wlink"); a.href = o.explorer.replace("{tx}", encodeURIComponent(o.txid)); a.target = "_blank"; a.rel = "noopener noreferrer"; t.append(a);
+      }
+      bo.append(t);
+    }
   });
   bp.append(mk("b", "Retiros por pagar (" + data.payouts.length + ")"));
   data.payouts.forEach(p => {
     const r = mk("div", null, "wrow"), bt = mk("div", null, "wbtns");
     const ok = mk("button", "Ya pagué", "btn main"), no = mk("button", "Rechazar", "btn ghost");
-    ok.onclick = () => { if (confirm("Marca como pagado SOLO después de transferir Bs " + bsOf(p.bs) + " a " + p.who + ". ¿Continuar?")) adminAct("mark_payout_paid", { p_id:p.id }, "Retiro marcado como pagado"); };
+    ok.onclick = () => { if (confirm("Marca como pagado SOLO después de enviar el equivalente a Bs " + bsOf(p.bs) + " a " + p.who + ". ¿Continuar?")) adminAct("mark_payout_paid", { p_id:p.id }, "Retiro marcado como pagado"); };
     no.onclick = () => { const n = prompt("Motivo del rechazo (opcional). Los puntos vuelven al creador:"); if (n !== null) adminAct("reject_payout", { p_id:p.id, p_note:n }, "Retiro rechazado, puntos devueltos"); };
     bt.append(ok, no); r.append(mk("span", p.who + " · Bs " + bsOf(p.bs) + " (" + p.points + " pts) · " + p.method + ": " + p.account), bt); bp.append(r);
   });
