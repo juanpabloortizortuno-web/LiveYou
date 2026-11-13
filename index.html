@@ -1580,6 +1580,182 @@
   @media(hover:none){.lvp-ctl{opacity:1;pointer-events:auto}}
   /* ═════════ FIN · CSS-15 ═════════ */
 
+
+  /* ═════════ INICIO · CSS-20 · MEJORAS ESTILO TIKTOK LIVE STUDIO (adaptado: respeta modo claro y posiciones del celular) ═════════ */
+:where(:root:not([data-theme="light"])) #mGoLive .mbox.stud {
+  background: #0b0c10;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.85);
+}
+:where(:root:not([data-theme="light"])) .st-bar {
+  background: #12141a;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 12px 20px;
+}
+.st-bar h2 {
+  display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+}
+:where(:root:not([data-theme="light"])) .st-card, :where(:root:not([data-theme="light"])) .sd {
+  background: #13151c;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+:where(:root:not([data-theme="light"])) .st-tb {
+  background: rgba(22, 25, 34, 0.9);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 10px 14px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+.st-ib {
+  border-radius: 12px;
+    padding: 6px 10px;
+    transition: background 0.15s, transform 0.12s;
+}
+:where(:root:not([data-theme="light"])) .st-ib:hover {
+  background: rgba(255, 255, 255, 0.09);
+    transform: translateY(-1px);
+}
+.st-ib.on {
+  background: rgba(254, 44, 85, 0.18);
+    color: #ff5c7c;
+    box-shadow: inset 0 0 0 1px rgba(254, 44, 85, 0.4);
+}
+#glBtn:not(:disabled) {
+  background: linear-gradient(135deg, #fe2c55, #ff5e3a);
+    border: 0;
+    box-shadow: 0 6px 22px rgba(254, 44, 85, 0.45);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+#glBtn:not(:disabled):hover {
+  filter: brightness(1.08);
+    transform: translateY(-1px);
+}
+:where(:root:not([data-theme="light"])) .sd-tabs {
+  background: #0b0c10;
+    padding: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+}
+.sd-tabs button.on {
+  background: linear-gradient(135deg, #fe2c55, #d91b42);
+    color: #fff;
+    box-shadow: 0 3px 10px rgba(254, 44, 85, 0.35);
+}
+:where(:root:not([data-theme="light"])) .sd-b {
+  background: #1a1d26;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    transition: all 0.15s ease;
+}
+:where(:root:not([data-theme="light"])) .sd-b:hover {
+  background: #232734;
+    border-color: rgba(255, 255, 255, 0.18);
+}
+:where(:root:not([data-theme="light"])) .sd-b.on {
+  background: rgba(254, 44, 85, 0.16);
+    border-color: #fe2c55;
+    color: #fff;
+}
+.vreact {
+    gap: 12px;
+}
+.vreact button {
+  width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(18, 20, 28, 0.65);
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    font-size: 1.45rem;
+    display: grid;
+    place-items: center;
+    transition: transform 0.14s cubic-bezier(0.2, 0.9, 0.3, 1.3), background 0.15s, border-color 0.15s;
+}
+.vreact button:hover {
+  transform: scale(1.1);
+    background: rgba(30, 34, 46, 0.85);
+    border-color: rgba(255, 255, 255, 0.35);
+}
+.vreact button:active, .vreact button.hold {
+  transform: scale(0.86);
+    border-color: var(--pink);
+    box-shadow: 0 0 18px rgba(254, 44, 85, 0.6);
+}
+#lvGiftBtn {
+  background: linear-gradient(135deg, rgba(255, 154, 61, 0.85), rgba(254, 44, 85, 0.9));
+    border: 1px solid rgba(255, 220, 150, 0.5);
+    box-shadow: 0 6px 20px rgba(254, 44, 85, 0.55);
+    animation: giftGlow 2.4s ease-in-out infinite;
+}
+@keyframes giftGlow {0%, 100% { box-shadow: 0 6px 20px rgba(254, 44, 85, 0.5); }
+  50% { box-shadow: 0 6px 26px rgba(255, 170, 60, 0.85); }}
+:where(:root:not([data-theme="light"])) .gifttray {
+  background: rgba(16, 18, 24, 0.88);
+    backdrop-filter: blur(18px);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.65);
+}
+:where(:root:not([data-theme="light"])) .gbtn {
+  background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: transform 0.15s, border-color 0.15s, background 0.15s;
+}
+.gbtn:hover {
+  transform: translateY(-2px);
+    background: rgba(254, 44, 85, 0.14);
+    border-color: var(--pink);
+}
+.pub-carwrap {
+  padding: 8px 0 16px;
+}
+.pub-s[data-rel="0"] {
+  box-shadow: 0 22px 55px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(254, 44, 85, 0.35);
+}
+.pub-s .lvc-th, .pub-s-th {
+  border-radius: 15px 0 0 15px;
+}
+.pub-s:not([data-rel="0"]) .lvc-th {
+  border-radius: 15px;
+    filter: brightness(0.75);
+    transition: filter 0.3s ease;
+}
+.pub-s:not([data-rel="0"]):hover .lvc-th {
+  filter: brightness(0.95);
+}
+.pub-info .who img {
+  border: 2px solid var(--pink);
+    box-shadow: 0 0 12px rgba(254, 44, 85, 0.4);
+}
+.pub-info .btn {
+  border-radius: 10px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #fe2c55, #e02046);
+    box-shadow: 0 4px 14px rgba(254, 44, 85, 0.35);
+}
+.pub-arr:hover {
+  background: var(--pink);
+    border-color: var(--pink);
+    transform: scale(1.08);
+}
+
+.pub-s{border-radius:16px;box-shadow:0 18px 45px rgba(0,0,0,.5)}
+:where(:root:not([data-theme="light"])) .pub-s{border:1px solid rgba(255,255,255,.12);background:#14161e}
+.pub-info{border-radius:0 15px 15px 0;padding:20px 18px;gap:10px}
+:where(:root:not([data-theme="light"])) .pub-info{background:linear-gradient(180deg,#181b24 0%,#11131a 100%);border:1px solid rgba(255,255,255,.1);border-left:1px solid rgba(255,255,255,.06)}
+.pub-arr{width:44px;height:44px;margin-top:-22px;transition:opacity .2s,background .15s,transform .15s,border-color .15s}
+:where(:root:not([data-theme="light"])) .pub-arr{background:rgba(20,22,30,.78);color:#fff;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.16);box-shadow:0 8px 24px rgba(0,0,0,.5)}
+/* en pantallas angostas la info va debajo del video: redondeo abajo, no a la derecha */
+@media(max-width:900px){.pub-s .lvc-th{border-radius:15px 15px 0 0}.pub-info{border-radius:0 0 15px 15px}}
+@container (max-width:900px){.pub-s .lvc-th{border-radius:15px 15px 0 0}.pub-info{border-radius:0 0 15px 15px}}
+  /* ═════════ FIN · CSS-20 ═════════ */
 </style>
 </head>
 <body>
@@ -3516,7 +3692,7 @@ function lvCarousel(wrap, pick){
   const playActive = () => slides.forEach((s, i) => { const it = items[i]; if (!it || it.live) return; if (s._rel === 0 && vis && !document.hidden) startPv(s, it); else stopPv(s); });
   /* ── movimiento continuo (como el carrusel de Twitch): cada cuadro calcula posición, tamaño y opacidad según su distancia fraccionaria al centro ── */
   const mod = (a, n) => ((a % n) + n) % n;
-  const KX = [-290, -170, 0, 430, 560], KS = [.66, .82, 1, .82, .66], KO = [.3, .55, 1, .55, .3];
+  const KX = [-290, -170, 0, 430, 560], KS = [.66, .82, 1, .82, .66], KO = [.4, .72, 1, .72, .4];
   const lerpK = (r, ys) => { const f = Math.max(-2, Math.min(2, r)) + 2, i = Math.min(3, Math.floor(f)); return ys[i] + (ys[i + 1] - ys[i]) * (f - i); };
   const render = () => {
     const n = items.length; if (!n) return;
@@ -3524,7 +3700,7 @@ function lvCarousel(wrap, pick){
       let r = i - pos; r -= n * Math.round(r / n);
       const a = Math.abs(r); let x, sc, op;
       if (a <= 2){ x = lerpK(r, KX); sc = lerpK(r, KS); op = lerpK(r, KO); }
-      else { const sg = r < 0 ? -1 : 1; x = KX[sg < 0 ? 0 : 4] + sg * (a - 2) * 130; sc = Math.max(.5, .66 - (a - 2) * .16); op = Math.max(0, .3 * (3 - a)); }
+      else { const sg = r < 0 ? -1 : 1; x = KX[sg < 0 ? 0 : 4] + sg * (a - 2) * 130; sc = Math.max(.5, .66 - (a - 2) * .16); op = Math.max(0, .4 * (3 - a)); }
       if (n >= 3) op *= Math.min(1, Math.max(0, (n / 2 - a) * 2));   /* al dar la vuelta, el cuadro se desvanece en vez de saltar */
       s.style.transform = "translateX(" + x.toFixed(1) + "px) scale(" + sc.toFixed(3) + ")";
       s.style.opacity = op.toFixed(3);
