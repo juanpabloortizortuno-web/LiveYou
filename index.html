@@ -4455,22 +4455,36 @@ function stuTicker(fn, ms){
 
 /* ---- dibujo ---- */
 function stuCover(c, v, x, y, w, h, mirror, zoom){
-  const vw = v.videoWidth || v.width, vh = v.videoHeight || v.height; if (!vw || !vh) return;
+  const vw = v.videoWidth || v.displayWidth || v.width, vh = v.videoHeight || v.displayHeight || v.height; if (!vw || !vh) return;
+  c.imageSmoothingEnabled = true; c.imageSmoothingQuality = "high";
   const s = Math.max(w / vw, h / vh) * (zoom || 1), dw = vw * s, dh = vh * s;
   c.save(); c.beginPath(); c.rect(x, y, w, h); c.clip();
   if (mirror){ c.translate(x + w / 2, 0); c.scale(-1, 1); c.drawImage(v, -dw / 2, y + (h - dh) / 2, dw, dh); }
   else c.drawImage(v, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
   c.restore();
 }
+function stuCamSrc(){
+  try {
+    if (typeof MediaStreamTrackProcessor === "undefined") return STU.camV;
+    const t = STU.camStream && STU.camStream.getVideoTracks()[0]; if (!t || t.readyState !== "live") return STU.camV;
+    if (STU._pt !== t){
+      STU._pt = t; if (STU._pf){ try { STU._pf.close(); } catch (e) {} STU._pf = null; }
+      const rd = new MediaStreamTrackProcessor({ track:t }).readable.getReader();
+      (async () => { try { for (;;){ const r = await rd.read(); if (r.done) break;
+        if (STU._pt !== t){ r.value.close(); break; } if (STU._pf) STU._pf.close(); STU._pf = r.value; } } catch (e) {} })();
+    }
+    return STU._pf || STU.camV;
+  } catch (e) { return STU.camV; }
+}
 function stuCam(x, y, w, h){
-  const c = STU.ctx, base = STU.canFilter ? stuFilterStr() : "none";
+  const c = STU.ctx, base = STU.canFilter ? stuFilterStr() : "none", src = stuCamSrc();
   if (STU.canFilter) c.filter = base;
-  stuCover(c, STU.camV, x, y, w, h, STU.mirror, STU.zoom);
+  stuCover(c, src, x, y, w, h, STU.mirror, STU.zoom);
   if (STU.canFilter && STU.beauty > 0){ /* suavizado: se mezcla una copia desenfocada encima */
     const px = (1 + STU.beauty / 100 * 4) * Math.min(STU.W, STU.H) / 720;
     c.globalAlpha = Math.min(.75, STU.beauty / 100 * .8);
     c.filter = (base === "none" ? "" : base + " ") + "blur(" + px.toFixed(1) + "px)";
-    stuCover(c, STU.camV, x, y, w, h, STU.mirror, STU.zoom);
+    stuCover(c, src, x, y, w, h, STU.mirror, STU.zoom);
     c.globalAlpha = 1;
   }
   if (STU.canFilter) c.filter = "none";
@@ -4643,7 +4657,7 @@ async function stuStart(raw){
   try {
     STU.micStream = new MediaStream(raw.getAudioTracks()); STU.camStream = new MediaStream(raw.getVideoTracks());
     const box = STU.box = document.createElement("div");
-    box.style.cssText = "position:fixed;left:0;bottom:0;width:2px;height:2px;overflow:hidden;opacity:.01;pointer-events:none;z-index:-1";
+    box.style.cssText = "position:fixed;left:0;bottom:0;width:320px;height:180px;overflow:hidden;opacity:.02;pointer-events:none;z-index:-1";
     const mkv = () => { const v = document.createElement("video"); v.muted = true; v.playsInline = true; v.autoplay = true; box.append(v); return v; };
     STU.camV = mkv(); STU.scrV = mkv(); document.body.append(box);
     STU.camV.srcObject = STU.camStream; STU.camV.play().catch(() => {});
@@ -4669,6 +4683,7 @@ function stuStop(keepRaw){
   try { STU.ac && STU.ac.close(); } catch (e) {}
   if (STU.box){ STU.box.remove(); STU.box = null; }
   STU.camStream = STU.micStream = STU.scrStream = STU.out = STU.ac = STU.dest = STU.micGain = STU.scrSrc = null;
+  try { if (STU._pf) STU._pf.close(); } catch (e) {} STU._pf = STU._pt = null;
   STU.camV = STU.scrV = STU.cv = STU.ctx = STU.bd = STU.scan = null; STU.parts = []; STU.stk = [];
   try { $("lvShare").lastElementChild.textContent = "Compartir pantalla"; } catch (e) {}
 }
@@ -6407,7 +6422,7 @@ sb.auth.getSession().then(async ({ data }) => {
     (L.camTop ? ["scr", "cam"] : ["cam", "scr"]).forEach(n => {
       if (n === "scr" && scr && L.scr){ const r = px(L.scr, W, H); c.imageSmoothingQuality = "high"; c.drawImage(STU.scrV, r.x, r.y, r.w, r.h); }
       if (n === "cam" && cam){ const r = px(L.cam, W, H); c.save(); path(c, r, L.cam.shape); c.clip(); stuCam(r.x, r.y, r.w, r.h); c.restore();
-        c.lineWidth = 4 * k; c.strokeStyle = "#fff"; path(c, r, L.cam.shape); c.stroke(); }
+        c.save(); c.shadowColor = "rgba(0,0,0,.45)"; c.shadowBlur = 14 * k; c.lineWidth = 3 * k; c.strokeStyle = "rgba(255,255,255,.92)"; path(c, r, L.cam.shape); c.stroke(); c.restore(); }
     });
   };
   /* ---- interfaz sobre la vista previa ---- */
