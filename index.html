@@ -1528,6 +1528,24 @@
     .st-center{order:-1}.st-stage{min-height:56vh;flex:none}.st-pop{position:static;max-height:none}
     .src-body{grid-template-columns:1fr}
   }
+
+  /* ── Carrusel con video automático, buscador de En vivo y enlaces del perfil ── */
+  .lvc-pv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000;opacity:0;transition:opacity .35s;z-index:1}
+  .lvc-pv.on{opacity:1}
+  .lvc-th .lvc-live,.lvc-th .lvc-v{z-index:2}
+  .lvc-snd{display:none;position:absolute;right:8px;bottom:8px;z-index:3;width:34px;height:34px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;cursor:pointer;font-size:1rem;padding:0}
+  .lvc-snd.show{display:block}
+  .lvsearch{position:relative;flex:1;min-width:200px;max-width:460px;margin-left:auto}
+  .lvsearch svg{position:absolute;left:13px;top:50%;width:18px;height:18px;transform:translateY(-50%);fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round;pointer-events:none}
+  .lvsearch input{width:100%;box-sizing:border-box;padding:11px 14px 11px 40px;border-radius:999px;background:var(--panel);border:1px solid var(--line);color:var(--text);font-size:.92rem}
+  .lvsearch input:focus{outline:none;border-color:var(--pink)}
+  @media(max-width:560px){.lvsearch{order:3;flex-basis:100%;max-width:none;margin-left:0}}
+  .plinks{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0}
+  .plink{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--text);text-decoration:none;font-size:.88rem;font-weight:600;max-width:100%}
+  .plink:hover{border-color:var(--pink)}.plink small{color:var(--muted);font-weight:500;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .flinks{display:flex;flex-direction:column;gap:8px;margin:6px 0 8px}
+  .flrow{display:grid;grid-template-columns:1fr 1.4fr 36px;gap:6px}.flrow input{min-width:0}
+  .flrow button{border:0;border-radius:8px;background:var(--panel);color:var(--text);cursor:pointer}.flrow button:hover{background:var(--pink)}
   /* ═════════ FIN · CSS-15 ═════════ */
 
 </style>
@@ -1657,6 +1675,7 @@
     <div id="vLive" class="hidden">
       <div class="head">
         <h2>En vivo</h2>
+        <div class="lvsearch"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="lvSearch" type="search" placeholder="Buscar directos, juegos, cursos…" autocomplete="off" aria-label="Buscar directos"></div>
         <button class="btn main" id="btnGoLive">Transmitir en vivo</button>
       </div>
       <div class="lvmodes" id="lvModes">
@@ -1820,6 +1839,7 @@
             <div class="tkbtns" id="pBtnsMe"><button class="btn main" id="btnUpProfile" type="button">Subir video</button><button class="btn" id="btnEdit">Editar perfil</button><button class="btn" id="btnLogout">Salir</button><button class="btn" type="button" id="btnWallet">💰 Monetización</button><button class="btn" type="button" data-theme-toggle aria-label="Cambiar entre modo oscuro y claro"><svg class="ti ti-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="ti ti-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 13.5A9 9 0 1110.5 3a7 7 0 0010.5 10.5z"/></svg><span data-theme-label>Modo claro</span></button><button class="btn" type="button" id="btnResetFeed" title="Borra lo que Para ti aprendió de ti en este dispositivo">Reiniciar mi feed</button></div>
             <div class="tkbtns hidden" id="pBtnsOther"><button class="btn main" id="pFollow" type="button" data-follow="">Seguir</button><button class="btn" id="pMsg" type="button">Mensaje</button></div>
             <p class="bio" id="pBio"></p>
+            <div class="plinks hidden" id="pLinks"></div>
           </div>
         </div>
         <div class="ptabs"><button class="on" type="button" id="tabVid">▦ Videos <i id="tabCnt">0</i></button><button type="button" id="tabSer">🎬 Minidramas</button><button type="button" id="tabPost">▤ Publicaciones</button><button type="button" id="tabFav">☆ Favoritos</button></div>
@@ -1829,6 +1849,7 @@
         <label for="fName">Nombre</label><input id="fName" maxlength="50">
         <label for="fUser">Usuario</label><input id="fUser" maxlength="30" pattern="[a-zA-Z0-9_.]{3,30}" title="3 a 30 letras, números, punto o guion bajo">
         <label for="fBio">Biografía</label><textarea id="fBio" maxlength="200"></textarea>
+        <label>Enlaces de tu perfil (máx. 5)</label><div class="flinks" id="fLinks"></div><button type="button" class="btn ghost" id="btnAddLink">＋ Añadir enlace</button>
         <label for="fFile">Cambiar foto (opcional)</label><input id="fFile" type="file" accept="image/*">
         <label for="fBanner">Cambiar portada / banner (opcional)</label><input id="fBanner" type="file" accept="image/*">
         <p class="msg" id="editMsg" role="status"></p>
@@ -2269,9 +2290,46 @@ function openEdit(show){
     $("fName").value = profile.full_name || "";
     $("fUser").value = profile.username || "";
     $("fBio").value = profile.bio || "";
-    $("fFile").value = ""; $("fBanner").value = ""; say($("editMsg"), "");
+    $("fFile").value = ""; $("fBanner").value = ""; say($("editMsg"), ""); fillLinkRows(linksOf(profile));
   }
 }
+/* ---- enlaces del perfil (se guardan en profiles.links) ---- */
+const LINK_MAX = 5;
+function normLink(u){
+  u = String(u || "").trim(); if (!u) return null; if (!/^https?:\/\//i.test(u)) u = "https://" + u;
+  let x; try { x = new URL(u); } catch (e) { return null; }
+  if (!/^https?:$/.test(x.protocol) || x.hostname.indexOf(".") < 0) return null;
+  return x.href.slice(0, 300);
+}
+function linkRow(t, u){
+  const d = document.createElement("div"); d.className = "flrow";
+  const a = document.createElement("input"); a.className = "lt"; a.maxLength = 30; a.placeholder = "Nombre (ej. Mi tienda)"; a.value = t || ""; a.setAttribute("aria-label", "Nombre del enlace");
+  const b = document.createElement("input"); b.className = "lu"; b.maxLength = 200; b.placeholder = "ejemplo.com"; b.inputMode = "url"; b.value = u || ""; b.setAttribute("aria-label", "Dirección del enlace");
+  const x = document.createElement("button"); x.type = "button"; x.textContent = "✕"; x.title = "Quitar"; x.setAttribute("aria-label", "Quitar enlace"); x.onclick = () => d.remove();
+  d.append(a, b, x); return d;
+}
+function linksOf(p){ let l = p && p.links; if (typeof l === "string"){ try { l = JSON.parse(l); } catch (e) { l = []; } } return Array.isArray(l) ? l.slice(0, LINK_MAX) : []; }
+function fillLinkRows(list){ const box = $("fLinks"); box.replaceChildren(); (list || []).forEach(l => box.append(linkRow(l.t, l.u))); }
+function readLinks(){
+  const out = []; let bad = false;
+  $("fLinks").querySelectorAll(".flrow").forEach(r => {
+    const t = r.querySelector(".lt").value.trim(), u = r.querySelector(".lu").value.trim(); if (!t && !u) return;
+    const h = normLink(u); if (!h){ bad = true; return; }
+    out.push({ t:t || new URL(h).hostname.replace(/^www\./, ""), u:h });
+  });
+  return { list:out.slice(0, LINK_MAX), bad };
+}
+function renderLinks(box, p){
+  box.replaceChildren(); let n = 0;
+  linksOf(p).forEach(l => {
+    const h = normLink(l && l.u); if (!h) return; n++;
+    const a = document.createElement("a"); a.className = "plink"; a.href = h; a.target = "_blank"; a.rel = "noopener noreferrer nofollow ugc";
+    const ic = document.createElement("span"); ic.textContent = "🔗"; const t = document.createElement("span"); t.textContent = String(l.t || "").slice(0, 30) || new URL(h).hostname;
+    const sm = document.createElement("small"); sm.textContent = new URL(h).hostname.replace(/^www\./, ""); a.append(ic, t, sm); box.append(a);
+  });
+  box.classList.toggle("hidden", !n);
+}
+$("btnAddLink").onclick = () => { if ($("fLinks").children.length >= LINK_MAX) return toastMsg("Máximo " + LINK_MAX + " enlaces", 2500); const r = linkRow("", ""); $("fLinks").append(r); r.querySelector(".lt").focus(); };
 $("btnEdit").onclick = () => openEdit(true);
 $("btnWho").onclick = () => show("Profile");
 $("btnLogout2").onclick = async () => { userLogout = true; await stopAll(); await doSignOut(); };
@@ -2380,12 +2438,16 @@ $("editForm").onsubmit = async e => {
     if (ub.error){ $("btnSave").disabled=false; return say($("editMsg"), "No se pudo subir la portada: " + ub.error.message, "err"); }
     bannerV = Date.now();
   }
-  const changes = { full_name: $("fName").value.trim(), username: $("fUser").value.trim().toLowerCase(), bio: $("fBio").value.trim(), avatar_url };
-  const { error } = await sb.from("profiles").update(changes).eq("id", me.id);
+  const lk = readLinks();
+  if (lk.bad){ $("btnSave").disabled = false; return say($("editMsg"), "Revisa los enlaces: deben ser direcciones válidas, como ejemplo.com", "err"); }
+  const changes = { full_name: $("fName").value.trim(), username: $("fUser").value.trim().toLowerCase(), bio: $("fBio").value.trim(), avatar_url, links: lk.list };
+  let { error } = await sb.from("profiles").update(changes).eq("id", me.id), noCol = false;
+  if (error && /links|PGRST204|42703/.test((error.code || "") + " " + (error.message || ""))){ noCol = true; delete changes.links; ({ error } = await sb.from("profiles").update(changes).eq("id", me.id)); }
   $("btnSave").disabled = false;
   if (error) return say($("editMsg"), error.code === "23505" ? "Ese usuario ya está en uso." : error.message, "err");
   profile = { ...profile, ...changes };
-  paint(); openEdit(false);
+  paint(); openEdit(false); renderLinks($("pLinks"), profile);
+  if (noCol && lk.list.length) toastMsg("Perfil guardado, pero los enlaces necesitan una columna nueva: ejecuta supabase_enlaces.sql en Supabase.", 7000);
 };
 
 /* ═════════ FIN · JS-07 ═════════ */
@@ -2726,10 +2788,11 @@ async function loadStats(uid){
 }
 async function loadMyVideos(){
   const uid = pv || me.id, isMe = !pv; let p = profile;
-  if (!isMe){ const r = await sb.from("profiles").select("id,username,full_name,avatar_url,bio").eq("id", uid).maybeSingle(); p = r.data; }
+  if (!isMe){ let r = await sb.from("profiles").select("id,username,full_name,avatar_url,bio,links").eq("id", uid).maybeSingle(); if (r.error) r = await sb.from("profiles").select("id,username,full_name,avatar_url,bio").eq("id", uid).maybeSingle(); p = r.data; }
   if (!p){ pv = null; return loadMyVideos(); }
   $("pName").textContent = nameOf(p); $("pUser").textContent = "@" + (p.username || ""); $("pAvatar").src = picOf(p);
   $("pBio").textContent = p.bio || (isMe ? "Añade una biografía para que te conozcan." : ""); $("pBio").classList.toggle("hidden", !$("pBio").textContent);
+  renderLinks($("pLinks"), p);
   $("pBtnsMe").classList.toggle("hidden", !isMe); $("pBtnsOther").classList.toggle("hidden", isMe);
   if (!isMe){ $("pFollow").dataset.follow = uid; paintFollowBtn($("pFollow")); $("pMsg").onclick = () => { show("Inbox"); loadInbox(); $("mTo").value = "@" + (p.username || ""); $("mBody").focus(); }; }
   if (isMe) openEdit(false);
@@ -3377,18 +3440,34 @@ function lvCarousel(wrap, pick){
   const arrow = (cls, label, d) => { const b = document.createElement("button"); b.type = "button"; b.className = "pub-arr " + cls; b.setAttribute("aria-label", label); b.innerHTML = '<svg viewBox="0 0 24 24"><path d="' + d + '"/></svg>'; return b; };
   const prev = arrow("l", "Anterior", "M15 6l-6 6 6 6"), next = arrow("r", "Siguiente", "M9 6l6 6-6 6"), car = document.createElement("div"); car.className = "pub-car";
   wrap.append(prev, car, next);
-  let items = [], slides = [], idx = 0, rot = 0, sig = "";
+  let items = [], slides = [], idx = 0, rot = 0, sig = "", vis = true, snd = false;
+  /* solo la diapositiva del centro reproduce su video (sin sonido, en bucle); las demás se detienen para no gastar datos */
+  const stopPv = s => { const v = s._pv; if (!v) return; s._pv = null; try { v.pause(); v.removeAttribute("src"); v.load(); } catch (e) {} v.remove(); if (s._sb) s._sb.classList.remove("show"); };
+  const startPv = (s, it) => {
+    if (s._pv){ s._pv.play().catch(() => {}); return; }
+    const th = s.firstChild, vd = document.createElement("video"); vd.className = "lvc-pv"; vd.muted = !snd; vd.loop = true; vd.playsInline = true; vd.autoplay = true; vd.preload = "auto"; vd.setAttribute("muted", "");
+    vd.onplaying = () => vd.classList.add("on"); vd.onerror = () => { if (s._pv === vd) stopPv(s); };
+    vd.src = it.video.url; th.append(vd); s._pv = vd;
+    if (!s._sb){ const b = document.createElement("button"); b.type = "button"; b.className = "lvc-snd"; b.setAttribute("aria-label", "Sonido"); b.textContent = "🔇";
+      b.onclick = e => { e.stopPropagation(); snd = !snd; slides.forEach(x => { if (x._pv) x._pv.muted = !snd; if (x._sb) x._sb.textContent = snd ? "🔊" : "🔇"; }); }; s._sb = b; th.append(b); }
+    s._sb.textContent = snd ? "🔊" : "🔇"; s._sb.classList.add("show");
+    const p = vd.play(); if (p && p.catch) p.catch(() => {});
+  };
+  const playActive = () => slides.forEach((s, i) => { const it = items[i]; if (!it || it.live) return; if (s._rel === 0 && vis && !document.hidden) startPv(s, it); else stopPv(s); });
   const place = () => {
     const n = items.length; if (!n) return; idx = ((idx % n) + n) % n;
     slides.forEach((s, i) => { let rel = i - idx; if (rel > n / 2) rel -= n; if (rel < -n / 2) rel += n; s.dataset.rel = Math.abs(rel) > 2 ? "x" : String(rel); s._rel = rel; });
+    playActive();
   };
+  if ("IntersectionObserver" in window) new IntersectionObserver(es => { vis = es[es.length - 1].isIntersecting; playActive(); }, { threshold:.2 }).observe(wrap);
+  document.addEventListener("visibilitychange", () => { if (wrap.isConnected) playActive(); });
   const spin = () => {
     clearInterval(rot);
     if (items.length > 1) rot = setInterval(() => {
       if (!wrap.isConnected){ clearInterval(rot); return; }
       if (document.hidden || !wrap.offsetParent || car.matches(":hover")) return;
       idx++; place();
-    }, 6500);
+    }, 8000);
   };
   prev.onclick = () => { idx--; place(); spin(); };
   next.onclick = () => { idx++; place(); spin(); };
@@ -3408,7 +3487,8 @@ function lvCarousel(wrap, pick){
       }
       spin();
     },
-    stop(){ clearInterval(rot); }
+    stop(){ clearInterval(rot); slides.forEach(stopPv); },
+    sig(){ return sig; }, wrap
   };
 }
 let lvVidCache = { t:0, items:[] };
@@ -3428,17 +3508,22 @@ async function lvHeroShow(hero, items){
   const tok = ++lvHeroTok; let title = "";
   if (!items || !items.length){ items = await lvLoadVideos(); title = "Mientras nadie transmite, mira los videos de la comunidad"; }
   if (tok !== lvHeroTok) return;
+  if (!items.length){ if (lvCarObj){ lvCarObj.stop(); lvCarObj = null; } hero.replaceChildren(); hero.classList.add("hidden"); return; }
+  const sg = items.map(lvItemId).join(",") + "|" + title;   /* misma lista = no se reconstruye (antes se reiniciaba cada 15 s y parecía congelado) */
+  if (lvCarObj && lvCarObj.sig() === items.map(lvItemId).join(",") && lvCarObj.tag === sg && hero.contains(lvCarObj.wrap)){ hero.classList.remove("hidden"); return; }
   hero.replaceChildren();
   if (lvCarObj){ lvCarObj.stop(); lvCarObj = null; }
-  if (!items.length){ hero.classList.add("hidden"); return; }
   hero.classList.remove("hidden");
   if (title){ const h = document.createElement("h3"); h.className = "lvcar-t"; h.textContent = title; hero.append(h); }
   const w = document.createElement("div"); hero.append(w);
   const vids = items.filter(x => x.video).map(x => ({ v:x.video, a:x.a }));
   lvCarObj = lvCarousel(w, it => it.live ? watchLive(it.live) : openPlayer(it.video, it.a, vids));
-  lvCarObj.set(items);
+  lvCarObj.tag = sg; lvCarObj.set(items);
 }
 
+let lvTerm = "", lvST = 0;
+const lvNorm = x => (x || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+$("lvSearch").oninput = e => { lvTerm = e.target.value; clearTimeout(lvST); lvST = setTimeout(loadLives, 250); };
 async function loadLives(){
   const cats = $("lvFilter"); cats.replaceChildren();
   ["Todos", "Siguiendo", ...TOPICS].forEach(t => {
@@ -3448,8 +3533,8 @@ async function loadLives(){
   const box = $("liveGrid"), hero = $("lvHero"), rail = $("lvRailList");
   const { data: raw, error } = await sb.from("lives").select("*").eq("is_live", true)
     .gte("last_seen", new Date(Date.now() - 45000).toISOString()).order("started_at", { ascending:false }).limit(120);
-  box.replaceChildren(); box.className = "lvgrid"; hero.replaceChildren(); hero.classList.add("hidden"); rail.replaceChildren();
-  if (error){ $("lvRail").classList.add("hidden"); return note(box, "No se pudieron cargar los directos."); }
+  box.replaceChildren(); box.className = "lvgrid"; rail.replaceChildren();
+  if (error){ $("lvRail").classList.add("hidden"); hero.replaceChildren(); hero.classList.add("hidden"); return note(box, "No se pudieron cargar los directos."); }
   const all = raw || [], au = await withAuthors(all, "host_id");
   all.forEach(l => { l._a = au[l.host_id]; });
   all.slice().sort((a, b) => (b.viewers || 0) - (a.viewers || 0)).slice(0, 12).forEach(l => rail.append(lvRow(l)));
@@ -3459,7 +3544,8 @@ async function loadLives(){
     const f = getFollows(); if (!f.length){ lvHeroShow(hero, null); return note(box, "Aún no sigues a nadie. Entra a un directo y toca Seguir."); }
     data = all.filter(l => f.includes(l.host_id));
   } else if (topicFilter !== "Todos") data = all.filter(l => l.topic === topicFilter);
-  if (!data.length){ lvHeroShow(hero, null); return note(box, "Nadie transmite ahora" + (topicFilter !== "Todos" ? " en " + topicFilter : "") + ". ¡Sé el primero!"); }
+  const qn = lvNorm(lvTerm); if (qn) data = data.filter(l => lvNorm(l.title).includes(qn) || lvNorm(nameOf(l._a)).includes(qn) || lvNorm(l.topic).includes(qn));
+  if (!data.length){ lvHeroShow(hero, null); return note(box, qn ? "No hay directos que coincidan con «" + lvTerm.trim() + "»." : "Nadie transmite ahora" + (topicFilter !== "Todos" ? " en " + topicFilter : "") + ". ¡Sé el primero!"); }
   const byV = data.slice().sort((a, b) => (b.viewers || 0) - (a.viewers || 0));
   lvHeroShow(hero, byV.slice(0, 8).map(l => ({ live:l })));
   data.forEach(l => box.append(lvCard(l)));
