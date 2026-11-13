@@ -1849,6 +1849,30 @@
   .av-opts label{margin:4px 0;font-size:.78rem}
   .av-opts select{padding:9px 10px;font-size:.88rem;width:100%}
   /* ═════════ FIN · CSS-21 ═════════ */
+
+/* ═════════ INICIO · CSS-21 · MEJORAS LIVE STUDIO (guías, texto, estados del botón) ═════════ */
+.st-stage{position:relative}
+.lg-v,.lg-h{position:absolute;background:#fe2c55;pointer-events:none;display:none;z-index:6}
+.lg-v{width:1px;top:0;bottom:0}.lg-h{height:1px;left:0;right:0}
+.lg-tag{position:absolute;z-index:7;background:#fe2c55;color:#fff;font:700 11px system-ui,sans-serif;padding:2px 6px;border-radius:6px;pointer-events:none;display:none}
+.st-stage.lg-drag{cursor:grabbing}
+.lt-pane label{display:block;margin:8px 0 3px;font-size:.78rem;opacity:.8}
+.lt-pane textarea{width:100%;min-height:54px;resize:vertical}
+.lt-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+#glBtn.lb-wait{background:#555!important;box-shadow:none!important;cursor:not-allowed}
+#glBtn.lb-count{background:#7b61ff!important;min-width:150px}
+.lb-list{display:flex;gap:8px;flex-wrap:wrap;font-size:.74rem;margin:0 8px}
+.lb-list span.ok{color:#3ddc97}.lb-list span.no{color:#ff9a3d}
+.st-tb{padding-bottom:max(6px,env(safe-area-inset-bottom))}
+/* ═════════ FIN · CSS-21 ═════════ */
+
+/* ═════════ INICIO · CSS-22 · ESTADÍSTICAS, MEDIDOR DE MIC Y MANIJA ═════════ */
+.lg-stats{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;font:600 .72rem system-ui,sans-serif;color:var(--muted);padding:4px 0}
+.lg-stats b{color:var(--text)}.lg-stats .bad{color:#ff9a3d}
+.lg-meter{width:64px;height:6px;border-radius:4px;background:rgba(127,127,127,.3);overflow:hidden;align-self:center}
+.lg-meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3ddc97,#ffd23f,#fe2c55);transition:width .08s}
+.lg-h8{position:absolute;width:16px;height:16px;border-radius:4px;background:#fe2c55;border:2px solid #fff;cursor:nwse-resize;z-index:8;display:none;touch-action:none}
+/* ═════════ FIN · CSS-22 ═════════ */
 </style>
 </head>
 <body>
@@ -2355,6 +2379,12 @@
           <label for="spPipSize">Tamaño de la burbuja</label><input id="spPipSize" type="range" min="15" max="50" value="30">
           <label for="spZoom">Zoom de cámara</label><input id="spZoom" type="range" min="100" max="250" value="100">
           <label class="st-chk"><input id="spMirror" type="checkbox"> Espejo (voltear la cámara)</label></div>
+        <div class="st-pane lt-pane hidden" data-pane="text"><label for="ltTxt">Texto en pantalla (máx. 200)</label><textarea id="ltTxt" maxlength="200" placeholder="Escribe tu mensaje…"></textarea>
+          <div class="lt-row"><label>Color <input id="ltCol" type="color" value="#ffffff"></label><label>Fondo <input id="ltBg" type="color" value="#000000"></label><label class="st-chk"><input id="ltMq" type="checkbox" checked> Desplazamiento</label></div>
+          <label for="ltSize">Tamaño</label><input id="ltSize" type="range" min="28" max="120" value="56">
+          <label for="ltSpd">Velocidad</label><input id="ltSpd" type="range" min="1" max="12" value="4">
+          <label for="ltY">Posición vertical</label><input id="ltY" type="range" min="8" max="94" value="85">
+          <label for="ltBgA">Opacidad del fondo</label><input id="ltBgA" type="range" min="0" max="100" value="55"></div>
         <div class="st-pane hidden" data-pane="quality"><div class="sd-two">
           <div><label for="glOrient">Formato</label><select id="glOrient"><option value="v">Vertical 9:16</option><option value="h">Horizontal 16:9</option></select></div>
           <div><label for="glQual">Resolución</label><select id="glQual"><option value="480">480p · ligera</option><option value="720">720p · HD</option><option value="1080">1080p · Full HD</option></select></div></div>
@@ -2367,6 +2397,7 @@
         <button type="button" class="st-ib" data-pop="filters"><i>🎨</i><span>Filtros</span></button>
         <button type="button" class="st-ib" data-pop="layout"><i>🧩</i><span>Diseño</span></button>
         <button type="button" class="st-ib" data-pop="quality"><i>⚙️</i><span>Calidad</span></button>
+        <button type="button" class="st-ib" data-pop="text"><i>🅰️</i><span>Texto</span></button>
         <span class="sep"></span>
         <button type="button" class="st-ib" id="stCam"><i>📷</i><span>Cámara</span></button>
         <button type="button" class="st-ib" id="stMic"><i>🎤</i><span>Micrófono</span></button>
@@ -4554,10 +4585,11 @@ function stuPaint(){
   else if (L === "screen") stuScreen(0, 0, W, Hh);
   else if (L === "pip"){
     stuScreen(0, 0, W, Hh);
-    if (cam){ const d = Math.round(Math.min(W, Hh) * STU.pipSize), m = Math.round(W * .03), x = STU.pip[1] === "l" ? m : W - d - m, y = STU.pip[0] === "t" ? m : Hh - d - m; stuBubble(x, y, d); }
+    if (cam){ const d = Math.round(Math.min(W, Hh) * STU.pipSize), m = Math.round(W * .03), x = STU.pipXY ? STU.pipXY.x * W : (STU.pip[1] === "l" ? m : W - d - m), y = STU.pipXY ? STU.pipXY.y * Hh : (STU.pip[0] === "t" ? m : Hh - d - m); STU.pipBox = {x:x, y:y, d:d}; stuBubble(x, y, d); }
   } else if (Hh > W){ const h1 = Math.round(Hh * .55); stuScreen(0, 0, W, h1); if (cam) stuCam(0, h1, W, Hh - h1); else stuNoCam(0, h1, W, Hh - h1, k); }
   else { const w1 = Math.round(W * .65); stuScreen(0, 0, w1, Hh); if (cam) stuCam(w1, 0, W - w1, Hh); else stuNoCam(w1, 0, W - w1, Hh, k); }
   stuFx(c, W, Hh, k);
+  if (window.lyTxtDraw) lyTxtDraw(c, W, Hh, k);
 }
 function stuDraw(){
   if (!STU.on || !STU.ctx) return;
@@ -4706,7 +4738,7 @@ document.querySelectorAll("[data-layout]").forEach(b => b.onclick = () => {
   if (STU.layout !== "cam" && !STU.scrStream) toastMsg("Primero comparte una pantalla o una página web", 3000);
   stuUiSync(); stuSyncMedia(); stuHint();
 });
-document.querySelectorAll("[data-pip]").forEach(b => b.onclick = () => { STU.pip = b.dataset.pip; stuUiSync(); });
+document.querySelectorAll("[data-pip]").forEach(b => b.onclick = () => { STU.pip = b.dataset.pip; STU.pipXY = null; stuUiSync(); });
 document.querySelectorAll("[data-fx]").forEach(b => b.onclick = () => { const k = b.dataset.fx; STU.fx.has(k) ? STU.fx.delete(k) : STU.fx.add(k); stuUiSync(); });
 document.querySelectorAll("[data-stk]").forEach(b => b.onclick = () => stuSticker(b.dataset.stk));
 $("sdBeauty").oninput = e => { STU.beauty = +e.target.value; };
@@ -6205,5 +6237,146 @@ sb.auth.getSession().then(async ({ data }) => {
 
 </script>
 <!-- ═════════ FIN · SCRIPT ═════════ -->
+
+<script>
+/* ═════════ INICIO · JS-21 · MEJORAS LIVE STUDIO: mover burbuja con guías, texto con marquesina y botón con estados ═════════ */
+(function(){
+  "use strict";
+  const $$ = id => document.getElementById(id);
+  const stage = document.querySelector(".st-stage"), pop = $$("stPop"), tb = document.querySelector(".st-tb"), form = $$("glForm"), btn = $$("glBtn");
+  if (!stage || !pop || !tb || !form || !btn || typeof STU === "undefined") return;
+
+  /* ---------- 1) Guías y arrastre de la burbuja de cámara ---------- */
+  const gv = document.createElement("div"), gh = document.createElement("div"), tag = document.createElement("div");
+  gv.className = "lg-v"; gh.className = "lg-h"; tag.className = "lg-tag"; stage.append(gv, gh, tag);
+  const SNAP = 6;
+  function rect(){ // zona real del vídeo dentro del escenario
+    const v = $$("glPrev"), r = v.getBoundingClientRect(), sr = stage.getBoundingClientRect(), ar = STU.W / STU.H;
+    let w = r.width, h = r.height; if (w / h > ar) w = h * ar; else h = w / ar;
+    return { l: r.left - sr.left + (r.width - w) / 2, t: r.top - sr.top + (r.height - h) / 2, w: w, h: h, x0: r.left + (r.width - w) / 2, y0: r.top + (r.height - h) / 2 };
+  }
+  let drag = null;
+  stage.addEventListener("pointerdown", e => {
+    if (!STU.on || STU.layout !== "pip" || !STU.pipBox) return;
+    const R = rect(), sc = R.w / STU.W, px = (e.clientX - R.x0) / sc, py = (e.clientY - R.y0) / sc, b = STU.pipBox, c = b.d / 2;
+    if (Math.hypot(px - (b.x + c), py - (b.y + c)) > c) return;
+    drag = { dx: px - b.x, dy: py - b.y }; stage.setPointerCapture(e.pointerId); stage.classList.add("lg-drag"); e.preventDefault();
+  });
+  stage.addEventListener("pointermove", e => {
+    if (!drag) return;
+    const R = rect(), sc = R.w / STU.W, b = STU.pipBox, W = STU.W, H = STU.H;
+    let x = (e.clientX - R.x0) / sc - drag.dx, y = (e.clientY - R.y0) / sc - drag.dy, sx = false, sy = false;
+    const cx = W / 2 - b.d / 2, cy = H / 2 - b.d / 2;
+    [[0, "x"], [cx, "x"], [W - b.d, "x"]].forEach(p => { if (Math.abs(x - p[0]) * sc < SNAP) { x = p[0]; sx = true; } });
+    [[0, "y"], [cy, "y"], [H - b.d, "y"]].forEach(p => { if (Math.abs(y - p[0]) * sc < SNAP) { y = p[0]; sy = true; } });
+    x = Math.max(0, Math.min(W - b.d, x)); y = Math.max(0, Math.min(H - b.d, y));
+    STU.pipXY = { x: x / W, y: y / H };
+    gv.style.display = sx ? "block" : "none"; gh.style.display = sy ? "block" : "none";
+    gv.style.left = (R.l + (x + b.d / 2) * sc) + "px"; gh.style.top = (R.t + (y + b.d / 2) * sc) + "px";
+    tag.style.display = "block"; tag.style.left = (R.l + (x + b.d) * sc + 6) + "px"; tag.style.top = (R.t + y * sc) + "px";
+    tag.textContent = Math.round(x) + "px ← → " + Math.round(W - x - b.d) + "px  ·  ↑ " + Math.round(y) + "px";
+  });
+  const end = () => { drag = null; stage.classList.remove("lg-drag"); gv.style.display = gh.style.display = tag.style.display = "none"; };
+  stage.addEventListener("pointerup", end); stage.addEventListener("pointercancel", end);
+  stage.addEventListener("wheel", e => { // rueda = tamaño de la burbuja
+    if (STU.layout !== "pip") return; e.preventDefault();
+    STU.pipSize = Math.max(.15, Math.min(.6, STU.pipSize + (e.deltaY < 0 ? .02 : -.02)));
+  }, { passive: false });
+  stage.addEventListener("dblclick", () => { STU.pipXY = null; });
+
+  /* ---------- 2) Fuente de texto con marquesina continua ---------- */
+  const T = STU.txt = { on: false, text: "", color: "#ffffff", size: 56, bg: "#000000", bgA: .55, marquee: true, speed: 4, y: .85, bold: true };
+  window.lyTxtDraw = function(c, W, H, k){
+    if (!T.on || !T.text) return;
+    const fs = Math.round(T.size * k), y = T.y * H;
+    c.save(); c.font = (T.bold ? "800 " : "500 ") + fs + "px 'Plus Jakarta Sans',system-ui,sans-serif"; c.textBaseline = "middle";
+    const tw = c.measureText(T.text).width, bh = fs * 1.5;
+    if (T.bgA > 0){ c.globalAlpha = T.bgA; c.fillStyle = T.bg; c.fillRect(0, y - bh / 2, W, bh); c.globalAlpha = 1; }
+    c.fillStyle = T.color; c.lineWidth = fs / 14; c.strokeStyle = "rgba(0,0,0,.6)"; c.lineJoin = "round";
+    if (T.marquee || tw > W - 20){ // ancho automático: bucle sin cortes
+      const gap = fs * 2, span = tw + gap, off = (STU.frame * T.speed * k) % span;
+      c.textAlign = "left"; c.beginPath(); c.rect(0, y - bh / 2, W, bh); c.clip();
+      for (let x = -off; x < W; x += span){ c.strokeText(T.text, x, y); c.fillText(T.text, x, y); }
+    } else { c.textAlign = "center"; c.strokeText(T.text, W / 2, y); c.fillText(T.text, W / 2, y); }
+    c.restore();
+  };
+  const bind = (id, f) => { const n = $$(id); n.addEventListener("input", () => f(n)); };
+  bind("ltTxt", n => { T.text = n.value; T.on = !!n.value.trim(); });
+  bind("ltCol", n => T.color = n.value); bind("ltBg", n => T.bg = n.value); bind("ltMq", n => T.marquee = n.checked);
+  bind("ltSize", n => T.size = +n.value); bind("ltSpd", n => T.speed = +n.value); bind("ltY", n => T.y = n.value / 100); bind("ltBgA", n => T.bgA = n.value / 100);
+  /* ---------- 3) Botón Iniciar LIVE: lista previa, cuenta atrás 3-2-1 ---------- */
+  const hint = btn.nextElementSibling, list = document.createElement("div"); list.className = "lb-list"; btn.after(list);
+  if (hint) hint.style.display = "none";
+  const topicOK = () => !!document.querySelector("#glTopics .on, #glTopics .sel, #glTopics [aria-pressed=true], #glTopics .active");
+  function check(){
+    if (btn.classList.contains("lb-count")) return;
+    const items = [["Cámara", !!(STU.camStream || STU.on)], ["Micrófono", !!STU.micOn], ["Tema", !btn.disabled]];
+    list.replaceChildren(); items.forEach(i => { const sp = document.createElement("span"); sp.className = i[1] ? "ok" : "no"; sp.textContent = (i[1] ? "✓ " : "○ ") + i[0]; list.append(sp); });
+    btn.classList.toggle("lb-wait", btn.disabled); btn.title = btn.disabled ? "Falta elegir un tema para poder empezar" : "Todo listo";
+  }
+  new MutationObserver(check).observe(btn, { attributes: true, attributeFilter: ["disabled"] });
+  setInterval(check, 800); check();
+  let armed = false;
+  form.addEventListener("submit", e => {
+    if (armed) { armed = false; return; }
+    e.preventDefault(); e.stopImmediatePropagation();
+    if (btn.disabled || btn.classList.contains("lb-count")) return;
+    let n = 3; const label = btn.textContent; btn.classList.add("lb-count"); btn.textContent = "Empieza en " + n + "…";
+    const cd = $$("glCount"); const iv = setInterval(() => {
+      n--; if (n > 0){ btn.textContent = "Empieza en " + n + "…"; return; }
+      clearInterval(iv); btn.classList.remove("lb-count"); btn.textContent = label; armed = true; form.requestSubmit(btn);
+    }, 1000);
+  }, true);
+})();
+/* ═════════ FIN · JS-21 ═════════ */
+</script>
+
+<script>
+/* ═════════ INICIO · JS-22 · ESTADÍSTICAS FPS, MEDIDOR DE MICRÓFONO Y MANIJA DE TAMAÑO ═════════ */
+(function(){
+  "use strict";
+  const stage = document.querySelector(".st-stage"), tb = document.querySelector(".st-tb"), vol = document.getElementById("stVol");
+  if (!stage || !tb || !vol || typeof STU === "undefined") return;
+  /* medidor de nivel junto al volumen */
+  const meter = document.createElement("div"); meter.className = "lg-meter"; meter.innerHTML = "<i></i>"; vol.after(meter);
+  let an = null, buf = null, src = null, lastStream = null;
+  function hook(){
+    if (!STU.ac || !STU.micStream || !STU.micStream.getAudioTracks().length || lastStream === STU.micStream) return;
+    try { an = STU.ac.createAnalyser(); an.fftSize = 256; buf = new Uint8Array(an.fftSize); src = STU.ac.createMediaStreamSource(STU.micStream); src.connect(an); lastStream = STU.micStream; } catch (e) {}
+  }
+  /* barra de estadísticas */
+  const st = document.createElement("div"); st.className = "lg-stats"; tb.after(st);
+  let f0 = 0, t0 = performance.now(), fps = 0;
+  setInterval(() => {
+    hook(); let lv = 0;
+    if (an && STU.micOn){ an.getByteTimeDomainData(buf); let m = 0; for (let i = 0; i < buf.length; i++) m = Math.max(m, Math.abs(buf[i] - 128)); lv = Math.min(100, m / 128 * 220); }
+    meter.firstChild.style.width = lv + "%";
+    const now = performance.now();
+    if (now - t0 >= 1000){ fps = STU.on ? Math.round((STU.frame - f0) * 1000 / (now - t0)) : 0; f0 = STU.frame; t0 = now;
+      const low = STU.on && fps < STU.fps * .8;
+      st.innerHTML = 'FPS: <b class="' + (low ? "bad" : "") + '">' + fps + "/" + STU.fps + "</b><span>Resolución: <b>" + STU.W + "×" + STU.H + "</b></span><span>Capa: <b>" +
+        ({ cam: "Cámara", screen: "Pantalla", pip: "Pantalla + cámara", split: "Lado a lado" }[STU.layout] || "") + "</b></span><span>Mic: <b>" + (STU.micOn ? "activo" : "silenciado") + "</b></span>";
+    }
+  }, 100);
+  /* manija de tamaño (esquina de la burbuja) */
+  const h = document.createElement("div"); h.className = "lg-h8"; stage.append(h);
+  const vr = () => { const v = document.getElementById("glPrev"), r = v.getBoundingClientRect(), s = stage.getBoundingClientRect(), a = STU.W / STU.H; let w = r.width, hh = r.height; if (w / hh > a) w = hh * a; else hh = w / a; return { l: r.left - s.left + (r.width - w) / 2, t: r.top - s.top + (r.height - hh) / 2, w: w, x0: r.left + (r.width - w) / 2, y0: r.top + (r.height - hh) / 2 }; };
+  (function loop(){
+    const b = STU.pipBox, ok = STU.on && STU.layout === "pip" && b;
+    h.style.display = ok ? "block" : "none";
+    if (ok){ const R = vr(), k = R.w / STU.W; h.style.left = (R.l + (b.x + b.d) * k - 8) + "px"; h.style.top = (R.t + (b.y + b.d) * k - 8) + "px"; }
+    requestAnimationFrame(loop);
+  })();
+  let rs = null;
+  h.addEventListener("pointerdown", e => { rs = { x: STU.pipBox.x, y: STU.pipBox.y }; h.setPointerCapture(e.pointerId); e.preventDefault(); e.stopPropagation(); });
+  h.addEventListener("pointermove", e => {
+    if (!rs) return; const R = vr(), k = R.w / STU.W, px = (e.clientX - R.x0) / k, py = (e.clientY - R.y0) / k;
+    let d = Math.max(px - rs.x, py - rs.y); d = Math.max(Math.min(STU.W, STU.H) * .15, Math.min(Math.min(STU.W, STU.H) * .8, d, STU.W - rs.x, STU.H - rs.y));
+    STU.pipSize = d / Math.min(STU.W, STU.H);
+  });
+  h.addEventListener("pointerup", () => { rs = null; }); h.addEventListener("pointercancel", () => { rs = null; });
+})();
+/* ═════════ FIN · JS-22 ═════════ */
+</script>
 </body>
 </html>
