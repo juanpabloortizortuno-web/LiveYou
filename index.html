@@ -1765,6 +1765,23 @@
 @media(max-width:900px){.pub-s .lvc-th{border-radius:15px 15px 0 0}.pub-info{border-radius:0 0 15px 15px}}
 @container (max-width:900px){.pub-s .lvc-th{border-radius:15px 15px 0 0}.pub-info{border-radius:0 0 15px 15px}}
   /* ═════════ FIN · CSS-20 ═════════ */
+
+  /* ── Directo del anfitrión: pantalla casi completa (estilo TikTok) y vista previa propia en espejo automático ── */
+  @media(min-width:761px){
+    body.hosting .side{display:none}
+    body.hosting .app{grid-template-columns:1fr!important;--sbw:0px}
+  }
+  body.hosting main:has(#vStage:not(.hidden)){max-width:none}
+  @media(min-width:1200px){
+    body.hosting .stage.host{grid-template-columns:300px minmax(0,1fr) 340px;gap:16px;max-width:none;padding:0 14px}
+    body.hosting .stage.host .smain{display:flex;flex-direction:column;align-items:stretch}
+    body.hosting .stage.host .vwrap{align-self:center;width:min(100%,calc((100vh - 200px) * 16 / 9))}
+    body.hosting .stage.host.portrait .vwrap{width:auto;height:calc(100vh - 150px);max-height:none}
+    body.hosting .stage.host .chat{height:calc(100vh - 28px);max-height:none}
+    body.hosting .stage.host .sd{max-height:calc(100vh - 24px)}
+  }
+  .stage.host.selfie #lvVideo{transform:scaleX(-1)}
+  label.sd-chk:has(#sdMirror),label.st-chk:has(#spMirror){display:none}
 </style>
 </head>
 <body>
@@ -5302,6 +5319,20 @@ sb.auth.getSession().then(async ({ data }) => {
   if (!sess && hadHash) say($("loginMsg"), "No se pudo completar el acceso: " + (recErr || initErr || "sin detalle"), "err");
 }).catch(err => say($("loginMsg"), "Error de sesión: " + err.message, "err"));
 
+
+/* ---------- Directo del anfitrión: modo pantalla casi completa + espejo automático de tu vista previa ---------- */
+(function(){
+  const vs = $("vStage"), box = $("stageBox"); if (!vs || !box) return;
+  const upd = () => {
+    const host = !vs.classList.contains("hidden") && box.classList.contains("host");
+    const selfie = host && (!STU.on || STU.layout === "cam");
+    if (document.body.classList.contains("hosting") !== host) document.body.classList.toggle("hosting", host);
+    if (box.classList.contains("selfie") !== selfie) box.classList.toggle("selfie", selfie);
+  };
+  const mo = new MutationObserver(upd);
+  mo.observe(vs, { attributes:true, attributeFilter:["class"] }); mo.observe(box, { attributes:true, attributeFilter:["class"] });
+  setInterval(upd, 600); upd();
+})();
 /* ═════════ FIN · JS-20 ═════════ */
 
 /* ═════════ INICIO · JS-21 · BUSCADOR LATERAL, MENÚ CARGAR Y VOLUMEN VERTICAL ═════════ */
