@@ -24,6 +24,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!-- ═════════ INICIO · HEAD-1 · ETIQUETAS, ÍCONOS Y AUTORÍA ═════════ -->
 <title>LiveYou · videos cortos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 <meta name="description" content="LiveYou: crea, mira y transmite videos cortos y directos en vivo con tu comunidad.">
 <meta name="author" content="Juan Pablo Ortiz Ortuño">
 <meta name="copyright" content="© 2026 Juan Pablo Ortiz Ortuño, Santa Cruz, Bolivia">
@@ -1782,6 +1785,70 @@
   }
   .stage.host.selfie #lvVideo{transform:scaleX(-1)}
   label.sd-chk:has(#sdMirror),label.st-chk:has(#spMirror){display:none}
+
+  /* ═════════ INICIO · CSS-21 · ESTILO TIKTOK LIVE: tipografía, íconos, presentación, chat transparente, regalos y avatares ═════════ */
+  body{font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif}
+  button,input,select,textarea{font-family:inherit}
+
+  /* Íconos laterales tipo TikTok Live */
+  .vreact{gap:14px;align-items:center}
+  .tk-act{display:flex;flex-direction:column;align-items:center;gap:3px}
+  .tk-act:has(>.hidden){display:none}
+  .tk-act span{font-size:.66rem;font-weight:700;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.9);letter-spacing:.02em}
+  .vreact button{width:46px;height:46px;border-radius:50%;background:rgba(18,20,28,.55);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.22);box-shadow:0 4px 16px rgba(0,0,0,.45);color:#fff;display:grid;place-items:center;padding:0}
+  .vreact button svg{width:24px;height:24px}
+  #lvGiftBtn{background:linear-gradient(135deg,#ff9a3d,#fe2c55);border:1.5px solid rgba(255,235,180,.7)}
+
+  /* Presentación del directo: anfitrión, EN VIVO y título */
+  .vhost{background:rgba(0,0,0,.38);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:5px 16px 5px 5px;border-radius:999px;border:1px solid rgba(255,255,255,.16)}
+  .vhname b{font-weight:800;letter-spacing:-.01em}
+  .vhname .badge{display:inline-flex;align-items:center;gap:5px;font-weight:800;letter-spacing:.06em}
+  .vhname .badge::before{content:"";width:6px;height:6px;border-radius:50%;background:#fff;animation:livePulse 1.2s ease-in-out infinite}
+  @keyframes livePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
+  .vbot h2{font-size:1.3rem;font-weight:800;letter-spacing:-.02em}
+  .vbot .chip{background:rgba(255,255,255,.16);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.24);font-weight:700}
+
+  /* Chat transparente (cristal) */
+  .stage:not(.portrait) .chat{background:rgba(14,16,24,.5);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);border:1px solid rgba(255,255,255,.14);box-shadow:0 12px 40px rgba(0,0,0,.45);color:#fff;position:relative}
+  @media(min-width:761px){.stage.portrait .chat{position:relative}}
+  .stage:not(.portrait) .chat form{background:rgba(10,12,18,.65);border-top:1px solid rgba(255,255,255,.12);align-items:center;padding:10px 12px}
+  #lvMsgs{-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 12%);mask-image:linear-gradient(to bottom,transparent 0,#000 12%);padding-top:24px}
+  .stage:not(.portrait) .cmsg:not(.sys){background:rgba(0,0,0,.36);border:1px solid rgba(255,255,255,.08);padding:6px 11px;border-radius:16px;align-self:flex-start;max-width:94%}
+
+  /* Chat sobre el video cuando el directo está en pantalla completa */
+  .vwrap .chat.over{position:absolute;right:78px;top:76px;bottom:18px;width:min(330px,34%);height:auto;max-height:none;z-index:4;display:flex;flex-direction:column;border-radius:16px;background:rgba(10,12,18,.28);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12);box-shadow:none;color:#fff}
+  .vwrap .chat.over #lvMsgs{flex:1;min-height:0;overflow-y:auto}
+  .vwrap .chat.over form{background:rgba(10,12,18,.5);border-radius:0 0 16px 16px}
+
+  /* Regalos y reacciones de avatar dentro del chat */
+  .cmsg.gift{background:linear-gradient(90deg,rgba(254,44,85,.38),rgba(255,166,0,.34))!important;border:1px solid rgba(255,200,90,.6)!important;box-shadow:0 4px 14px rgba(254,44,85,.28);border-radius:16px;padding:7px 12px;animation:giftPopChat .35s cubic-bezier(.2,.9,.3,1.3)}
+  .cmsg.gift b{color:#ffd23f}
+  .cmsg.av-react{background:linear-gradient(90deg,rgba(37,244,238,.2),rgba(123,29,94,.35))!important;border:1px solid rgba(37,244,238,.42)!important;border-radius:16px;padding:6px 11px;align-self:flex-start;animation:giftPopChat .3s ease-out}
+  .cmsg.av-react .cav{width:38px;height:38px;border:2px solid rgba(37,244,238,.6)}
+  .av-badge-react{display:inline-flex;align-items:center;gap:6px;margin-top:3px;padding:3px 10px;border-radius:999px;background:rgba(0,0,0,.45);font-weight:700;font-size:.82rem;color:#fff}
+  @keyframes giftPopChat{from{transform:translateY(10px) scale(.92);opacity:0}to{transform:none;opacity:1}}
+
+  /* Botón de emoticones y bandeja */
+  .chat-emo-btn{width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.1);color:#fff;font-size:1.2rem;display:grid;place-items:center;flex:none;padding:0;cursor:pointer}
+  .chat-emo-btn:hover{background:rgba(255,255,255,.2)}
+  .chat-tray{position:absolute;left:10px;right:10px;bottom:66px;background:rgba(18,21,30,.95);backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.16);border-radius:16px;padding:12px;z-index:15;box-shadow:0 12px 32px rgba(0,0,0,.65);display:flex;flex-direction:column;gap:10px;color:#fff}
+  .chat-tray h5{margin:0;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  .emo-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  .emo-grid button{background:rgba(255,255,255,.06);border:0;border-radius:8px;padding:6px 0;font-size:1.25rem;cursor:pointer;transition:transform .12s,background .12s}
+  .emo-grid button:hover{background:rgba(255,255,255,.18);transform:scale(1.1)}
+  .av-react-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .av-react-btn{display:flex;align-items:center;gap:6px;background:rgba(254,44,85,.14);border:1px solid rgba(254,44,85,.35);border-radius:10px;padding:6px 8px;color:#fff;font-size:.74rem;font-weight:700;text-align:left;cursor:pointer}
+  .av-react-btn:hover{background:rgba(254,44,85,.28);border-color:var(--pink)}
+  .av-react-btn img{width:26px;height:26px;border-radius:50%;flex:none}
+
+  /* Creador de avatar en Editar perfil */
+  .av-studio{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:16px;padding:16px;margin:14px 0}
+  .av-studio-head{display:flex;align-items:center;gap:16px;margin-bottom:12px}
+  .av-studio-head img{width:78px;height:78px;border-radius:50%;border:3px solid var(--pink);background:#1a1d26;flex:none}
+  .av-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .av-opts label{margin:4px 0;font-size:.78rem}
+  .av-opts select{padding:9px 10px;font-size:.88rem;width:100%}
+  /* ═════════ FIN · CSS-21 ═════════ */
 </style>
 </head>
 <body>
@@ -1958,11 +2025,11 @@
             <div id="reactLayer"></div>
             <div class="vbot"><h2 id="lvTitle"></h2><span class="chip on" id="lvTopic"></span></div>
             <div class="vreact">
-              <button type="button" data-react="❤️" aria-label="Corazón">❤️</button>
-              <button type="button" data-react="🔥" aria-label="Fuego">🔥</button>
-              <button type="button" data-react="👏" aria-label="Aplauso">👏</button>
-              <button type="button" data-react="😂" aria-label="Risa">😂</button>
-              <button type="button" id="lvGiftBtn" class="hidden" aria-label="Enviar regalo">🎁</button>
+              <div class="tk-act"><button type="button" data-react="❤️" aria-label="Me gusta"><svg viewBox="0 0 24 24" fill="#fe2c55"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button><span>Me gusta</span></div>
+              <div class="tk-act"><button type="button" data-react="🔥" aria-label="Fuego">🔥</button><span>Fuego</span></div>
+              <div class="tk-act"><button type="button" data-react="👏" aria-label="Aplauso">👏</button><span>Aplausos</span></div>
+              <div class="tk-act"><button type="button" data-react="😂" aria-label="Risa">😂</button><span>Risa</span></div>
+              <div class="tk-act"><button type="button" id="lvGiftBtn" class="hidden" aria-label="Enviar regalo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></button><span>Regalo</span></div>
             </div>
             <div id="giftTray" class="gifttray hidden">
               <div class="gthead"><span>Tu saldo: <b id="gtBal">…</b> pts</span><button type="button" id="gtClose" aria-label="Cerrar">✕</button></div>
@@ -1982,7 +2049,13 @@
         </div>
         <aside class="chat">
           <div id="lvMsgs" aria-live="polite"></div>
-          <form id="lvForm"><input id="lvInput" maxlength="300" placeholder="Escribe un mensaje" autocomplete="off" aria-label="Mensaje"><button class="btn main" type="submit">Enviar</button></form>
+          <div id="chatTray" class="chat-tray hidden">
+            <h5>Reacciones de tu avatar</h5>
+            <div class="av-react-grid" id="avReactGrid"></div>
+            <h5>Emoticones rápidos</h5>
+            <div class="emo-grid" id="emoGrid"></div>
+          </div>
+          <form id="lvForm"><button type="button" class="chat-emo-btn" id="btnChatEmo" aria-label="Emoticones y avatar" title="Emoticones y avatar">😊</button><input id="lvInput" maxlength="300" placeholder="Comenta en vivo…" autocomplete="off" aria-label="Mensaje"><button class="btn main" type="submit">Enviar</button></form>
         </aside>
         <!-- ═════════ INICIO · HTML-06B · LIVE STUDIO (panel del anfitrión) ═════════ -->
         <aside class="sd hidden" id="sdPanel" aria-label="Live Studio">
@@ -2084,6 +2157,23 @@
         <label for="fName">Nombre</label><input id="fName" maxlength="50">
         <label for="fUser">Usuario</label><input id="fUser" maxlength="30" pattern="[a-zA-Z0-9_.]{3,30}" title="3 a 30 letras, números, punto o guion bajo">
         <label for="fBio">Biografía</label><textarea id="fBio" maxlength="200"></textarea>
+        <div class="av-studio">
+          <div class="av-studio-head">
+            <img id="avPreviewImg" alt="Vista previa de tu avatar">
+            <div>
+              <strong>🎭 Creador de avatar</strong>
+              <p class="sd-note">Crea tu avatar para el perfil y para enviar reacciones en el chat de los directos.</p>
+              <button type="button" class="btn main" id="btnUseAvatar" style="padding:7px 14px;font-size:.82rem;margin-top:6px">Usar como foto de perfil</button>
+            </div>
+          </div>
+          <div class="av-opts">
+            <div><label for="avGender">Género</label><select id="avGender"><option value="female">👩 Mujer</option><option value="male">👨 Hombre</option></select></div>
+            <div><label for="avSkin">Tono de piel</label><select id="avSkin"><option value="#ffdbac">Claro</option><option value="#f1c27d">Trigueño</option><option value="#e0ac69">Canela</option><option value="#c68642">Moreno</option><option value="#8d5524">Oscuro</option></select></div>
+            <div><label for="avHair">Peinado</label><select id="avHair"><option value="long">Largo lacio</option><option value="wavy">Ondulado</option><option value="short">Corto moderno</option><option value="bun">Recogido / moño</option></select></div>
+            <div><label for="avHairColor">Color de cabello</label><select id="avHairColor"><option value="#1a1a1a">Negro</option><option value="#4a2e1b">Castaño</option><option value="#d4a017">Rubio</option><option value="#b22222">Rojizo</option><option value="#fe2c55">Fantasía rosa</option></select></div>
+            <div style="grid-column:1/-1"><label for="avOutfit">Estilo de ropa</label><select id="avOutfit"><option value="casual">👕 Casual</option><option value="elegant">🧥 Elegante</option><option value="urban">🧢 Urbano</option><option value="sport">⚡ Deportivo</option></select></div>
+          </div>
+        </div>
         <label>Enlaces de tu perfil (máx. 5)</label><div class="flinks" id="fLinks"></div><button type="button" class="btn ghost" id="btnAddLink">＋ Añadir enlace</button>
         <label for="fFile">Cambiar foto (opcional)</label><input id="fFile" type="file" accept="image/*">
         <label for="fBanner">Cambiar portada / banner (opcional)</label><input id="fBanner" type="file" accept="image/*">
@@ -3877,6 +3967,7 @@ async function loadLives(){
 /* ═════════ INICIO · JS-17 · CHAT Y REACCIONES DEL DIRECTO ═════════ */
 /* chat y reacciones */
 function addLv(name, text, cls, pic){
+  if (cls !== "sys" && window.lyAvChat && window.lyAvChat(name, text, cls, pic)) return;
   const d = document.createElement("div"); d.className = "cmsg" + (cls ? " " + cls : "");
   if (cls === "sys") d.textContent = text;
   else {
@@ -4128,7 +4219,7 @@ function hostConn(conn){
   });
   conn.on("data", d => {
     const v = H && H.viewers.get(conn.peer); if (!v || !d) return;
-    if (d.t === "chat"){ const text = String(d.text || "").trim().slice(0, 300); if (!text) return; addLv(v.name, text, "", v.pic); bcast({ t:"chat", name:v.name, text, pic:v.pic }); }
+    if (d.t === "chat"){ const text = String(d.text || "").trim().slice(0, 300); if (!text) return; const pic = (window.lyAvPic && window.lyAvPic(text, d.pic)) || v.pic; addLv(v.name, text, "", pic); bcast({ t:"chat", name:v.name, text, pic }); }
     else if (d.t === "react" && REACTS.includes(d.e)) hostReact(conn.peer, d.e);
     else if (d.t === "gift" && typeof d.id === "string") hostGift(v, d.id);
   });
@@ -5332,6 +5423,127 @@ sb.auth.getSession().then(async ({ data }) => {
   const mo = new MutationObserver(upd);
   mo.observe(vs, { attributes:true, attributeFilter:["class"] }); mo.observe(box, { attributes:true, attributeFilter:["class"] });
   setInterval(upd, 600); upd();
+})();
+
+/* ═════════ INICIO · JS-22 · AVATAR POR USUARIO, EMOTICONES / REACCIONES EN EL CHAT Y CHAT SOBRE EL VIDEO EN PANTALLA COMPLETA ═════════ */
+(function(){
+  const AV_DEF = { gender:"female", skin:"#f1c27d", hair:"long", hairColor:"#1a1a1a", outfit:"casual" };
+  const HEX = /^#[0-9a-fA-F]{6}$/;
+  const keyOf = () => "liveyou_avatar_cfg_" + (me && me.id ? me.id : "anon");
+  const getAv = () => { let c = {}; try { c = JSON.parse(localStorage.getItem(keyOf()) || "{}"); } catch (e) {} return Object.assign({}, AV_DEF, c); };
+  const setAv = c => { try { localStorage.setItem(keyOf(), JSON.stringify(c)); } catch (e) {} };
+
+  const AV_REACTIONS = [
+    { id:"wave",  label:"Saludar",    emoji:"👋" },
+    { id:"love",  label:"Me encanta", emoji:"😍" },
+    { id:"laugh", label:"Jajaja",     emoji:"😂" },
+    { id:"party", label:"¡Fiesta!",   emoji:"🎉" },
+    { id:"fire",  label:"¡Brutal!",   emoji:"🔥" },
+    { id:"crown", label:"¡Crack!",    emoji:"👑" }
+  ];
+  const BY_ID = {}; AV_REACTIONS.forEach(r => BY_ID[r.id] = r);
+  const TAG = /^\[AVATAR:(wave|love|laugh|party|fire|crown)\]$/;
+  const EMOS = ["❤️","🔥","😂","😍","👏","🎉","👑","🙌","💎","🚀","🤩","🥳","💯","✨"];
+
+  /* Retrato SVG: mujer / hombre, tono de piel, peinado, color de cabello, ropa y expresión */
+  window.buildAvatarSVG = function(cfg, mood){
+    const c = Object.assign({}, AV_DEF, cfg || {});
+    const skin = HEX.test(c.skin) ? c.skin : AV_DEF.skin, hc = HEX.test(c.hairColor) ? c.hairColor : AV_DEF.hairColor;
+    const fem = c.gender !== "male", m = mood || "happy";
+    const cloth = { casual: fem ? "#fe2c55" : "#00aff0", elegant:"#1e222d", urban:"#7b1d5e", sport:"#10b981" }[c.outfit] || "#fe2c55";
+    const back = (fem && (c.hair === "long" || c.hair === "wavy")) ? '<path d="M24 44C20 75 22 95 32 98L68 98C78 95 80 75 76 44Z" fill="' + hc + '"/>'
+      : (c.hair === "bun" ? '<circle cx="50" cy="16" r="11" fill="' + hc + '"/>' : "");
+    const front = c.hair === "short" ? '<path d="M28 40C28 18 72 18 72 40C66 28 34 28 28 40Z" fill="' + hc + '"/>'
+      : '<path d="M26 44C26 16 74 16 74 44C68 30 52 26 38 34C32 37 28 41 26 44Z" fill="' + hc + '"/>';
+    const eyes = m === "love" ? '<text x="40" y="50" font-size="11" text-anchor="middle">❤️</text><text x="60" y="50" font-size="11" text-anchor="middle">❤️</text>'
+      : m === "laugh" ? '<path d="M35 46Q40 41 45 46" stroke="#1a1a1a" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M55 46Q60 41 65 46" stroke="#1a1a1a" stroke-width="2.5" fill="none" stroke-linecap="round"/>'
+      : '<circle cx="40" cy="46" r="3" fill="#1a1a1a"/><circle cx="60" cy="46" r="3" fill="#1a1a1a"/>';
+    const mouth = (m === "laugh" || m === "party") ? '<path d="M41 56Q50 67 59 56Z" fill="#fff" stroke="#1a1a1a" stroke-width="1.5"/>'
+      : m === "fire" ? '<circle cx="50" cy="58" r="4.5" fill="#fe2c55"/>'
+      : '<path d="M42 56Q50 63 58 56" stroke="#1a1a1a" stroke-width="2.3" fill="none" stroke-linecap="round"/>';
+    const extra = m === "crown" ? '<text x="50" y="18" font-size="16" text-anchor="middle">👑</text>'
+      : m === "wave" ? '<text x="80" y="70" font-size="18">👋</text>'
+      : m === "party" ? '<text x="78" y="34" font-size="16">🎉</text>'
+      : m === "fire" ? '<text x="78" y="36" font-size="16">🔥</text>' : "";
+    const collar = c.outfit === "elegant" ? '<path d="M42 72L50 85L58 72" fill="#fff"/><path d="M48 75L50 88L52 75" fill="#fe2c55"/>'
+      : c.outfit === "sport" ? '<path d="M34 74L66 74" stroke="#25f4ee" stroke-width="3"/>' : "";
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e2230"/><stop offset="1" stop-color="#11131a"/></linearGradient></defs><rect width="100" height="100" rx="50" fill="url(#g)"/>'
+      + back + '<path d="M18 98C20 74 34 70 50 70C66 70 80 74 82 98Z" fill="' + cloth + '"/>' + collar
+      + '<rect x="43" y="60" width="14" height="14" rx="5" fill="' + skin + '"/><ellipse cx="50" cy="46" rx="20" ry="23" fill="' + skin + '"/>' + front + eyes + mouth + extra + '</svg>';
+    return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
+  };
+
+  /* Editor de avatar en "Editar perfil" (cada usuario guarda el suyo) */
+  const F = { avGender:"gender", avSkin:"skin", avHair:"hair", avHairColor:"hairColor", avOutfit:"outfit" };
+  const syncEditor = () => {
+    const c = getAv();
+    Object.keys(F).forEach(id => { const el = $(id); if (el) el.value = c[F[id]]; });
+    if ($("avPreviewImg")) $("avPreviewImg").src = buildAvatarSVG(c);
+  };
+  Object.keys(F).forEach(id => { const el = $(id); if (el) el.addEventListener("change", () => {
+    const c = {}; Object.keys(F).forEach(i => { c[F[i]] = $(i).value; }); setAv(c); $("avPreviewImg").src = buildAvatarSVG(c);
+  }); });
+  if ($("btnEdit")) $("btnEdit").addEventListener("click", syncEditor);
+  if ($("btnUseAvatar")) $("btnUseAvatar").onclick = async () => {
+    if (!me || !profile) return;
+    const btn = $("btnUseAvatar"); btn.disabled = true;
+    try {
+      const img = await new Promise((ok, ko) => { const i = new Image(); i.onload = () => ok(i); i.onerror = ko; i.src = buildAvatarSVG(getAv()); });
+      const cv = document.createElement("canvas"); cv.width = cv.height = 256; cv.getContext("2d").drawImage(img, 0, 0, 256, 256);
+      const blob = await new Promise(ok => cv.toBlob(ok, "image/png"));
+      const path = me.id + "/avatar-" + Date.now() + ".png";
+      const up = await sb.storage.from("avatars").upload(path, blob, { contentType:"image/png" }); if (up.error) throw up.error;
+      const pub = sb.storage.from("avatars").getPublicUrl(path).data.publicUrl;
+      const r = await sb.from("profiles").update({ avatar_url:pub }).eq("id", me.id); if (r.error) throw r.error;
+      profile = { ...profile, avatar_url:pub }; $("eAvatar").src = pub; paint(); toastMsg("¡Avatar aplicado a tu foto de perfil! ✓");
+    } catch (e) { toastMsg("No se pudo aplicar el avatar: " + ((e && e.message) || e)); }
+    btn.disabled = false;
+  };
+
+  /* Mensajes de reacción de avatar (los usa addLv) y avatar que viaja con el mensaje */
+  const okSvg = p => typeof p === "string" && p.length < 9000 && p.startsWith("data:image/svg+xml;utf8,");
+  window.lyAvPic = (text, pic) => TAG.test(String(text || "")) && okSvg(pic) ? pic : null;
+  window.lyAvChat = (name, text, cls, pic) => {
+    const m = TAG.exec(String(text || "")); if (!m) return false;
+    const r = BY_ID[m[1]], d = document.createElement("div"); d.className = "cmsg av-react" + (cls ? " " + cls : "");
+    const im = new Image(); im.className = "cav"; im.alt = ""; im.src = pic || buildAvatarSVG(null, r.id);
+    const w = document.createElement("div"), b = document.createElement("b"), bd = document.createElement("div");
+    b.textContent = name + (cls === "host" ? " 👑 " : " "); bd.className = "av-badge-react"; bd.textContent = r.emoji + " " + r.label;
+    w.append(b, bd); d.append(im, w); $("lvMsgs").append(d); $("lvMsgs").scrollTop = $("lvMsgs").scrollHeight;
+    if (typeof floatEmoji === "function") floatEmoji(r.emoji, { size:2.6 });
+    return true;
+  };
+
+  /* Bandeja: emoticones rápidos + reacciones con tu avatar */
+  const sendAvReact = r => {
+    const pic = buildAvatarSVG(getAv(), r.id), tag = "[AVATAR:" + r.id + "]";
+    if (typeof H !== "undefined" && H){ addLv(nameOf(profile), tag, "host", pic); bcast({ t:"chat", name:nameOf(profile), text:tag, host:true, pic }); }
+    else if (typeof W !== "undefined" && W && W.conn && W.conn.open){ W.conn.send({ t:"chat", text:tag, pic }); }
+    else toastMsg("Aún no estás conectado al directo");
+  };
+  const fillTray = () => {
+    const eg = $("emoGrid"), ag = $("avReactGrid"); if (!eg || !ag) return;
+    eg.replaceChildren(); ag.replaceChildren();
+    EMOS.forEach(em => { const b = document.createElement("button"); b.type = "button"; b.textContent = em; b.onclick = () => { $("lvInput").value += em; $("lvInput").focus(); }; eg.append(b); });
+    const c = getAv();
+    AV_REACTIONS.forEach(r => {
+      const b = document.createElement("button"); b.type = "button"; b.className = "av-react-btn";
+      const im = new Image(); im.alt = ""; im.src = buildAvatarSVG(c, r.id); const sp = document.createElement("span"); sp.textContent = r.label;
+      b.append(im, sp); b.onclick = () => { $("chatTray").classList.add("hidden"); sendAvReact(r); }; ag.append(b);
+    });
+  };
+  if ($("btnChatEmo")) $("btnChatEmo").onclick = () => { fillTray(); $("chatTray").classList.toggle("hidden"); };
+  document.addEventListener("pointerdown", e => { const t = $("chatTray"); if (t && !t.classList.contains("hidden") && !e.target.closest("#chatTray,#btnChatEmo")) t.classList.add("hidden"); });
+
+  /* Pantalla completa: el chat pasa a una ventana transparente sobre el video; al salir vuelve a su sitio */
+  (function(){
+    const chat = document.querySelector("#stageBox > .chat"), vw = $("vwrap"); if (!chat || !vw) return;
+    let home = null, next = null;
+    document.addEventListener("fullscreenchange", () => {
+      if (document.fullscreenElement === vw){ home = chat.parentNode; next = chat.nextSibling; vw.append(chat); chat.classList.add("over"); }
+      else if (chat.classList.contains("over")){ chat.classList.remove("over"); home.insertBefore(chat, next && next.parentNode === home ? next : null); $("chatTray").classList.add("hidden"); }
+    });
+  })();
 })();
 /* ═════════ FIN · JS-20 ═════════ */
 
