@@ -1873,6 +1873,14 @@
 .lg-meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3ddc97,#ffd23f,#fe2c55);transition:width .08s}
 .lg-h8{position:absolute;width:16px;height:16px;border-radius:4px;background:#fe2c55;border:2px solid #fff;cursor:nwse-resize;z-index:8;display:none;touch-action:none}
 /* ═════════ FIN · CSS-22 ═════════ */
+
+/* ═════════ INICIO · CSS-23 · CAPAS LIBRES (pantalla y cámara) ═════════ */
+.ly-box{position:absolute;border:2px solid #fe2c55;pointer-events:none;display:none;z-index:8}
+.ly-hd{position:absolute;width:12px;height:12px;background:#fff;border:2px solid #fe2c55;border-radius:3px;pointer-events:auto;touch-action:none}
+.ly-tbar{position:absolute;top:6px;left:50%;transform:translateX(-50%);display:none;gap:4px;background:rgba(20,16,30,.92);border-radius:10px;padding:4px;z-index:9}
+.ly-tbar button{background:none;border:0;color:#fff;font-size:15px;padding:5px 8px;border-radius:7px;cursor:pointer}
+.ly-tbar button:hover,.ly-tbar button.on{background:#fe2c55}
+/* ═════════ FIN · CSS-23 ═════════ */
 </style>
 </head>
 <body>
@@ -4583,10 +4591,7 @@ function stuPaint(){
   let L = STU.layout; if (L !== "cam" && !scr) L = "cam";
   if (L === "cam"){ if (cam) stuCam(0, 0, W, Hh); else stuNoCam(0, 0, W, Hh, k); }
   else if (L === "screen") stuScreen(0, 0, W, Hh);
-  else if (L === "pip"){
-    stuScreen(0, 0, W, Hh);
-    if (cam){ const d = Math.round(Math.min(W, Hh) * STU.pipSize), m = Math.round(W * .03), x = STU.pipXY ? STU.pipXY.x * W : (STU.pip[1] === "l" ? m : W - d - m), y = STU.pipXY ? STU.pipXY.y * Hh : (STU.pip[0] === "t" ? m : Hh - d - m); STU.pipBox = {x:x, y:y, d:d}; stuBubble(x, y, d); }
-  } else if (Hh > W){ const h1 = Math.round(Hh * .55); stuScreen(0, 0, W, h1); if (cam) stuCam(0, h1, W, Hh - h1); else stuNoCam(0, h1, W, Hh - h1, k); }
+  else if (L === "pip"){ if (window.lyLayers) lyLayers(c, W, Hh, scr, cam, k); else stuScreen(0, 0, W, Hh); } else if (Hh > W){ const h1 = Math.round(Hh * .55); stuScreen(0, 0, W, h1); if (cam) stuCam(0, h1, W, Hh - h1); else stuNoCam(0, h1, W, Hh - h1, k); }
   else { const w1 = Math.round(W * .65); stuScreen(0, 0, w1, Hh); if (cam) stuCam(w1, 0, W - w1, Hh); else stuNoCam(w1, 0, W - w1, Hh, k); }
   stuFx(c, W, Hh, k);
   if (window.lyTxtDraw) lyTxtDraw(c, W, Hh, k);
@@ -6377,6 +6382,100 @@ sb.auth.getSession().then(async ({ data }) => {
   h.addEventListener("pointerup", () => { rs = null; }); h.addEventListener("pointercancel", () => { rs = null; });
 })();
 /* ═════════ FIN · JS-22 ═════════ */
+</script>
+
+<script>
+/* ═════════ INICIO · JS-23 · CAPAS LIBRES: pantalla y cámara se mueven, se estiran y cambian de forma ═════════ */
+(function(){
+  "use strict";
+  const stage = document.querySelector(".st-stage"); if (!stage || typeof STU === "undefined") return;
+  const L = STU.L = { scr: null, cam: null, key: null, camTop: true, sel: "cam" }, SNAP = 6, MIN = 48;
+  const px = (o, W, H) => ({ x: o.x * W, y: o.y * H, w: o.w * W, h: o.h * H });
+  function path(c, r, shape){
+    c.beginPath();
+    if (shape === "circle"){ const d = Math.min(r.w, r.h); c.arc(r.x + r.w / 2, r.y + r.h / 2, d / 2, 0, 7); }
+    else if (shape === "round"){ const q = Math.min(r.w, r.h) * .2; c.roundRect ? c.roundRect(r.x, r.y, r.w, r.h, q) : c.rect(r.x, r.y, r.w, r.h); }
+    else c.rect(r.x, r.y, r.w, r.h);
+  }
+  function init(W, H){
+    if (!L.cam){ const d = .28 * Math.min(W, H), m = .03 * W; L.cam = { x: (W - d - m) / W, y: (H - d - m) / H, w: d / W, h: d / H, shape: "circle" }; }
+    if (STU.scrStream !== L.key){ L.key = STU.scrStream; L.scr = null; }
+    if (!L.scr && STU.scrV.videoWidth){ const a = STU.scrV.videoWidth / STU.scrV.videoHeight, w = Math.min(W, H * a), h = w / a; L.scr = { x: (W - w) / 2 / W, y: (H - h) / 2 / H, w: w / W, h: h / H }; }
+  }
+  window.lyLayers = function(c, W, H, scr, cam, k){
+    init(W, H);
+    (L.camTop ? ["scr", "cam"] : ["cam", "scr"]).forEach(n => {
+      if (n === "scr" && scr && L.scr){ const r = px(L.scr, W, H); c.imageSmoothingQuality = "high"; c.drawImage(STU.scrV, r.x, r.y, r.w, r.h); }
+      if (n === "cam" && cam){ const r = px(L.cam, W, H); c.save(); path(c, r, L.cam.shape); c.clip(); stuCam(r.x, r.y, r.w, r.h); c.restore();
+        c.lineWidth = 4 * k; c.strokeStyle = "#fff"; path(c, r, L.cam.shape); c.stroke(); }
+    });
+  };
+  /* ---- interfaz sobre la vista previa ---- */
+  const box = document.createElement("div"); box.className = "ly-box";
+  const HD = { nw: "nwse", n: "ns", ne: "nesw", e: "ew", se: "nwse", s: "ns", sw: "nesw", w: "ew" }, hs = {};
+  Object.keys(HD).forEach(n => { const h = document.createElement("div"); h.className = "ly-hd"; h.style.cursor = HD[n] + "-resize"; h.dataset.h = n; box.append(h); hs[n] = h; });
+  const gv = document.createElement("div"), gh = document.createElement("div"), tag = document.createElement("div");
+  gv.className = "lg-v"; gh.className = "lg-h"; tag.className = "lg-tag";
+  const tbar = document.createElement("div"); tbar.className = "ly-tbar";
+  tbar.innerHTML = '<button data-a="fit" title="Ajustar al lienzo">⤢</button><button data-a="center" title="Centrar">⌖</button><button data-a="front" title="Traer al frente">⇅</button>' +
+    '<button data-s="circle" title="Círculo">●</button><button data-s="round" title="Cuadrado redondeado">▢</button><button data-s="rect" title="Rectángulo">▭</button>';
+  stage.append(box, gv, gh, tag, tbar);
+  const view = () => { const v = document.getElementById("glPrev"), r = v.getBoundingClientRect(), s = stage.getBoundingClientRect(), a = STU.W / STU.H; let w = r.width, h = r.height; if (w / h > a) w = h * a; else h = w / a; return { l: r.left - s.left + (r.width - w) / 2, t: r.top - s.top + (r.height - h) / 2, k: w / STU.W, x0: r.left + (r.width - w) / 2, y0: r.top + (r.height - h) / 2 }; };
+  const active = () => STU.on && STU.layout === "pip" && STU.scrStream && L.scr && L.cam;
+  const cur = () => L[L.sel], rectOf = () => px(cur(), STU.W, STU.H);
+  function store(r){ const o = cur(); o.x = r.x / STU.W; o.y = r.y / STU.H; o.w = r.w / STU.W; o.h = r.h / STU.H; }
+  (function loop(){
+    const on = active(); box.style.display = on ? "block" : "none"; tbar.style.display = on ? "flex" : "none";
+    if (on){ const V = view(), r = rectOf(), k = V.k; Object.assign(box.style, { left: V.l + r.x * k + "px", top: V.t + r.y * k + "px", width: r.w * k + "px", height: r.h * k + "px" });
+      const P = { n: [.5, 0], s: [.5, 1], e: [1, .5], w: [0, .5], nw: [0, 0], ne: [1, 0], sw: [0, 1], se: [1, 1] };
+      Object.keys(P).forEach(n => { hs[n].style.left = P[n][0] * 100 + "%"; hs[n].style.top = P[n][1] * 100 + "%"; hs[n].style.margin = "-8px 0 0 -8px"; });
+      tbar.querySelectorAll("[data-s]").forEach(b => { b.style.display = L.sel === "cam" ? "" : "none"; b.classList.toggle("on", L.sel === "cam" && L.cam.shape === b.dataset.s); }); }
+    requestAnimationFrame(loop);
+  })();
+  const hit = (X, Y) => { const V = view(), x = (X - V.x0) / V.k, y = (Y - V.y0) / V.k, W = STU.W, H = STU.H;
+    for (const n of (L.camTop ? ["cam", "scr"] : ["scr", "cam"])){ const o = L[n]; if (!o || (n === "cam" && !STU.camOn)) continue; const r = px(o, W, H);
+      if (n === "cam" && o.shape === "circle"){ const d = Math.min(r.w, r.h) / 2; if (Math.hypot(x - r.x - r.w / 2, y - r.y - r.h / 2) <= d) return n; }
+      else if (x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h) return n; } return null; };
+  let op = null;
+  stage.addEventListener("pointerdown", e => {
+    if (!active()) return; const hd = e.target.dataset && e.target.dataset.h, V = view();
+    if (!hd){ if (e.target.closest(".ly-tbar")) return; const n = hit(e.clientX, e.clientY); if (!n) return; L.sel = n; }
+    const r = rectOf(); op = { hd: hd || null, r0: r, sx: e.clientX, sy: e.clientY };
+    stage.setPointerCapture(e.pointerId); e.preventDefault(); e.stopPropagation();
+  }, true);
+  stage.addEventListener("pointermove", e => {
+    if (!op) return; const V = view(), W = STU.W, H = STU.H, dx = (e.clientX - op.sx) / V.k, dy = (e.clientY - op.sy) / V.k, r0 = op.r0; let r;
+    const lock = L.sel === "cam" && L.cam.shape === "circle";
+    if (!op.hd){
+      r = { x: r0.x + dx, y: r0.y + dy, w: r0.w, h: r0.h }; let sx = false, sy = false;
+      [0, (W - r.w) / 2, W - r.w].forEach(c => { if (Math.abs(r.x - c) * V.k < SNAP){ r.x = c; sx = true; } });
+      [0, (H - r.h) / 2, H - r.h].forEach(c => { if (Math.abs(r.y - c) * V.k < SNAP){ r.y = c; sy = true; } });
+      gv.style.display = sx ? "block" : "none"; gh.style.display = sy ? "block" : "none";
+      gv.style.left = V.l + (r.x + r.w / 2) * V.k + "px"; gh.style.top = V.t + (r.y + r.h / 2) * V.k + "px";
+      tag.style.display = "block"; tag.style.left = V.l + (r.x + r.w) * V.k + 6 + "px"; tag.style.top = V.t + r.y * V.k + "px";
+      tag.textContent = "← " + Math.round(r.x) + "  → " + Math.round(W - r.x - r.w) + "  ↑ " + Math.round(r.y) + "  ↓ " + Math.round(H - r.y - r.h) + " px";
+    } else {
+      let l = r0.x, t = r0.y, rt = r0.x + r0.w, b = r0.y + r0.h, h = op.hd;
+      if (h.includes("w")) l += dx; if (h.includes("e")) rt += dx; if (h.includes("n")) t += dy; if (h.includes("s")) b += dy;
+      let w = Math.max(MIN, rt - l), hh = Math.max(MIN, b - t);
+      if (h.length === 2 || lock){ const a = r0.w / r0.h; if (h.length === 1){ if (h === "n" || h === "s") w = hh * a; else hh = w / a; } else if (Math.abs(dx) >= Math.abs(dy) * a) hh = w / a; else w = hh * a; }
+      let x = h.includes("w") ? r0.x + r0.w - w : r0.x, y = h.includes("n") ? r0.y + r0.h - hh : r0.y;
+      if (h === "n" || h === "s") x = r0.x + (r0.w - w) / 2; if (h === "e" || h === "w") y = r0.y + (r0.h - hh) / 2;
+      r = { x: x, y: y, w: w, h: hh };
+    }
+    store(r);
+  });
+  const end = () => { op = null; gv.style.display = gh.style.display = tag.style.display = "none"; };
+  stage.addEventListener("pointerup", end); stage.addEventListener("pointercancel", end);
+  tbar.addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b || !active()) return; const W = STU.W, H = STU.H, o = cur(), r = rectOf();
+    if (b.dataset.s){ L.cam.shape = b.dataset.s; if (b.dataset.s === "circle"){ const d = Math.min(r.w, r.h); store({ x: r.x + (r.w - d) / 2, y: r.y + (r.h - d) / 2, w: d, h: d }); } }
+    else if (b.dataset.a === "center") store({ x: (W - r.w) / 2, y: (H - r.h) / 2, w: r.w, h: r.h });
+    else if (b.dataset.a === "front") L.camTop = L.sel === "cam";
+    else if (b.dataset.a === "fit"){ const a = r.w / r.h, w = Math.min(W, H * a), h = w / a; store({ x: (W - w) / 2, y: (H - h) / 2, w: w, h: h }); }
+  });
+})();
+/* ═════════ FIN · JS-23 ═════════ */
 </script>
 </body>
 </html>
