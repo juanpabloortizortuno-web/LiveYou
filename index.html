@@ -1546,6 +1546,9 @@
   .flinks{display:flex;flex-direction:column;gap:8px;margin:6px 0 8px}
   .flrow{display:grid;grid-template-columns:1fr 1.4fr 36px;gap:6px}.flrow input{min-width:0}
   .flrow button{border:0;border-radius:8px;background:var(--panel);color:var(--text);cursor:pointer}.flrow button:hover{background:var(--pink)}
+
+  /* categorías: todas visibles (se acomodan en varias filas en vez de cortarse) */
+  .lvcats{flex-wrap:wrap;overflow:visible;row-gap:8px}
   /* ═════════ FIN · CSS-15 ═════════ */
 
 </style>
@@ -3496,7 +3499,7 @@ async function lvLoadVideos(){
   if (lvVidCache.items.length && Date.now() - lvVidCache.t < 60000) return lvVidCache.items;
   try {
     const { data, error } = await sb.from("videos").select("*").order("created_at", { ascending:false }).limit(40);
-    if (error || !data) return [];
+    if (error || !data){ console.warn("Carrusel de videos: no se pudieron leer los videos →", error && error.message); return []; }
     const ok = data.filter(v => v.url && !isFlv(v.url));
     let au = {}; try { au = await withAuthors(ok, "user_id"); } catch (e) {}
     lvVidCache = { t:Date.now(), items: ok.slice().sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 8).map(v => ({ video:v, a:au[v.user_id] })) };
