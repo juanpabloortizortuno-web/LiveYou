@@ -1323,6 +1323,50 @@
   .fwbig .fwrow{padding:9px 12px}.fwbig .srtx b{font-size:.98rem}
   .fwver{flex:none;padding:8px 24px;border-radius:8px;border:0;background:var(--ly-card2);color:var(--text);font:inherit;font-weight:700;cursor:pointer}
   .fwver:hover{filter:brightness(1.15)}
+
+  /* ── Sección En vivo (juegos, tutoriales y cursos) ── */
+  .lvmodes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:6px 0 18px}
+  .lvm{display:flex;align-items:center;gap:14px;text-align:left;padding:16px 18px;border-radius:16px;border:1px solid var(--line);background:linear-gradient(120deg,var(--ly-bn1),transparent 75%),var(--panel);color:var(--text);cursor:pointer;font:inherit;transition:transform .15s,border-color .15s}
+  .lvm:hover{transform:translateY(-2px);border-color:var(--pink)}
+  .lvm-i{font-size:1.9rem;line-height:1;flex:none}
+  .lvm b{display:block;font-size:1rem}.lvm small{display:block;color:var(--muted);font-size:.8rem;margin-top:2px;line-height:1.35}
+  .lvhero{margin-bottom:18px}
+  .lvhero-in{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:24px;align-items:center;padding:16px;border:1px solid var(--line);border-radius:18px;background:var(--panel);cursor:pointer;text-align:left}
+  .lvhero-in:hover,.lvhero-in:focus-visible{border-color:var(--pink);outline:0}
+  .lvhero-i h3{font-size:1.5rem;line-height:1.25;margin:10px 0}
+  .lvhero-w{display:flex;align-items:center;gap:10px;margin:0 0 16px;color:var(--muted);font-size:.92rem}
+  .lvhero-w img{width:36px;height:36px;border-radius:50%;object-fit:cover}
+  .lvcats{display:flex;gap:8px;overflow-x:auto;padding:4px 0 14px;scrollbar-width:none}.lvcats::-webkit-scrollbar{display:none}
+  .lvcat{flex:none;border:1px solid var(--line);background:none;color:var(--text);padding:8px 16px;border-radius:999px;font:inherit;font-weight:600;font-size:.9rem;cursor:pointer;white-space:nowrap}
+  .lvcat:hover{border-color:var(--pink)}
+  .lvcat.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+  .lvlayout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:start}
+  .lvgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:22px 18px}
+  .lvgrid.feed{display:block}
+  .lvc{display:flex;flex-direction:column;gap:10px;text-align:left;background:none;border:0;padding:0;color:var(--text);cursor:pointer;font:inherit}
+  .lvc-th{position:relative;display:block;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#15121f}
+  .lvc-th img{width:100%;height:100%;object-fit:cover;display:block}
+  .lvc:hover .lvc-th{box-shadow:0 0 0 2px var(--pink)}
+  .lvc-live{position:absolute;left:8px;top:8px;background:#e91916;color:#fff;font-size:.7rem;font-weight:800;padding:2px 7px;border-radius:5px;letter-spacing:.03em}
+  .lvc-v{position:absolute;left:8px;bottom:8px;background:rgba(0,0,0,.72);color:#fff;font-size:.75rem;padding:2px 7px;border-radius:5px}
+  .lvc-b{display:flex;gap:10px}
+  .lvc-av{width:40px;height:40px;border-radius:50%;object-fit:cover;flex:none}
+  .lvc-t{display:flex;flex-direction:column;min-width:0;gap:2px}
+  .lvc-t strong{font-size:.95rem;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .lvc-t span{font-size:.82rem;color:var(--muted)}
+  .lvc-tag{display:inline-block;align-self:flex-start;background:var(--ly-card2);color:var(--text)!important;padding:2px 10px;border-radius:999px;font-size:.76rem!important;font-weight:600;margin-top:3px}
+  .lvrail{position:sticky;top:12px;border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:10px 8px}
+  .lvrail h4{margin:6px 10px 8px;font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  .lvr{display:flex;align-items:center;gap:10px;width:100%;padding:7px 10px;border:0;background:none;color:var(--text);border-radius:10px;cursor:pointer;font:inherit;text-align:left}
+  .lvr:hover{background:var(--ly-card)}
+  .lvr img{width:36px;height:36px;border-radius:50%;object-fit:cover;flex:none}
+  .lvr-t{flex:1;min-width:0}.lvr-t b,.lvr-t span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lvr-t b{font-size:.9rem}.lvr-t span{font-size:.78rem;color:var(--muted)}
+  .lvr-v{display:flex;align-items:center;gap:6px;font-size:.8rem}
+  .lvr-v::before{content:"";width:8px;height:8px;border-radius:50%;background:#e91916}
+  .lvnote{font-size:.82rem;color:var(--muted);line-height:1.4;margin:8px 0 0}
+  @media(max-width:1100px){.lvlayout{grid-template-columns:1fr}.lvrail{display:none}}
+  @media(max-width:860px){.lvmodes{grid-template-columns:1fr}.lvhero-in{grid-template-columns:1fr}}
   /* ═════════ FIN · CSS-15 ═════════ */
 
 </style>
@@ -1420,9 +1464,18 @@
         <h2>En vivo</h2>
         <button class="btn main" id="btnGoLive">Transmitir en vivo</button>
       </div>
-      <div class="chips" id="lvFilter"></div>
+      <div class="lvmodes" id="lvModes">
+        <button type="button" class="lvm" data-lymode="game"><span class="lvm-i">🎮</span><span><b>Transmitir un juego</b><small>Comparte tu pantalla con tu cámara en una esquina</small></span></button>
+        <button type="button" class="lvm" data-lymode="tuto"><span class="lvm-i">🛠️</span><span><b>Dar un tutorial</b><small>Muestra paso a paso lo que haces en tu pantalla</small></span></button>
+        <button type="button" class="lvm" data-lymode="curso"><span class="lvm-i">🎓</span><span><b>Dar un curso</b><small>Enseña en vivo y responde preguntas en el chat</small></span></button>
+      </div>
+      <div class="lvhero hidden" id="lvHero"></div>
+      <div class="lvcats" id="lvFilter"></div>
       <p class="msg" id="liveMsg" role="status"></p>
-      <div id="liveGrid" class="grid wide"></div>
+      <div class="lvlayout">
+        <div id="liveGrid" class="lvgrid"></div>
+        <aside class="lvrail hidden" id="lvRail" aria-label="Canales en vivo"><h4>Canales en vivo</h4><div id="lvRailList"></div></aside>
+      </div>
     </div>
 
 <!-- ═════════ FIN · HTML-05 ═════════ -->
@@ -1716,6 +1769,7 @@
   <div class="gprev"><video id="glPrev" autoplay muted playsinline></video><div id="glCount" class="gcount hidden"></div></div>
   <label>Filtro</label><div class="sd-fl" id="glFilters"></div>
   <div class="sd-two"><div><label for="glOrient">Formato</label><select id="glOrient"><option value="v">Vertical 9:16</option><option value="h">Horizontal 16:9</option></select></div><div><label for="glQual">Calidad</label><select id="glQual"><option value="480">480p · ligera</option><option value="720">720p · HD</option><option value="1080">1080p · Full HD</option></select></div></div>
+  <div><label>Tipo de transmisión</label><div class="chips" id="glModes"></div><p class="lvnote hidden" id="glModeNote"></p></div>
   <label>Elige un tema</label><div class="chips" id="glTopics"></div>
   <label for="glTitle">Título (opcional)</label><input id="glTitle" maxlength="60" placeholder="Ej. Hablemos de cripto">
   <p class="msg" id="glMsg" role="status"></p>
@@ -2910,7 +2964,7 @@ $("railMore").onclick = () => $("navLive").click();
 
 /* ═════════ INICIO · JS-16 · DIRECTOS (lista y conexión) ═════════ */
 /* ---------- Directos ---------- */
-const TOPICS = ["Charla","Música","Cripto","Educación","Gaming","Cocina","Deportes","Humor","Otro"];
+const TOPICS = ["Gaming","Tutoriales","Cursos","Educación","Charla","Música","Cripto","Cocina","Deportes","Humor","Otro"];
 const REACTS = ["❤️","🔥","👏","😂"];
 const MAX_VIEWERS = 15;
 const ICE = { iceServers: [{ urls:"stun:stun.l.google.com:19302" }, { urls:"stun:global.stun.twilio.com:3478" },
@@ -2980,36 +3034,73 @@ async function openFromLink(){
 }
 let topicFilter = "Todos", pickedTopic = null, H = null, W = null;
 
+const LV_ICON = { Gaming:"🎮", Tutoriales:"🛠️", Cursos:"🎓", Educación:"📚", Charla:"💬", Música:"🎵", Cripto:"🪙", Cocina:"🍳", Deportes:"⚽", Humor:"😂", Otro:"✨" };
+const lvNum = n => (n || 0) >= 1000 ? ((n / 1000).toFixed(1).replace(".0", "")) + " k" : String(n || 0);
+const lvTag = t => (LV_ICON[t] ? LV_ICON[t] + " " : "") + (t || "");
+function lvThumb(l, cls){
+  const th = document.createElement("span"); th.className = cls || "lvc-th";
+  const img = new Image(); img.alt = ""; img.loading = "lazy"; img.src = thumbUrl(l.host_id);
+  img.onerror = () => { img.onerror = null; img.src = picOf(l._a); };
+  const live = document.createElement("span"); live.className = "lvc-live"; live.textContent = "EN VIVO";
+  const vw = document.createElement("span"); vw.className = "lvc-v"; vw.textContent = "👁 " + lvNum(l.viewers) + ((l.viewers || 0) >= MAX_VIEWERS ? " · Lleno" : "");
+  th.append(img, live, vw); return th;
+}
+function lvCard(l){
+  const b = document.createElement("button"); b.type = "button"; b.className = "lvc";
+  const body = document.createElement("span"); body.className = "lvc-b";
+  const av = new Image(); av.className = "lvc-av"; av.alt = ""; av.src = picOf(l._a);
+  const tx = document.createElement("span"); tx.className = "lvc-t";
+  const t = document.createElement("strong"); t.textContent = l.title;
+  const w = document.createElement("span"); w.textContent = nameOf(l._a);
+  const c = document.createElement("span"); c.className = "lvc-tag"; c.textContent = lvTag(l.topic);
+  tx.append(t, w, c); body.append(av, tx); b.append(lvThumb(l), body); b.onclick = () => watchLive(l); return b;
+}
+function lvRow(l){
+  const b = document.createElement("button"); b.type = "button"; b.className = "lvr";
+  const im = new Image(); im.alt = ""; im.src = picOf(l._a);
+  const t = document.createElement("span"); t.className = "lvr-t";
+  const n = document.createElement("b"); n.textContent = nameOf(l._a); const s = document.createElement("span"); s.textContent = lvTag(l.topic);
+  t.append(n, s);
+  const v = document.createElement("span"); v.className = "lvr-v"; v.textContent = lvNum(l.viewers);
+  b.append(im, t, v); b.onclick = () => watchLive(l); return b;
+}
+function lvHeroEl(l){
+  const d = document.createElement("div"); d.className = "lvhero-in"; d.tabIndex = 0; d.setAttribute("role", "button");
+  const info = document.createElement("div"); info.className = "lvhero-i";
+  const tag = document.createElement("span"); tag.className = "lvc-tag"; tag.textContent = lvTag(l.topic);
+  const h = document.createElement("h3"); h.textContent = l.title;
+  const who = document.createElement("p"); who.className = "lvhero-w";
+  const av = new Image(); av.alt = ""; av.src = picOf(l._a); const nm = document.createElement("span"); nm.textContent = nameOf(l._a) + " · " + lvNum(l.viewers) + " viendo";
+  who.append(av, nm);
+  const go = document.createElement("span"); go.className = "btn main lvhero-go"; go.textContent = "Ver ahora";
+  info.append(tag, h, who, go); d.append(lvThumb(l), info);
+  d.onclick = () => watchLive(l); d.onkeydown = e => { if (e.key === "Enter"){ e.preventDefault(); watchLive(l); } };
+  return d;
+}
 async function loadLives(){
-  if (!$("lvFilter").children.length)
-    chips($("lvFilter"), ["Todos", "Siguiendo", ...TOPICS], topicFilter, t => { topicFilter = t; loadLives(); });
-  const box = $("liveGrid");
-  let q = sb.from("lives").select("*").eq("is_live", true)
-    .gte("last_seen", new Date(Date.now() - 45000).toISOString()).order("started_at", { ascending:false });
-  if (topicFilter === "Siguiendo"){ const f = getFollows(); if (!f.length){ box.replaceChildren(); return note(box, "Aún no sigues a nadie. Entra a un directo y toca Seguir."); } q = q.in("host_id", f); }
-  else if (topicFilter !== "Todos") q = q.eq("topic", topicFilter);
-  const { data, error } = await q;
-  box.replaceChildren();
-  if (error) return note(box, "No se pudieron cargar los directos.");
-  if (!data.length) return note(box, "Nadie transmite ahora" + (topicFilter !== "Todos" ? " en " + topicFilter : "") + ". ¡Sé el primero!");
-  box.className = "grid wide";
-  const au = await withAuthors(data, "host_id");
-  data.forEach(l => {
-    const a = au[l.host_id];
-    const b = document.createElement("button"); b.className = "lcard"; b.type = "button";
-    const av = document.createElement("span"); av.className = "lthumb";
-    const img = new Image(); img.alt = ""; img.src = thumbUrl(l.host_id); img.onerror = () => { img.onerror = null; img.src = picOf(a); };
-    const bd = document.createElement("span"); bd.className = "badge"; bd.textContent = "EN VIVO";
-    av.append(img, bd);
-    const info = document.createElement("div"); info.className = "linfo";
-    const t = document.createElement("strong"); t.textContent = l.title;
-    const who = document.createElement("span"); who.className = "user"; who.textContent = nameOf(a);
-    const m = document.createElement("span"); m.className = "user"; m.textContent = l.topic + " · " + (l.viewers || 0) + " viendo";
-    info.append(t, who, m);
-    l._a = a;
-    b.append(av, info); b.onclick = () => watchLive(l);
-    box.append(b);
+  const cats = $("lvFilter"); cats.replaceChildren();
+  ["Todos", "Siguiendo", ...TOPICS].forEach(t => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "lvcat" + (t === topicFilter ? " on" : "");
+    b.textContent = lvTag(t) || t; b.onclick = () => { topicFilter = t; loadLives(); }; cats.append(b);
   });
+  const box = $("liveGrid"), hero = $("lvHero"), rail = $("lvRailList");
+  const { data: raw, error } = await sb.from("lives").select("*").eq("is_live", true)
+    .gte("last_seen", new Date(Date.now() - 45000).toISOString()).order("started_at", { ascending:false }).limit(120);
+  box.replaceChildren(); box.className = "lvgrid"; hero.replaceChildren(); hero.classList.add("hidden"); rail.replaceChildren();
+  if (error){ $("lvRail").classList.add("hidden"); return note(box, "No se pudieron cargar los directos."); }
+  const all = raw || [], au = await withAuthors(all, "host_id");
+  all.forEach(l => { l._a = au[l.host_id]; });
+  all.slice().sort((a, b) => (b.viewers || 0) - (a.viewers || 0)).slice(0, 12).forEach(l => rail.append(lvRow(l)));
+  $("lvRail").classList.toggle("hidden", !all.length);
+  let data = all;
+  if (topicFilter === "Siguiendo"){
+    const f = getFollows(); if (!f.length) return note(box, "Aún no sigues a nadie. Entra a un directo y toca Seguir.");
+    data = all.filter(l => f.includes(l.host_id));
+  } else if (topicFilter !== "Todos") data = all.filter(l => l.topic === topicFilter);
+  if (!data.length) return note(box, "Nadie transmite ahora" + (topicFilter !== "Todos" ? " en " + topicFilter : "") + ". ¡Sé el primero!");
+  const top = data.slice().sort((a, b) => (b.viewers || 0) - (a.viewers || 0))[0];
+  hero.append(lvHeroEl(top)); hero.classList.remove("hidden");
+  data.filter(l => l !== top).forEach(l => box.append(lvCard(l)));
 }
 
 /* ═════════ FIN · JS-16 ═════════ */
@@ -3123,7 +3214,7 @@ function hostConn(conn){
   conn.on("close", () => dropViewer(conn.peer));
   conn.on("error", () => dropViewer(conn.peer));
 }
-function cleanupHost(){
+function cleanupHost(){ try { if (window.lyPreScr){ window.lyPreScr.getTracks().forEach(t => t.stop()); window.lyPreScr = null; } } catch (x) {}
   if (!H) return;
   clearInterval(H.hb); clearInterval(H.th); H.stream.getTracks().forEach(t => t.stop()); stuStop(); try { H.peer.destroy(); } catch (e) {}
   H = null; $("glBtn").disabled = !pickedTopic;
@@ -3131,6 +3222,11 @@ function cleanupHost(){
 $("glForm").onsubmit = async e => {
   e.preventDefault();
   if (!pickedTopic || H) return;
+  let preScr = null;
+  if (window.lyMode && window.lyMode.screen && navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia){
+    try { preScr = await navigator.mediaDevices.getDisplayMedia({ video:{ frameRate:{ ideal:STU.fps }, width:{ max:1920 }, height:{ max:1080 }, displaySurface:"monitor" }, audio:true, systemAudio:"include" }); window.lyPreScr = preScr; }
+    catch (x) { preScr = null; window.lyPreScr = null; say($("glMsg"), "No elegiste ninguna pantalla: saldrás solo con la cámara. Puedes compartirla luego desde el Studio.", ""); }
+  }
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
     return say($("glMsg"), "Tu navegador no permite usar la cámara. Abre la página con https en Chrome, Edge o Firefox.", "err");
   $("glBtn").disabled = true; glCancelled = false;
@@ -3143,7 +3239,7 @@ $("glForm").onsubmit = async e => {
   say($("glMsg"), "");
   for (const n of [3, 2, 1]){ if (glCancelled) break; $("glCount").textContent = n; $("glCount").classList.remove("hidden"); await new Promise(r => setTimeout(r, 900)); }
   $("glCount").classList.add("hidden");
-  if (glCancelled || !stream.active){ stream.getTracks().forEach(t => t.stop()); prevStream = null; $("glBtn").disabled = !pickedTopic; return; }
+  if (glCancelled || !stream.active){ stream.getTracks().forEach(t => t.stop()); if (preScr){ preScr.getTracks().forEach(t => t.stop()); window.lyPreScr = null; } prevStream = null; $("glBtn").disabled = !pickedTopic; return; }
   prevStream = null; $("glPrev").srcObject = null; $("glPrev").style.filter = "";
   say($("glMsg"), "Preparando Live Studio…");
   try { stream = await stuStart(stream); } catch (err) { console.error(err); say($("glMsg"), "El Studio no está disponible en este navegador: se transmite en modo simple."); }
@@ -3162,6 +3258,7 @@ $("glForm").onsubmit = async e => {
     $("lvTitle").textContent = title; $("lvTopic").textContent = H.topic; setHost(profile);
     $("lvVideo").srcObject = stream; $("lvVideo").muted = true; playLv();
     enterStage(true); lvSys("Estás en vivo. Los espectadores aparecerán aquí.");
+    if (preScr){ const ps = preScr; window.lyPreScr = null; stuShare("screen", ps); }
     snap(); setTimeout(snap, 4000); H.th = setInterval(snap, 30000);
     H.hb = setInterval(() => sb.from("lives").update({ last_seen:new Date().toISOString(), viewers:H.viewers.size }).eq("id", H.row.id).then(() => {}), 15000);
   });
@@ -3481,14 +3578,14 @@ function stuStop(keepRaw){
 function stuHint(){ try { const t = STU.out && STU.out.getVideoTracks()[0]; if (t) t.contentHint = (STU.scrStream && STU.layout !== "cam") ? "detail" : "motion"; } catch (e) {} }
 const stuCamVisible = () => !!(STU.camOn || (STU.scrStream && STU.layout !== "cam"));
 function stuSyncMedia(){ camOff = !stuCamVisible(); paintStat(); if (H) bcast(mediaState()); }
-async function stuShare(kind){
+async function stuShare(kind, pre){
   if (!STU.on) return;
   if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia)
     return lvSys("Tu dispositivo no permite compartir pantalla ni páginas web (en el celular casi ningún navegador lo permite). Usa una computadora con Chrome o Edge.");
   const tab = kind === "tab";
   const opts = { video:{ frameRate:{ ideal:STU.fps }, width:{ max:1920 }, height:{ max:1080 }, displaySurface: tab ? "browser" : "monitor" }, audio:true };
   if (tab){ opts.selfBrowserSurface = "exclude"; opts.preferCurrentTab = false; } else opts.systemAudio = "include";
-  let s; try { s = await navigator.mediaDevices.getDisplayMedia(opts); } catch (e) { if (e && e.name !== "NotAllowedError") lvSys("No se pudo compartir: " + (e.message || e)); return; }
+  let s = pre || null; if (!s) try { s = await navigator.mediaDevices.getDisplayMedia(opts); } catch (e) { if (e && e.name !== "NotAllowedError") lvSys("No se pudo compartir: " + (e.message || e)); return; }
   if (!STU.on){ s.getTracks().forEach(t => t.stop()); return; }
   stuStopShare(true);
   STU.scrStream = s; STU.scrV.srcObject = s; STU.scrV.play().catch(() => {});
@@ -4541,6 +4638,48 @@ sb.auth.getSession().then(async ({ data }) => {
   document.addEventListener("ly-follows", later);
   setTimeout(refresh, 1500);
   const nf = $("navFeed"); if (nf) nf.addEventListener("click", later);
+})();
+
+/* ---------- Tipos de transmisión: cámara, juego, tutorial, curso ---------- */
+(function(){
+  const canShare = !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) && !matchMedia("(max-width:760px)").matches;
+  const MODES = {
+    cam:   { label:"📷 Cámara",   topic:null,         screen:false, ph:"Ej. Hablemos de cripto", note:"" },
+    game:  { label:"🎮 Juego",    topic:"Gaming",     screen:true,  orient:"h", ph:"Ej. Jugando con suscriptores", note:"Al empezar, el navegador te pedirá qué pantalla o ventana compartir (marca «compartir audio» para que se oiga el juego). Tu cámara saldrá pequeña en una esquina." },
+    tuto:  { label:"🛠️ Tutorial", topic:"Tutoriales", screen:true,  orient:"h", ph:"Ej. Cómo crear una página web paso a paso", note:"Al empezar, el navegador te pedirá qué pantalla o ventana compartir. Tu cámara saldrá pequeña en una esquina y podrás cambiar el diseño en el Studio." },
+    curso: { label:"🎓 Curso",    topic:"Cursos",     screen:true,  orient:"h", ph:"Ej. Curso de Excel · Clase 1", note:"Al empezar, el navegador te pedirá qué pantalla o ventana compartir. Explica en vivo y responde preguntas en el chat." }
+  };
+  window.lyMode = MODES.cam;
+  const keys = canShare ? ["cam", "game", "tuto", "curso"] : ["cam"];
+  const box = $("glModes"), note = $("glModeNote");
+  function draw(cur){
+    box.replaceChildren();
+    keys.forEach(k => {
+      const b = document.createElement("button"); b.type = "button"; b.className = "chip" + (k === cur ? " on" : ""); b.textContent = MODES[k].label;
+      b.onclick = () => set(k); box.append(b);
+    });
+    box.parentElement.classList.toggle("hidden", keys.length < 2);
+  }
+  function set(k){
+    const m = MODES[k] || MODES.cam; window.lyMode = m; draw(k in MODES ? k : "cam");
+    note.textContent = m.note; note.classList.toggle("hidden", !m.note);
+    $("glTitle").placeholder = m.ph;
+    if (m.topic){
+      pickedTopic = m.topic; $("glBtn").disabled = false;
+      chips($("glTopics"), TOPICS, m.topic, t => { pickedTopic = t; $("glBtn").disabled = false; });
+    }
+    if (m.orient){
+      STU.orient = m.orient; $("glOrient").value = m.orient; $("glPrev").parentElement.classList.toggle("v", m.orient === "v"); stuSave();
+    }
+  }
+  const go = $("btnGoLive"), orig = go.onclick;
+  go.onclick = e => {
+    const pre = window.lyPreset; window.lyPreset = null;
+    const wasLive = !!H; orig.call(go, e);
+    if (!wasLive) set(pre || "cam");
+  };
+  document.querySelectorAll("[data-lymode]").forEach(b => b.onclick = () => { window.lyPreset = b.dataset.lymode; go.click(); });
+  if (!canShare) $("lvModes").classList.add("hidden");
 })();
 /* ═════════ FIN · JS-21 ═════════ */
 
