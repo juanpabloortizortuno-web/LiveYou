@@ -1549,6 +1549,31 @@
 
   /* categorías: todas visibles (se acomodan en varias filas en vez de cortarse) */
   .lvcats{flex-wrap:wrap;overflow:visible;row-gap:8px}
+
+  /* ── Carrusel fluido: se desliza, y el video lleva controles como el reproductor principal ── */
+  .pub-car{touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:grab}
+  .pub-car.drag{cursor:grabbing}
+  .pub-s{translate:var(--dx,0px) 0;will-change:transform,opacity;transition:transform .65s cubic-bezier(.22,.8,.26,1),translate .65s cubic-bezier(.22,.8,.26,1),opacity .65s ease}
+  .pub-car.drag .pub-s{transition:none}
+  .lvc-pv{background:#000}
+  .lvp{position:absolute;inset:0;z-index:4;pointer-events:none;color:#fff}
+  .lvp.hidden{display:none}
+  .lvp-big{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:64px;height:64px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;display:none;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px);pointer-events:auto;padding:0}
+  .lvp-big svg{width:30px;height:30px}
+  .lvp.paused .lvp-big{display:flex}
+  .lvp-ctl{position:absolute;left:0;right:0;bottom:0;padding:34px 12px 8px;background:linear-gradient(transparent,rgba(0,0,0,.82));opacity:0;transition:opacity .25s;pointer-events:none}
+  .pub-s[data-rel="0"]:hover .lvp-ctl,.lvp-ctl:focus-within,.lvp.paused .lvp-ctl{opacity:1;pointer-events:auto}
+  .lvp-seek{display:block;width:100%;height:14px;margin:0 0 2px;padding:0;border:0;background:none;box-shadow:none;accent-color:var(--pink);cursor:pointer}
+  .lvp-row{display:flex;align-items:center;gap:2px;font-size:.8rem}
+  .lvp-b{width:34px;height:34px;border:0;background:none;color:#fff;display:flex;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;padding:0;flex:none}
+  .lvp-b:hover{background:rgba(255,255,255,.16)}.lvp-b svg{width:22px;height:22px}
+  .lvp-time{margin-left:6px;font-variant-numeric:tabular-nums;white-space:nowrap}.lvp-sp{flex:1}
+  .lvp-line{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(255,255,255,.22);transition:opacity .2s}
+  .lvp-line i{display:block;height:100%;width:0;background:var(--pink)}
+  .pub-s[data-rel="0"]:hover .lvp-line,.lvp.paused .lvp-line{opacity:0}
+  .pub-s[data-rel="0"]:hover .lvc-v{opacity:0}
+  .lvc-th:fullscreen{aspect-ratio:auto;border-radius:0;width:100%;height:100%;background:#000}
+  @media(hover:none){.lvp-ctl{opacity:1;pointer-events:auto}}
   /* ═════════ FIN · CSS-15 ═════════ */
 
 </style>
@@ -3443,17 +3468,45 @@ function lvCarousel(wrap, pick){
   const arrow = (cls, label, d) => { const b = document.createElement("button"); b.type = "button"; b.className = "pub-arr " + cls; b.setAttribute("aria-label", label); b.innerHTML = '<svg viewBox="0 0 24 24"><path d="' + d + '"/></svg>'; return b; };
   const prev = arrow("l", "Anterior", "M15 6l-6 6 6 6"), next = arrow("r", "Siguiente", "M9 6l6 6-6 6"), car = document.createElement("div"); car.className = "pub-car";
   wrap.append(prev, car, next);
-  let items = [], slides = [], idx = 0, rot = 0, sig = "", vis = true, snd = false;
-  /* solo la diapositiva del centro reproduce su video (sin sonido, en bucle); las demás se detienen para no gastar datos */
-  const stopPv = s => { const v = s._pv; if (!v) return; s._pv = null; try { v.pause(); v.removeAttribute("src"); v.load(); } catch (e) {} v.remove(); if (s._sb) s._sb.classList.remove("show"); };
+  let items = [], slides = [], idx = 0, rot = 0, sig = "", vis = true, snd = false, adv = 0, drag = false, moved = false;
+  const IC = {
+    play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
+    pause:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>',
+    vol:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4h4l5 4V6L8 10z"/><path d="M16 9a4 4 0 010 6M18.5 6.5a8 8 0 010 11"/></svg>',
+    mute:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4h4l5 4V6L8 10z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>',
+    fs:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>'
+  };
+  const fmt = t => { t = Math.max(0, Math.floor(t || 0)); return Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0"); };
+  const go = d => { idx += d; adv = 0; place(); };
+  /* controles como los del reproductor principal: reproducir/pausar, barra para avanzar, tiempo, sonido y pantalla completa */
+  const mkUi = (s, th) => {
+    const root = document.createElement("div"); root.className = "lvp paused";
+    root.innerHTML = '<button type="button" class="lvp-big" aria-label="Reproducir">' + IC.play + '</button><div class="lvp-ctl"><input type="range" class="lvp-seek" min="0" max="1000" value="0" aria-label="Avanzar"><div class="lvp-row"><button type="button" class="lvp-b lvp-pp" aria-label="Reproducir o pausar"></button><span class="lvp-time">0:00 / 0:00</span><span class="lvp-sp"></span><button type="button" class="lvp-b lvp-mu" aria-label="Sonido"></button><button type="button" class="lvp-b lvp-fs" aria-label="Pantalla completa">' + IC.fs + '</button></div></div><div class="lvp-line"><i></i></div>';
+    const q = c => root.querySelector(c), ui = { root, big:q(".lvp-big"), ctl:q(".lvp-ctl"), seek:q(".lvp-seek"), pp:q(".lvp-pp"), time:q(".lvp-time"), mu:q(".lvp-mu"), fs:q(".lvp-fs"), bar:q(".lvp-line i"), seeking:false };
+    [ui.big, ui.ctl].forEach(el => ["click", "dblclick", "pointerdown"].forEach(ev => el.addEventListener(ev, e => e.stopPropagation())));
+    ui.pp.onclick = ui.big.onclick = () => { const v = s._pv; if (!v) return; if (v.paused){ v.dataset.user = ""; v.play().catch(() => {}); } else { v.dataset.user = "1"; v.pause(); } };
+    ui.mu.onclick = () => { snd = !snd; slides.forEach(x => { if (x._pv) x._pv.muted = !snd; }); };
+    ui.fs.onclick = () => { if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); else { const f = th.requestFullscreen || th.webkitRequestFullscreen; if (f) f.call(th); } };
+    ui.seek.oninput = () => { const v = s._pv; if (v && isFinite(v.duration)) v.currentTime = ui.seek.value / 1000 * v.duration; };
+    ui.seek.onpointerdown = () => { ui.seeking = true; }; ui.seek.onpointerup = ui.seek.onblur = () => { ui.seeking = false; };
+    return ui;
+  };
+  /* solo la diapositiva del centro reproduce su video; las demás se detienen para no gastar datos */
+  const stopPv = s => { const v = s._pv; if (!v) return; s._pv = null; try { v.pause(); v.removeAttribute("src"); v.load(); } catch (e) {} v.remove(); if (s._ui) s._ui.root.classList.add("hidden"); };
   const startPv = (s, it) => {
-    if (s._pv){ s._pv.play().catch(() => {}); return; }
-    const th = s.firstChild, vd = document.createElement("video"); vd.className = "lvc-pv"; vd.muted = !snd; vd.loop = true; vd.playsInline = true; vd.autoplay = true; vd.preload = "auto"; vd.setAttribute("muted", "");
-    vd.onplaying = () => vd.classList.add("on"); vd.onerror = () => { if (s._pv === vd) stopPv(s); };
-    vd.src = it.video.url; th.append(vd); s._pv = vd;
-    if (!s._sb){ const b = document.createElement("button"); b.type = "button"; b.className = "lvc-snd"; b.setAttribute("aria-label", "Sonido"); b.textContent = "🔇";
-      b.onclick = e => { e.stopPropagation(); snd = !snd; slides.forEach(x => { if (x._pv) x._pv.muted = !snd; if (x._sb) x._sb.textContent = snd ? "🔊" : "🔇"; }); }; s._sb = b; th.append(b); }
-    s._sb.textContent = snd ? "🔊" : "🔇"; s._sb.classList.add("show");
+    if (s._pv){ if (!s._pv.dataset.user) s._pv.play().catch(() => {}); return; }
+    const th = s.firstChild, vd = document.createElement("video"), ui = s._ui || (s._ui = mkUi(s, th));
+    vd.className = "lvc-pv"; vd.muted = !snd; if (!snd) vd.setAttribute("muted", ""); vd.loop = items.length < 2; vd.playsInline = true; vd.autoplay = true; vd.preload = "auto";
+    const upd = () => { const d = vd.duration; ui.time.textContent = fmt(vd.currentTime) + " / " + fmt(d); const f = d ? vd.currentTime / d : 0; ui.bar.style.width = (f * 100) + "%"; if (!ui.seeking && isFinite(d)) ui.seek.value = Math.round(f * 1000); };
+    vd.onloadedmetadata = () => { const r = vd.videoWidth / vd.videoHeight; vd.style.objectFit = (r > 1.5 && r < 2.1) ? "cover" : "contain"; upd(); };
+    vd.ontimeupdate = upd;
+    vd.onplay = vd.onpause = () => { ui.pp.innerHTML = vd.paused ? IC.play : IC.pause; ui.root.classList.toggle("paused", vd.paused); };
+    vd.onvolumechange = () => { ui.mu.innerHTML = vd.muted ? IC.mute : IC.vol; };
+    vd.onplaying = () => { vd.classList.add("on"); adv = 0; };
+    vd.onerror = () => { if (s._pv === vd) stopPv(s); };
+    vd.onended = () => { if (items.length > 1 && !car.matches(":hover") && s._rel === 0) go(1); else { vd.currentTime = 0; vd.play().catch(() => {}); } };   /* al terminar, pasa solo al siguiente */
+    ui.root.classList.remove("hidden"); ui.root.classList.add("paused"); ui.pp.innerHTML = IC.play; ui.mu.innerHTML = snd ? IC.vol : IC.mute; ui.time.textContent = "0:00 / 0:00"; ui.seek.value = 0; ui.bar.style.width = "0%";
+    vd.src = it.video.url; s._pv = vd; th.append(vd, ui.root);
     const p = vd.play(); if (p && p.catch) p.catch(() => {});
   };
   const playActive = () => slides.forEach((s, i) => { const it = items[i]; if (!it || it.live) return; if (s._rel === 0 && vis && !document.hidden) startPv(s, it); else stopPv(s); });
@@ -3464,16 +3517,29 @@ function lvCarousel(wrap, pick){
   };
   if ("IntersectionObserver" in window) new IntersectionObserver(es => { vis = es[es.length - 1].isIntersecting; playActive(); }, { threshold:.2 }).observe(wrap);
   document.addEventListener("visibilitychange", () => { if (wrap.isConnected) playActive(); });
-  const spin = () => {
-    clearInterval(rot);
-    if (items.length > 1) rot = setInterval(() => {
-      if (!wrap.isConnected){ clearInterval(rot); return; }
-      if (document.hidden || !wrap.offsetParent || car.matches(":hover")) return;
-      idx++; place();
-    }, 8000);
+  const tick = () => {
+    if (!wrap.isConnected){ clearInterval(rot); return; }
+    if (document.hidden || !wrap.offsetParent || car.matches(":hover") || drag) return;
+    const pv = slides[idx] && slides[idx]._pv; adv++;
+    if (pv){ if (pv.dataset.user) return; if (!pv.paused && !pv.ended){ if (adv >= 60) go(1); return; } }
+    if (adv >= 8) go(1);
   };
-  prev.onclick = () => { idx--; place(); spin(); };
-  next.onclick = () => { idx++; place(); spin(); };
+  const spin = () => { clearInterval(rot); adv = 0; if (items.length > 1) rot = setInterval(tick, 1000); };
+  prev.onclick = () => { go(-1); spin(); };
+  next.onclick = () => { go(1); spin(); };
+  /* deslizar con el mouse o el dedo: la fila sigue al puntero y al soltar se acomoda con inercia */
+  car.addEventListener("dragstart", e => e.preventDefault());
+  car.addEventListener("pointerdown", e => {
+    if (e.button || e.target.closest("button,input")) return;
+    const x0 = e.clientX; let dx = 0; moved = false;
+    const mv = ev => { dx = ev.clientX - x0; if (!drag && Math.abs(dx) > 6){ drag = true; moved = true; car.classList.add("drag"); } if (drag) car.style.setProperty("--dx", dx + "px"); };
+    const up = () => {
+      document.removeEventListener("pointermove", mv); document.removeEventListener("pointerup", up); document.removeEventListener("pointercancel", up);
+      if (drag){ drag = false; car.classList.remove("drag"); car.style.removeProperty("--dx"); if (dx < -50) go(1); else if (dx > 50) go(-1); else place(); spin(); }
+    };
+    document.addEventListener("pointermove", mv); document.addEventListener("pointerup", up); document.addEventListener("pointercancel", up);
+  });
+  car.tabIndex = 0; car.addEventListener("keydown", e => { if (e.key === "ArrowRight"){ go(1); spin(); } else if (e.key === "ArrowLeft"){ go(-1); spin(); } });
   return {
     set(list){
       items = list || []; wrap.classList.toggle("hidden", !items.length);
@@ -3483,7 +3549,7 @@ function lvCarousel(wrap, pick){
         items.forEach((it, i) => {
           const s = document.createElement("div"); s.className = "pub-s";
           s.append(lvSlideThumb(it), lvSlideInfo(it, pick));
-          s.onclick = () => { if (s._rel === 0) pick(it); else if (Math.abs(s._rel) <= 2){ idx = i; place(); spin(); } };
+          s.onclick = () => { if (moved){ moved = false; return; } if (s._rel === 0) pick(it); else if (Math.abs(s._rel) <= 2){ idx = i; adv = 0; place(); spin(); } };
           slides.push(s); car.append(s);
         });
         place();
