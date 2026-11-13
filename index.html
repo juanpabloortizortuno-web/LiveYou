@@ -326,7 +326,15 @@
 @media(max-width:760px){#vProfile .cover{height:150px}#vProfile .cover::after{height:150px}.pbig{width:96px;height:96px;margin-top:-50px}.pstats{gap:22px}}
 
 /* ===== SUBIR VIDEO ===== */
-.upbox{max-width:500px}
+.upbox{max-width:520px;max-height:92vh;overflow:auto}
+.uphead{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.uphead h2{margin:0}
+.upsplit{display:flex;gap:10px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--pink);border-radius:12px;padding:12px;margin:12px 0;font-size:.88rem;line-height:1.45}
+.upsplit .upi{font-size:1.5rem;line-height:1}
+.upsplit b{display:block;margin-bottom:2px}
+.upsplit small{display:block;opacity:.75;margin-top:4px}
+.upbox .actions{flex-wrap:wrap}
+.upchip.done{border-color:var(--teal)}
 .drop{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:36px 16px;border:2px dashed var(--line);border-radius:16px;cursor:pointer;color:var(--muted);transition:border-color .15s,background .15s;margin:12px 0 0}
 .drop:hover,.drop.over{border-color:var(--pink);background:rgba(255,61,110,.07)}
 .drop strong{color:var(--text)}.drop span{font-size:.85rem}
@@ -1131,6 +1139,7 @@
     <button class="linkbtn" type="button" id="btnForgot">Olvidé mi contraseña</button>
     <button class="linkbtn" id="btnEmail" type="button">Prefiero recibir un enlace de acceso por correo</button>
     <p class="msg" id="loginMsg" role="status"></p>
+    <button class="btn main hidden" type="button" id="btnRetry">Reintentar</button>
     <p class="copy">© 2026 <strong>Juan Pablo Ortiz Ortuño</strong> · Santa Cruz, Bolivia<br>Todos los derechos reservados.</p>
   </div>
 </section>
@@ -1355,15 +1364,16 @@
 <!-- ═════════ FIN · HTML-12 ═════════ -->
 <!-- ═════════ INICIO · HTML-13 · VENTANA · SUBIR VIDEO ═════════ -->
 <div id="mUpload" class="modal hidden"><form class="mbox upbox" id="upForm">
-  <h2>Subir video</h2>
+  <div class="uphead"><h2>Subir video</h2><button class="ibtn hidden" type="button" id="upMinX" aria-label="Minimizar" title="Minimizar: sigue subiendo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 12h12"/></svg></button></div>
   <label class="drop" id="upDrop" for="upFile"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></svg><strong>Toca para elegir un video</strong><span>o arrástralo aquí · MP4 o FLV · si pesa más de 25 MB se divide solo en partes (hasta 400 MB)</span></label>
   <input id="upFile" type="file" accept="video/*,.flv,.mp4" class="hidden">
   <div id="upPrevBox" class="upprev hidden"><video id="upPrev" muted playsinline controls></video><div id="upFlv" class="upflv hidden">Video FLV listo para subir</div><div class="upinfo"><span id="upName"></span><button class="btn ghost" type="button" id="upClear">Quitar</button></div></div>
+  <div class="upsplit hidden" id="upSplit"><span class="upi" id="upSplitIco">🎬</span><div><b id="upSplitTit"></b><span id="upSplitTxt"></span><small id="upSplitSub"></small></div></div>
   <label for="upCap">Descripción</label><textarea id="upCap" maxlength="200" placeholder="Cuéntales de qué trata tu video…"></textarea>
   <div class="upcnt"><span id="upCnt">0</span>/200</div>
-  <div class="upbar hidden" id="upBar"><i></i></div><div class="uppct hidden" id="upPct"><span id="upPctTxt">0%</span><span id="upPctSub">Puedes cerrar esta ventana: el video sigue subiendo.</span></div>
+  <div class="upbar hidden" id="upBar"><i></i></div><div class="uppct hidden" id="upPct"><span id="upPctTxt">0%</span><span id="upPctSub">Puedes minimizar esta ventana: sigue subiendo. No cierres ni recargues la pestaña.</span></div>
   <p class="msg" id="upMsg" role="status"></p>
-  <div class="actions"><button class="btn main" type="submit" id="upBtn">Publicar</button><button class="btn ghost" type="button" data-close="mUpload">Cancelar</button></div>
+  <div class="actions"><button class="btn main" type="submit" id="upBtn">Publicar</button><button class="btn main hidden" type="button" id="upMin">⤓ Minimizar</button><button class="btn ghost hidden" type="button" id="upStop">Detener subida</button><button class="btn ghost" type="button" data-close="mUpload" id="upClose">Cancelar</button></div>
 </form></div>
 
 <!-- ═════════ FIN · HTML-13 ═════════ -->
@@ -1484,6 +1494,9 @@ let storageOk = true; try { localStorage.setItem("ly_t", "1"); localStorage.remo
 /* ═════════ INICIO · JS-03 · ALMACENAMIENTO RESISTENTE (Safari) ═════════ */
 /* Almacenamiento resistente: Safari a veces lanza "The quota has been exceeded" en localStorage */
 const memStore = {};
+try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {} /* pide al navegador que NO borre la sesión guardada */
+const hadSavedSession = (() => { try { for (let i = 0; i < localStorage.length; i++) if (/^sb-.*-auth-token$/.test(localStorage.key(i))) return true; } catch (e) {} return false; })();
+let loginWhy = "";
 const safeStorage = {
   getItem(k){ try { const v = localStorage.getItem(k); if (v !== null) return v; } catch (e) {} try { const v = sessionStorage.getItem(k); if (v !== null) return v; } catch (e) {} return k in memStore ? memStore[k] : null; },
   setItem(k, v){ try { localStorage.setItem(k, v); delete memStore[k]; return; } catch (e) {} try { sessionStorage.setItem(k, v); return; } catch (e) {} memStore[k] = v; },
@@ -1501,15 +1514,22 @@ const fallbackAvatar = n => "https://ui-avatars.com/api/?background=ff3d6e&color
 
 /* ═════════ INICIO · JS-04 · LOGIN (Google, correo y contraseña) ═════════ */
 /* ---------- Login ---------- */
+/* vuelve siempre a la misma dirección donde estás, para que la sesión se guarde donde la vas a usar */
+const HERE = (location.origin + location.pathname).replace(/index\.html$/, "");
+async function doSignOut(){
+  try { await sb.auth.signOut({ scope:"local" }); } catch (e) {}
+  try { for (const st of [localStorage, sessionStorage]) Object.keys(st).filter(k => /^sb-.*-auth-token/.test(k)).forEach(k => st.removeItem(k)); } catch (e) {}
+}
 $("btnGoogle").onclick = async () => {
-  const { error } = await sb.auth.signInWithOAuth({ provider:"google", options:{ redirectTo: SITE_URL } });
+  /* prompt:select_account → Google te deja ELEGIR la cuenta en vez de entrar con la última */
+  const { error } = await sb.auth.signInWithOAuth({ provider:"google", options:{ redirectTo: HERE, queryParams:{ prompt:"select_account" } } });
   if (error) say($("loginMsg"), "No se pudo iniciar con Google: " + error.message, "err");
 };
 $("btnEmail").onclick = async () => {
   const email = $("email").value.trim();
   if (!email) return say($("loginMsg"), "Escribe tu correo.", "err");
   $("btnEmail").disabled = true;
-  const { error } = await sb.auth.signInWithOtp({ email, options:{ emailRedirectTo: SITE_URL } });
+  const { error } = await sb.auth.signInWithOtp({ email, options:{ emailRedirectTo: HERE } });
   $("btnEmail").disabled = false;
   error ? say($("loginMsg"), error.message, "err")
         : say($("loginMsg"), "Listo. Revisa tu correo y abre el enlace.", "ok");
@@ -1523,24 +1543,25 @@ $("btnPass").onclick = async () => {
   const email = $("email").value.trim(), password = $("pass").value;
   if (!email || password.length < 6) return say($("loginMsg"), "Escribe tu correo y una contraseña de al menos 6 caracteres.", "err");
   $("btnPass").disabled = true;
-  const r = authMode === "in" ? await sb.auth.signInWithPassword({ email, password }) : await sb.auth.signUp({ email, password, options:{ emailRedirectTo: SITE_URL } });
+  const r = authMode === "in" ? await sb.auth.signInWithPassword({ email, password }) : await sb.auth.signUp({ email, password, options:{ emailRedirectTo: HERE } });
   $("btnPass").disabled = false;
   if (r.error) return say($("loginMsg"), /Invalid login/i.test(r.error.message) ? "Correo o contraseña incorrectos." : r.error.message, "err");
   if (authMode === "up" && !r.data.session) say($("loginMsg"), "Cuenta creada. Revisa tu correo para confirmarla y luego entra.", "ok");
 };
 $("btnForgot").onclick = async () => {
   const email = $("email").value.trim(); if (!email) return say($("loginMsg"), "Escribe tu correo y vuelve a pulsar aquí.", "err");
-  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: SITE_URL });
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: HERE });
   error ? say($("loginMsg"), error.message, "err") : say($("loginMsg"), "Te enviamos un correo para cambiar la contraseña.", "ok");
 };
-$("btnLogout").onclick = async () => { userLogout = true; await stopAll(); await sb.auth.signOut(); };
+$("btnLogout").onclick = async () => { userLogout = true; await stopAll(); await doSignOut(); };
 
 /* ═════════ FIN · JS-04 ═════════ */
 
 /* ═════════ INICIO · JS-05 · PERFIL ═════════ */
 /* ---------- Perfil ---------- */
 async function loadProfile(user){
-  let { data } = await sb.from("profiles").select("*").eq("id", user.id).maybeSingle();
+  let { data, error:pErr } = await sb.from("profiles").select("*").eq("id", user.id).maybeSingle();
+  if (pErr && !data) throw pErr; /* un fallo de conexión ya no se confunde con "no tengo perfil" */
   const m = user.user_metadata || {};
   if (!data) { // respaldo si el trigger no creó el perfil
     const base = {
@@ -1592,7 +1613,7 @@ function openEdit(show){
 }
 $("btnEdit").onclick = () => openEdit(true);
 $("btnWho").onclick = () => show("Profile");
-$("btnLogout2").onclick = async () => { userLogout = true; await stopAll(); await sb.auth.signOut(); };
+$("btnLogout2").onclick = async () => { userLogout = true; await stopAll(); await doSignOut(); };
 $("navProfile").onclick = () => show("Profile");
 $("navInbox").onclick = () => { show("Inbox"); loadInbox(); };
 
@@ -2221,9 +2242,16 @@ let upURL = null;
 function upSet(f){
   if (upURL){ URL.revokeObjectURL(upURL); upURL = null; }
   $("upDrop").classList.toggle("hidden", !!f); $("upPrevBox").classList.toggle("hidden", !f);
-  if (!f){ say($("upMsg"), ""); return; }
+  if (!f){ say($("upMsg"), ""); $("upSplit").classList.add("hidden"); return; }
   $("upName").textContent = f.name + " · " + (f.size / 1048576).toFixed(1) + " MB";
-  say($("upMsg"), f.size > MAX_VIDEO ? "🎬 Pesa " + (f.size / 1048576).toFixed(0) + " MB: se dividirá solo en ~" + Math.ceil(f.size / PART_TARGET) + " partes y quedará como minidrama. Escribe el título de la minidrama en la descripción." : "");
+  const mb = (f.size / 1048576).toFixed(0), big = f.size > MAX_VIDEO, np = Math.ceil(f.size / PART_TARGET);
+  $("upSplit").classList.remove("hidden");
+  $("upSplitIco").textContent = big ? "🎬" : "📹";
+  $("upSplitTit").textContent = big ? "Minidrama: se dividirá en unas " + np + " partes" : "Video normal";
+  $("upSplitTxt").textContent = big
+    ? "Tu video pesa " + mb + " MB. Se corta solo en partes de ~20 MB, sin perder calidad (Parte 1/" + np + ", 2/" + np + "…). Al terminar queda en tu perfil, en la pestaña 🎬 Minidramas. Escribe el título de la minidrama en la descripción."
+    : "Pesa " + mb + " MB. Se publicará en tu perfil, en la pestaña ▦ Videos.";
+  $("upSplitSub").textContent = big ? "El número final puede variar un poco según los cortes del video; te avisamos cuando termine el corte." : "";
   const v = $("upPrev"), flv = /\.flv$/i.test(f.name);
   $("upFlv").classList.toggle("hidden", !flv); v.classList.toggle("hidden", flv);
   if (flv) v.removeAttribute("src"); else { upURL = URL.createObjectURL(f); v.src = upURL; }
@@ -2234,11 +2262,38 @@ $("upCap").oninput = () => { $("upCnt").textContent = $("upCap").value.length; }
 ["dragenter","dragover"].forEach(ev => $("upDrop").addEventListener(ev, e => { e.preventDefault(); $("upDrop").classList.add("over"); }));
 ["dragleave","drop"].forEach(ev => $("upDrop").addEventListener(ev, e => { e.preventDefault(); $("upDrop").classList.remove("over"); }));
 $("upDrop").addEventListener("drop", e => { const f = e.dataTransfer.files[0]; if (!f) return; try { $("upFile").files = e.dataTransfer.files; } catch (x) {} upSet(f); });
-let upBusy = false;
+let upBusy = false, upCancel = false, upXhr = null, upWL = null;
+async function upWake(on){ try { if (on && navigator.wakeLock && !upWL){ upWL = await navigator.wakeLock.request("screen"); upWL.addEventListener("release", () => { upWL = null; }); } else if (!on && upWL){ await upWL.release(); upWL = null; } } catch (e) {} }
+document.addEventListener("visibilitychange", () => { if (!document.hidden && upBusy) upWake(true); });
+function upUi(){
+  const b = upBusy;
+  ["upMin", "upStop", "upMinX"].forEach(i => $(i).classList.toggle("hidden", !b));
+  $("upClose").classList.toggle("hidden", b); $("upBtn").classList.toggle("hidden", b);
+  if (b){ $("upChip").onclick = () => openM("mUpload"); clearTimeout($("upChip")._t); $("upChip").classList.remove("done"); }
+  upWake(b);
+}
+function cancelUpload(){ upCancel = true; try { if (upXhr) upXhr.abort(); } catch (e) {} try { ffEnd(); } catch (e) {} }
+function minimizeUpload(){ closeM("mUpload"); toastMsg("Sigue subiendo en segundo plano. Mira el avance abajo.", 3500); }
+$("upMin").onclick = $("upMinX").onclick = minimizeUpload;
+$("upStop").onclick = () => { if (confirm("¿Detener la subida? Se perderá lo que ya se subió.")) cancelUpload(); };
+/* aviso final: si la ventana está minimizada, la tarjeta de abajo te lleva a tu perfil al tocarla */
+function finishUp(label, go){
+  const open = !$("mUpload").classList.contains("hidden"); closeM("mUpload");
+  if (open) return go();
+  const c = $("upChip"); $("upChipTxt").textContent = label; $("upChipBar").style.width = "100%"; c.classList.remove("hidden"); c.classList.add("done");
+  const back = () => { c.classList.add("hidden"); c.classList.remove("done"); c.onclick = () => openM("mUpload"); };
+  c.onclick = () => { back(); go(); }; clearTimeout(c._t); c._t = setTimeout(back, 20000);
+}
+async function freshToken(){
+  let { data } = await sb.auth.getSession();
+  if (!data || !data.session){ const r = await sb.auth.refreshSession(); data = r.data; }
+  if (!data || !data.session) throw new Error("Tu sesión se cerró. Entra de nuevo y repite la subida.");
+  return data.session.access_token;
+}
 $("navUpload").onclick = () => { if (upBusy){ openM("mUpload"); return; } $("upPct").classList.add("hidden"); $("upForm").reset(); upSet(null); $("upCnt").textContent = "0"; $("upBar").classList.add("hidden"); $("upBtn").disabled = false; say($("upMsg"), ""); openM("mUpload"); };
 function upProgress(p, txt){
   const w = p + "%"; $("upBar").firstElementChild.style.width = w; $("upChipBar").style.width = w;
-  $("upPctTxt").textContent = txt || (p + "%"); $("upChipTxt").textContent = txt || ("Subiendo video… " + p + "%");
+  $("upPctTxt").textContent = txt || (p + "%"); $("upChipTxt").textContent = (txt || "Subiendo video…") + " " + p + "%";
 }
 window.addEventListener("beforeunload", e => { if (upBusy){ e.preventDefault(); e.returnValue = ""; } });
 $("upChip").onclick = () => openM("mUpload");
@@ -2247,6 +2302,7 @@ function xhrUpload(path, f, token){
     const x = new XMLHttpRequest(); x.open("POST", SUPABASE_URL + "/storage/v1/object/videos/" + path);
     x.setRequestHeader("Authorization", "Bearer " + token); x.setRequestHeader("apikey", SUPABASE_KEY);
     x.setRequestHeader("Content-Type", f.type || "video/mp4"); x.setRequestHeader("x-upsert", "false");
+    upXhr = x; x.onabort = () => res("Cancelado");
     x.upload.onprogress = ev => { if (ev.lengthComputable) upProgress(Math.min(99, Math.round(ev.loaded / ev.total * 100))); };
     x.onload = () => res(x.status < 300 ? null : (JSON.parse(x.responseText || "{}").message || "Error " + x.status));
     x.onerror = () => res("Se perdió la conexión"); x.send(f);
@@ -2260,14 +2316,15 @@ $("upForm").onsubmit = async e => {
   if (!(f.type.startsWith("video/") || fext === "flv" || fext === "mp4")) return say($("upMsg"), "El archivo debe ser un video MP4 o FLV.", "err");
   if (f.size > MAX_BIG) return say($("upMsg"), "El video pesa más de 400 MB. Pártelo en dos antes de subirlo.", "err");
   if (f.size > MAX_VIDEO) return uploadSeries(f, $("upCap").value.trim(), fext);
-  const cap = $("upCap").value.trim();
-  upBusy = true; $("upBtn").disabled = true; $("upBar").classList.remove("hidden"); $("upPct").classList.remove("hidden");
+  const cap = $("upCap").value.trim(), uid = me.id;
+  upBusy = true; upCancel = false; upUi(); $("upBtn").disabled = true; $("upBar").classList.remove("hidden"); $("upPct").classList.remove("hidden");
   upProgress(0); say($("upMsg"), ""); $("upChip").classList.remove("hidden");
   const ext = (fext || "mp4").replace(/[^a-z0-9]/g, "");
-  const path = me.id + "/" + Date.now() + "." + ext;
-  const { data: ss } = await sb.auth.getSession();
-  const err = await xhrUpload(path, f, ss.session.access_token);
-  const done = (msg, bad) => { upBusy = false; $("upBtn").disabled = false; $("upChip").classList.add("hidden"); toastMsg(msg, 3500); if (bad) say($("upMsg"), msg, "err"); };
+  const path = uid + "/" + Date.now() + "." + ext;
+  let tok = "";
+  try { tok = await freshToken(); } catch (e) { upBusy = false; upUi(); $("upBtn").disabled = false; $("upChip").classList.add("hidden"); $("upBar").classList.add("hidden"); $("upPct").classList.add("hidden"); return say($("upMsg"), e.message, "err"); }
+  const err = await xhrUpload(path, f, tok);
+  const done = (msg, bad) => { if (upCancel){ msg = "Subida cancelada"; upCancel = false; } upBusy = false; upUi(); $("upBtn").disabled = false; $("upChip").classList.add("hidden"); toastMsg(msg, 3500); if (bad) say($("upMsg"), msg, "err"); };
   if (err){ $("upBar").classList.add("hidden"); $("upPct").classList.add("hidden"); return done("No se pudo subir: " + err, true); }
   upProgress(100, "Publicando…");
   const url = sb.storage.from("videos").getPublicUrl(path).data.publicUrl;
@@ -2279,15 +2336,15 @@ $("upForm").onsubmit = async e => {
     const tu = await sb.storage.from("videos").upload(tp, new Blob([u8], { type:"image/jpeg" }), { contentType:"image/jpeg", upsert:true });
     if (!tu.error) th = { url: sb.storage.from("videos").getPublicUrl(tp).data.publicUrl, dur: isFinite(r.dur) && r.dur > 0 ? Math.round(r.dur * 10) / 10 : null };
   } catch (e) {} }
-  const row = { user_id: me.id, url, path, caption: cap };
+  const row = { user_id: uid, url, path, caption: cap };
   if (th){ row.thumb_url = th.url; if (th.dur) row.duration = th.dur; }
   let ins = await sb.from("videos").insert(row);
   /* si aún no corriste supabase_thumbs.sql, se publica igual, sin portada guardada */
-  if (ins.error && th) ins = await sb.from("videos").insert({ user_id: me.id, url, path, caption: cap });
+  if (ins.error && th) ins = await sb.from("videos").insert({ user_id: uid, url, path, caption: cap });
   const error = ins.error;
   $("upBar").classList.add("hidden"); $("upPct").classList.add("hidden");
   if (error) return done("No se pudo publicar: " + error.message, true);
-  done("Video publicado ✓"); closeM("mUpload"); show("Profile");
+  done("Video publicado ✓"); finishUp("✅ Video publicado · toca para verlo", () => show("Profile"));
 };
 
 
@@ -3304,6 +3361,7 @@ function xhrUpPart(path, blob, token, onp){
     const x = new XMLHttpRequest(); x.open("POST", SUPABASE_URL + "/storage/v1/object/videos/" + path);
     x.setRequestHeader("Authorization", "Bearer " + token); x.setRequestHeader("apikey", SUPABASE_KEY);
     x.setRequestHeader("Content-Type", blob.type || "video/mp4"); x.setRequestHeader("x-upsert", "true");
+    upXhr = x; x.onabort = () => res("Cancelado");
     x.upload.onprogress = ev => { if (ev.lengthComputable) onp(ev.loaded); };
     x.onload = () => { let m = ""; try { m = JSON.parse(x.responseText || "{}").message; } catch (e) {} res(x.status < 300 ? null : (m || "Error " + x.status)); };
     x.onerror = () => res("Se perdió la conexión"); x.send(blob);
@@ -3314,12 +3372,14 @@ const newUuid = () => (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
 async function uploadSeries(f, cap, fext){
   const title = (cap || f.name.replace(/\.[^.]+$/, "")).trim().slice(0, 80) || "Minidrama";
   const ext0 = (fext || "mp4").replace(/[^a-z0-9]/g, "") || "mp4";
-  upBusy = true; $("upBtn").disabled = true; say($("upMsg"), "");
+  const uid = me.id;
+  upBusy = true; upCancel = false; upUi(); $("upBtn").disabled = true; say($("upMsg"), "");
   ["upBar", "upPct"].forEach(i => $(i).classList.remove("hidden")); $("upChip").classList.remove("hidden");
   const status = (t, p) => upProgress(p, t);
   const uploaded = [];
   const end = (msg, bad) => {
-    upBusy = false; $("upBtn").disabled = false; $("upChip").classList.add("hidden");
+    if (upCancel){ msg = "Subida cancelada"; bad = false; upCancel = false; }
+    upBusy = false; upUi(); $("upBtn").disabled = false; $("upChip").classList.add("hidden");
     $("upBar").classList.add("hidden"); $("upPct").classList.add("hidden"); toastMsg(msg, 4500); if (bad) say($("upMsg"), msg, "err");
   };
   try {
@@ -3327,14 +3387,19 @@ async function uploadSeries(f, cap, fext){
     if (chk.error) throw new Error("Falta ejecutar supabase_minidramas.sql en Supabase (una sola vez).");
     status("Preparando…", 1);
     const sp = await splitVideo(f, ext0, status);
+    if (upCancel) throw new Error("Subida cancelada");
     const n = sp.parts.length, total = sp.parts.reduce((t, b) => t + b.size, 0), sid = newUuid(), stamp = Date.now(), rows = [];
+    $("upSplitIco").textContent = "✂️"; $("upSplitTit").textContent = "Se dividió en " + n + " partes"; $("upSplitTxt").textContent = "Subiendo la Parte 1 de " + n + "… Al terminar quedarán en tu perfil → 🎬 Minidramas.";
+    status("Listo: " + n + " partes. Subiendo…", 15);
     let sent = 0;
     for (let i = 0; i < n; i++){
-      const blob = sp.parts[i], path = me.id + "/" + stamp + "_p" + String(i + 1).padStart(2, "0") + "." + sp.ext;
-      const { data:ss } = await sb.auth.getSession(); let err = "";
+      if (upCancel) throw new Error("Subida cancelada");
+      $("upSplitTxt").textContent = "Subiendo la Parte " + (i + 1) + " de " + n + "… Al terminar quedarán en tu perfil → 🎬 Minidramas.";
+      const blob = sp.parts[i], path = uid + "/" + stamp + "_p" + String(i + 1).padStart(2, "0") + "." + sp.ext;
+      const tok = await freshToken(); let err = "";
       for (let t = 0; t < 3; t++){
-        err = await xhrUpPart(path, blob, ss.session.access_token, ld => upProgress(Math.min(98, Math.round(15 + 83 * (sent + ld) / total)), "Subiendo parte " + (i + 1) + " de " + n + "…"));
-        if (!err) break; await new Promise(r => setTimeout(r, 1500));
+        err = await xhrUpPart(path, blob, tok, ld => upProgress(Math.min(98, Math.round(15 + 83 * (sent + ld) / total)), "Subiendo parte " + (i + 1) + " de " + n + "…"));
+        if (!err || upCancel) break; await new Promise(r => setTimeout(r, 1500));
       }
       if (err) throw new Error("Falló la parte " + (i + 1) + ": " + err);
       uploaded.push(path); sent += blob.size;
@@ -3345,7 +3410,7 @@ async function uploadSeries(f, cap, fext){
         const tu = await sb.storage.from("videos").upload(tp, jb, { contentType:"image/jpeg", upsert:true });
         if (!tu.error){ uploaded.push(tp); th = { url:sb.storage.from("videos").getPublicUrl(tp).data.publicUrl, dur:isFinite(r.dur) && r.dur > 0 ? Math.round(r.dur * 10) / 10 : null }; }
       } catch (e) {}
-      const row = { user_id:me.id, url:sb.storage.from("videos").getPublicUrl(path).data.publicUrl, path, caption:title + " · Parte " + (i + 1) + "/" + n, series_id:sid, series_title:title, part_no:i + 1, part_total:n };
+      const row = { user_id:uid, url:sb.storage.from("videos").getPublicUrl(path).data.publicUrl, path, caption:title + " · Parte " + (i + 1) + "/" + n, series_id:sid, series_title:title, part_no:i + 1, part_total:n };
       if (th){ row.thumb_url = th.url; if (th.dur) row.duration = th.dur; }
       rows.push(row);
     }
@@ -3353,7 +3418,7 @@ async function uploadSeries(f, cap, fext){
     let ins = await sb.from("videos").insert(rows);
     if (ins.error && rows.some(r => r.thumb_url)) ins = await sb.from("videos").insert(rows.map(r => { const c = Object.assign({}, r); delete c.thumb_url; delete c.duration; return c; }));
     if (ins.error) throw new Error("No se pudo publicar: " + ins.error.message);
-    end("🎬 Minidrama publicada: " + n + " partes ✓"); closeM("mUpload"); show("Profile"); profTab("ser");
+    end("🎬 Minidrama publicada: " + n + " partes ✓"); finishUp("✅ Minidrama publicada · toca para verla", () => { show("Profile"); profTab("ser"); });
   } catch (e) {
     if (uploaded.length){ try { await sb.storage.from("videos").remove(uploaded); } catch (x) {} }
     end((e && e.message) || "No se pudo subir la minidrama", true);
@@ -3410,12 +3475,18 @@ async function route(session){
       me = profile = null; stopAll();
       $("app").classList.add("hidden"); $("onboard").classList.add("hidden"); $("login").classList.remove("hidden");
       if (urlErr) { say($("loginMsg"), "No se pudo iniciar sesión: " + urlErr.replace(/\+/g, " "), "err"); history.replaceState(null, "", location.pathname); }
+      else if (loginWhy){ say($("loginMsg"), loginWhy, "err"); loginWhy = ""; }
       else if (!storageOk) say($("loginMsg"), "Tu navegador bloquea el almacenamiento (modo privado o bloqueo de rastreo), por eso no se guarda la sesión. Prueba en otra pestaña normal o en otro navegador.", "err");
       return;
     }
     me = session.user;
-    const pr = await loadProfile(me);
-    if (tok !== routeTok) return;
+    $("btnRetry").classList.add("hidden");
+    let pr = null, lastErr = null;
+    for (let t = 0; t < 3 && !pr; t++){
+      try { pr = await loadProfile(me); } catch (e) { lastErr = e; await new Promise(r => setTimeout(r, 1200 * (t + 1))); }
+      if (tok !== routeTok) return;
+    }
+    if (!pr) throw lastErr || new Error("sin conexión");
     profile = pr;
     $("login").classList.add("hidden");
     if (profile.onboarded === false){
@@ -3427,6 +3498,11 @@ async function route(session){
     if (location.hash.includes("access_token")) history.replaceState(null, "", location.pathname);
   } catch (err) {
     console.error(err);
+    if (session){ /* la sesión sigue guardada: solo falló la conexión, no se pierde nada */
+      $("app").classList.add("hidden"); $("onboard").classList.add("hidden"); $("login").classList.remove("hidden");
+      say($("loginMsg"), "No se pudo cargar tu cuenta (revisa tu conexión). Tu sesión sigue guardada.", "err");
+      $("btnRetry").classList.remove("hidden"); $("btnRetry").onclick = () => route(session); return;
+    }
     $("app").classList.add("hidden"); $("onboard").classList.add("hidden"); $("login").classList.remove("hidden");
     say($("loginMsg"), "No se pudo cargar tu cuenta: " + (err && err.message ? err.message : err), "err");
   }
@@ -3437,7 +3513,11 @@ sb.auth.onAuthStateChange((_evt, session) => {
   if (_evt === "TOKEN_REFRESHED" || _evt === "USER_UPDATED") return;
   if (_evt === "SIGNED_IN" && me && session && session.user.id === me.id) return;
   if (_evt === "SIGNED_OUT" && !userLogout){
-    setTimeout(async () => { const r = await sb.auth.getSession(); if (!r.data.session) route(null); }, 1500); return; }
+    setTimeout(async () => {
+      let r = await sb.auth.getSession();
+      if (!r.data.session){ try { r = await sb.auth.refreshSession(); } catch (e) {} } /* un último intento antes de sacarte */
+      if (!r.data || !r.data.session){ loginWhy = "Tu sesión se cerró (venció o se usó en otra pestaña o dispositivo). Entra de nuevo."; route(null); }
+    }, 1500); return; }
   userLogout = false; setTimeout(() => route(session), 0);
 });
 document.addEventListener("visibilitychange", () => { if (!document.hidden && me) sb.auth.getSession(); });
@@ -3455,7 +3535,9 @@ sb.auth.getSession().then(async ({ data }) => {
     try { recErr = await recoverFromHash(); } catch (e) { recErr = e.message; }
     if (!recErr){ const r = await sb.auth.getSession(); sess = r.data.session; }
   }
-  dbgSession = sess ? "sí" : "no"; dbg(); route(sess);
+  dbgSession = sess ? "sí" : "no"; dbg();
+  if (!sess && hadSavedSession && !hadHash && !hadCode) loginWhy = "Tu sesión guardada ya no era válida (venció o se cerró en otro lugar). Entra de nuevo.";
+  route(sess);
   if (!sess && hadHash) say($("loginMsg"), "No se pudo completar el acceso: " + (recErr || initErr || "sin detalle"), "err");
 }).catch(err => say($("loginMsg"), "Error de sesión: " + err.message, "err"));
 
